@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Player & Playlist — Music Search</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #0f0f0f;
+      color: #f1f1f1;
+      padding: 20px;
+    }
+    .top-bar {
+      max-width: 1200px;
+      margin: 0 auto 16px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .top-bar a {
+      color: #ff3c00;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .top-bar a:hover {
+      text-decoration: underline;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: #212121;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 20px;
+      border: 1px solid #303030;
+      background: #121212;
+      color: #fff;
+      font-size: 14px;
+    }
+    input[type="text"]:focus { outline: none; border-color: #3ea6ff; }
+    button {
+      padding: 10px 18px;
+      border-radius: 20px;
+      border: none;
+      background: #cc0000;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #ff0000; }
+    .btn-secondary {
+      background: #303030;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    .btn-secondary:hover { background: #424242; }
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #000;
+    }
+    .video-container iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: 0;
+    }
+    .results-list, .playlist-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: #181818;
+      padding: 8px;
+      border-radius: 8px;
+    }
+    .item img {
+      width: 80px;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .item-info { flex: 1; overflow: hidden; }
+    .item-title {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-actions { display: flex; gap: 5px; }
+    h2 { font-size: 18px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div><strong>Firestorm Module:</strong> Music Search &amp; Playlist Engine</div>
+    <div><a href="/">&larr; Return to Firestorm Hub</a></div>
+  </div>
+
+  <div class="container">
+    <main>
+      <div class="card">
+        <div class="video-container">
+          <div id="player"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Search YouTube</h2>
+        <form class="search-box" onsubmit="searchYouTube(event)">
+          <input type="text" id="searchInput" placeholder="Search videos...">
+          <button type="submit">Search</button>
+        </form>
+        <ul id="searchResults" class="results-list"></ul>
+      </div>
+    </main>
+
+    <aside>
+      <div class="card">
+        <h2>Playlist</h2>
+        <ul id="playlist" class="playlist-list"></ul>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    let player;
+    // Embedded YouTube API key
+    const apiKey = 'AIzaSyBdu5k9t0zNO80z84S62y2G1aMdFHY7wH4';
+    let playlist = JSON.parse(localStorage.getItem('yt_playlist')) || [];
+    let currentPlayingIndex = -1;
+
+    // Load YouTube IFrame Player API
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '360',
+        width: '640',
+        videoId: playlist.length > 0 ? playlist[0].id : 'M7lc1UVf-VE',
+        events: {
+          'onStateChange': onPlayerStateChange
+        }
+      });
+      renderPlaylist();
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.ENDED) {
+        playNext();
+      }
+    }
+
+    async function searchYouTube(e) {
+      e.preventDefault();
+      const query = document.getElementById('searchInput').value;
+      if (!query) return;
+
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(query)}&type=video&key=${apiKey}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.error) {
+          alert('API Error: ' + data.error.message);
+          return;
+        }
+
+        renderResults(data.items || []);
+      } catch (err) {
+        console.error('Error fetching search results:', err);
+      }
+    }
+
+    function renderResults(items) {
+      const container = document.getElementById('searchResults');
+      container.innerHTML = '';
+
+      items.forEach(item => {
+        const id = item.id.videoId;
+        const title = item.snippet.title;
+        const thumb = item.snippet.thumbnails.default.url;
+
+        const li = document.createElement('li');
+        li.className = 'item';
+        li.innerHTML = `
+          <img src="${thumb}" alt="${title}">
+          <div class="item-info">
+            <div class="item-title">${title}</div>
+          </div>
+          <div class="item-actions">
+            <button class="btn-secondary" onclick="playVideo('${id}')">Play</button>
+            <button class="btn-secondary" onclick="addToPlaylist('${id}', \`${escapeQuotes(title)}\`, '${thumb}')">+</button>
+          </div>
+        `;
+        container.appendChild(li);
+      });
+    }
+
+    function escapeQuotes(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function playVideo(id) {
+      if (player && player.loadVideoById) {
+        player.loadVideoById(id);
+      }
+    }
+
+    function addToPlaylist(id, title, thumb) {
+      if (playlist.some(item => item.id === id)) return;
+      playlist.push({ id, title, thumb });
+      savePlaylist();
+      renderPlaylist();
+    }
+
+    function removeFromPlaylist(index) {
+      playlist.splice(index, 1);
+      savePlaylist();
+      renderPlaylist();
+    }
+
+    function playFromPlaylist(index) {
+      currentPlayingIndex = index;
+      playVideo(playlist[index].id);
+    }
+
+    function playNext() {
+      if (currentPlayingIndex + 1 < playlist.length) {
+        playFromPlaylist(currentPlayingIndex + 1);
+      }
+    }
+
+    function savePlaylist() {
+      localStorage.setItem('yt_playlist', JSON.stringify(playlist));
+    }
+
+    function renderPlaylist() {
+      const container = document.getElementById('playlist');
+      container.innerHTML = '';
+
+      if (playlist.length === 0) {
+        container.innerHTML = '<li style="color:#888; font-size:13px;">Playlist is empty</li>';
+        return;
+      }
+
+      playlist.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'item';
+        li.innerHTML = `
+          <img src="${item.thumb}" alt="${item.title}">
+          <div class="item-info">
+            <div class="item-title">${item.title}</div>
+          </div>
+          <div class="item-actions">
+            <button class="btn-secondary" onclick="playFromPlaylist(${index})">▶</button>
+            <button class="btn-secondary" onclick="removeFromPlaylist(${index})">✕</button>
+          </div>
+        `;
+        container.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>

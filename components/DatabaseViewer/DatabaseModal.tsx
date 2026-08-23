@@ -2,171 +2,256 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import { Database, ShieldCheck, ShieldAlert, Key, X, Sparkles, UserCheck, RefreshCw, Layers } from 'lucide-react';
-import { User } from '@/lib/types';
+import { FirestormDatabase } from '@/lib/db';
+import {
+  Database,
+  X,
+  Copy,
+  Check,
+  Download,
+  Trash2,
+  RefreshCw,
+  Search,
+  Key,
+  ShieldCheck,
+  ShieldAlert
+} from 'lucide-react';
 
 export default function DatabaseModal() {
-  const { isDbModalOpen, setDbModalOpen, usersList, switchUser, currentUser, refreshData } = useAuth();
-  const [activeTab, setActiveTab] = useState<'table' | 'json'>('table');
+  const { isDbModalOpen, setDbModalOpen, refreshData, isMounted, usersList } = useAuth();
+  const [activeTab, setActiveTab] = useState<'users' | 'emails' | 'logs' | 'raw'>('users');
+  const [copiedRaw, setCopiedRaw] = useState(false);
+  const [search, setSearch] = useState('');
 
-  if (!isDbModalOpen) return null;
+  if (!isMounted || !isDbModalOpen) return null;
+
+  const emails = FirestormDatabase.getStoredEmails();
+  const logs = FirestormDatabase.getAuditLogs();
+
+  const handleCopyRaw = () => {
+    const fullDb = {
+      users: usersList,
+      emails,
+      logs
+    };
+    navigator.clipboard.writeText(JSON.stringify(fullDb, null, 2));
+    setCopiedRaw(true);
+    setTimeout(() => setCopiedRaw(false), 2000);
+  };
+
+  const handleDownload = () => {
+    const fullDb = {
+      users: usersList,
+      emails,
+      logs,
+      exportedAt: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(fullDb, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `firestorm-db-export-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleClearAll = () => {
+    if (confirm('Warning: This will reset the client-side sandbox database to default initial state. Proceed?')) {
+      localStorage.clear();
+      refreshData();
+      setDbModalOpen(false);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900 border border-orange-500/40 rounded-2xl shadow-2xl shadow-orange-950/50 flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in">
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-label="Firestorm Database Inspector"
+        className="w-full max-w-5xl max-h-[90vh] bg-[#0c0c0c] border border-zinc-800 text-zinc-100 rounded-lg shadow-2xl flex flex-col overflow-hidden"
+      >
         {/* Header */}
-        <div className="p-4 sm:p-6 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-slate-950 font-bold">
+        <div className="p-4 border-b border-zinc-800 bg-[#121212] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded bg-[#ff3c00]/10 text-[#ff3c00]">
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                Secure Firestorm Database Records
-                <span className="text-xs font-mono font-normal px-2 py-0.5 rounded bg-orange-950 text-orange-300 border border-orange-500/30">
-                  {usersList.length} Registered Users
-                </span>
-              </h3>
-              <p className="text-xs text-slate-400">
-                Persistent storage showing unique 12-digit alphanumeric user IDs, encrypted hashes, and verification flags.
+              <h2 className="font-bold text-white font-mono uppercase text-sm">
+                Sandbox Database Inspector
+              </h2>
+              <p className="text-[11px] text-zinc-400 font-mono">
+                Inspect local storage persistence schemas, 12-digit UIDs &amp; audit trails
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Tab switch */}
-            <div className="hidden sm:flex items-center bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs">
-              <button
-                type="button"
-                onClick={() => setActiveTab('table')}
-                className={`px-3 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
-                  activeTab === 'table' ? 'bg-orange-500 text-slate-950' : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Table View
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('json')}
-                className={`px-3 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
-                  activeTab === 'json' ? 'bg-orange-500 text-slate-950' : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Raw JSON
-              </button>
-            </div>
-
             <button
-              id="close-db-modal-btn"
+              type="button"
+              onClick={handleDownload}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-xs font-mono text-zinc-200"
+              title="Download JSON DB export"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export JSON</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleCopyRaw}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-xs font-mono text-zinc-200"
+            >
+              {copiedRaw ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedRaw ? 'Copied' : 'Copy All'}</span>
+            </button>
+            <button
               type="button"
               onClick={() => setDbModalOpen(false)}
-              className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+              className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Modal Body */}
-        <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-slate-900/90 space-y-4">
-          {activeTab === 'table' ? (
-            <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-900/90 text-slate-400 font-semibold border-b border-slate-800">
-                    <tr>
-                      <th className="p-3">Unique 12-Digit UID</th>
-                      <th className="p-3">User Name</th>
-                      <th className="p-3">Email Address</th>
-                      <th className="p-3">Verified Status</th>
-                      <th className="p-3">MFA Layer</th>
-                      <th className="p-3">Password Hash</th>
-                      <th className="p-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-850">
-                    {usersList.map((user) => {
-                      const isCurrent = currentUser?.id === user.id;
-                      return (
-                        <tr key={user.id} className={isCurrent ? 'bg-orange-950/20' : 'hover:bg-slate-900/50'}>
-                          <td className="p-3 font-mono font-bold text-orange-400 whitespace-nowrap">
-                            {user.id}
-                            {isCurrent && (
-                              <span className="ml-1.5 text-[9px] font-sans px-1.5 py-0.5 rounded bg-orange-500 text-slate-950 font-bold">
-                                ACTIVE
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-3 font-medium text-slate-200 whitespace-nowrap">
-                            {user.firstName} {user.lastName}
-                          </td>
-                          <td className="p-3 text-slate-300 whitespace-nowrap">
-                            {user.email}
-                          </td>
-                          <td className="p-3 whitespace-nowrap">
-                            {user.isVerified ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 font-medium text-[11px]">
-                                <ShieldCheck className="w-3 h-3" />
-                                Verified
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-400 font-medium text-[11px]">
-                                <ShieldAlert className="w-3 h-3" />
-                                Unverified
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-3 whitespace-nowrap">
-                            <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${
-                              user.mfaEnabled 
-                                ? 'bg-orange-950/60 text-orange-300 border border-orange-500/30' 
-                                : 'bg-slate-800 text-slate-400'
-                            }`}>
-                              {user.mfaEnabled ? '2FA Active' : 'Off'}
-                            </span>
-                          </td>
-                          <td className="p-3 font-mono text-[10px] text-slate-500 truncate max-w-[100px]" title={user.passwordHash}>
-                            {user.passwordHash.substring(0, 12)}...
-                          </td>
-                          <td className="p-3 text-right whitespace-nowrap">
-                            {!isCurrent && (
-                              <button
-                                type="button"
-                                onClick={() => switchUser(user)}
-                                className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-orange-300 text-xs font-semibold transition-colors cursor-pointer"
-                              >
-                                Switch To
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+        {/* Tab Selection */}
+        <div className="flex border-b border-zinc-800 bg-[#0e0e0e] text-xs font-mono">
+          <button
+            type="button"
+            onClick={() => setActiveTab('users')}
+            className={`px-4 py-2.5 border-b-2 font-bold transition-colors ${
+              activeTab === 'users' ? 'border-[#ff3c00] text-[#ff3c00] bg-[#141414]' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Users Registry ({usersList.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('emails')}
+            className={`px-4 py-2.5 border-b-2 font-bold transition-colors ${
+              activeTab === 'emails' ? 'border-[#ff3c00] text-[#ff3c00] bg-[#141414]' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Outbox Messages ({emails.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('logs')}
+            className={`px-4 py-2.5 border-b-2 font-bold transition-colors ${
+              activeTab === 'logs' ? 'border-[#ff3c00] text-[#ff3c00] bg-[#141414]' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Audit Logs ({logs.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('raw')}
+            className={`px-4 py-2.5 border-b-2 font-bold transition-colors ${
+              activeTab === 'raw' ? 'border-[#ff3c00] text-[#ff3c00] bg-[#141414]' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Raw JSON Document
+          </button>
+        </div>
+
+        {/* Tab Body */}
+        <div className="flex-1 p-4 overflow-y-auto font-mono text-xs">
+          {activeTab === 'users' && (
+            <div className="space-y-3">
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-zinc-500" />
+                <input
+                  type="text"
+                  placeholder="Filter users by UID, email, or name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 rounded bg-[#141414] border border-zinc-800 text-xs text-white focus:outline-none focus:border-[#ff3c00]"
+                />
+              </div>
+
+              <div className="divide-y divide-zinc-800 border border-zinc-800 rounded bg-[#101010] overflow-hidden">
+                {usersList
+                  .filter(u => u.id.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()) || u.firstName.toLowerCase().includes(search.toLowerCase()))
+                  .map((user) => (
+                    <div key={user.id} className="p-3 hover:bg-[#161616] transition-colors flex items-center justify-between gap-4">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-[#ff3c00]">{user.id}</span>
+                          <span className="text-zinc-200 font-sans font-semibold">{user.firstName} {user.lastName}</span>
+                          <span className="text-zinc-500 text-[11px]">({user.email})</span>
+                        </div>
+                        <div className="text-[11px] text-zinc-500 flex items-center gap-3">
+                          <span>Created: {new Date(user.createdAt).toLocaleDateString()}</span>
+                          <span>Verification Code: <code className="text-amber-400">{user.verificationCode}</code></span>
+                          <span>MFA: {user.mfaEnabled ? 'Enabled' : 'Disabled'}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          user.isVerified ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30' : 'bg-amber-950 text-amber-400 border border-amber-500/30'
+                        }`}>
+                          {user.isVerified ? 'VERIFIED' : 'UNVERIFIED'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
-          ) : (
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-              <pre className="font-mono text-xs text-orange-300 overflow-x-auto max-h-[400px]">
-                {JSON.stringify(usersList, null, 2)}
-              </pre>
+          )}
+
+          {activeTab === 'emails' && (
+            <div className="divide-y divide-zinc-800 border border-zinc-800 rounded bg-[#101010] overflow-hidden">
+              {emails.map((msg) => (
+                <div key={msg.id} className="p-3 hover:bg-[#161616] transition-colors space-y-1">
+                  <div className="flex justify-between items-center text-zinc-400">
+                    <span className="text-zinc-200 font-bold">{msg.subject}</span>
+                    <span className="text-[10px] text-zinc-500">{new Date(msg.timestamp).toLocaleString()}</span>
+                  </div>
+                  <div className="text-zinc-500 text-[11px]">
+                    To: {msg.recipientName} &lt;{msg.to}&gt; | Code: <span className="text-amber-400">{msg.verificationCode || 'N/A'}</span>
+                  </div>
+                </div>
+              ))}
             </div>
+          )}
+
+          {activeTab === 'logs' && (
+            <div className="p-3 bg-[#101010] border border-zinc-800 rounded space-y-1.5">
+              {logs.map((log) => (
+                <div key={log.id} className="text-[11px] flex items-center justify-between text-zinc-300 py-1 border-b border-zinc-850">
+                  <div>
+                    <span className="text-[#ff3c00] font-bold">[{log.action}]</span> {log.details}
+                  </div>
+                  <span className="text-zinc-500 text-[10px]">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'raw' && (
+            <pre className="p-3 rounded bg-[#070707] border border-zinc-850 text-[11px] text-emerald-400 overflow-x-auto whitespace-pre">
+              {JSON.stringify({ users: usersList, emails, logs }, null, 2)}
+            </pre>
           )}
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs">
-          <span className="text-slate-400 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            Automatic ID guarantee: 12-alphanumeric collision-resistant identifier per user.
-          </span>
+        <div className="p-3 border-t border-zinc-800 bg-[#121212] flex items-center justify-between text-xs font-mono">
+          <button
+            type="button"
+            onClick={handleClearAll}
+            className="inline-flex items-center gap-1 text-red-400 hover:text-red-300 transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Reset Sandbox Database</span>
+          </button>
           <button
             type="button"
             onClick={() => setDbModalOpen(false)}
-            className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold cursor-pointer transition-colors"
+            className="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
           >
-            Close Inspector
+            Close
           </button>
         </div>
       </div>

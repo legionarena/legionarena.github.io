@@ -3,127 +3,145 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { EmailMessage } from '@/lib/types';
-import { Mail, ShieldCheck, KeyRound, AlertTriangle, X, CheckCircle2, ArrowRight, Trash2, Clock, Sparkles } from 'lucide-react';
+import {
+  Mail,
+  X,
+  CheckCircle2,
+  Copy,
+  Check,
+  KeyRound,
+  ShieldCheck,
+  RefreshCw,
+  ExternalLink,
+  Inbox,
+  Clock
+} from 'lucide-react';
 
 export default function EmailInboxDrawer() {
-  const { 
-    emailsList, 
-    isEmailDrawerOpen, 
-    closeEmailDrawer, 
-    selectedEmailForViewing, 
-    verifyEmail, 
-    markEmailRead, 
-    currentUser 
+  const {
+    emailsList,
+    isEmailDrawerOpen,
+    closeEmailDrawer,
+    selectedEmailForViewing,
+    openEmailDrawer,
+    markEmailRead,
+    verifyEmail,
+    isMounted
   } = useAuth();
 
-  const [activeEmailId, setActiveEmailId] = useState<string | null>(null);
-  const [verificationFeedback, setVerificationFeedback] = useState<string>('');
+  const [selectedIdOverride, setSelectedIdOverride] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [verifySuccess, setVerifySuccess] = useState<string | null>(null);
 
-  if (!isEmailDrawerOpen) return null;
+  if (!isMounted || !isEmailDrawerOpen) return null;
 
-  // Selected email to preview
-  const currentEmail = 
-    emailsList.find(e => e.id === activeEmailId) || 
-    selectedEmailForViewing || 
+  const currentEmail =
+    (selectedIdOverride ? emailsList.find((e) => e.id === selectedIdOverride) : null) ||
+    selectedEmailForViewing ||
     (emailsList.length > 0 ? emailsList[0] : null);
 
-  const handleSelectEmail = (email: EmailMessage) => {
-    setActiveEmailId(email.id);
-    markEmailRead(email.id);
+  const handleCopy = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
   };
 
-  const handleDirect1ClickVerify = async (email: EmailMessage) => {
-    if (!email.verificationCode && !email.token) return;
-    const code = email.verificationCode || email.token || '';
+  const handleAutoVerify = async (code: string, userId: string) => {
     try {
-      await verifyEmail(code, email.userId);
-      setVerificationFeedback(`Successfully verified ${email.to}! Badge updated.`);
-      setTimeout(() => setVerificationFeedback(''), 3500);
+      await verifyEmail(code, userId);
+      setVerifySuccess('Email verified successfully!');
+      setTimeout(() => setVerifySuccess(null), 3000);
     } catch (err: unknown) {
-      setVerificationFeedback(err instanceof Error ? err.message : 'Verification failed.');
-      setTimeout(() => setVerificationFeedback(''), 3500);
+      const msg = err instanceof Error ? err.message : 'Verification failed';
+      alert(msg);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/70 backdrop-blur-sm animate-fadeIn flex justify-end">
-      <div className="w-full max-w-2xl h-full bg-slate-900 border-l border-orange-500/40 shadow-2xl flex flex-col">
-        {/* Drawer Header */}
-        <div className="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in">
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-label="Firestorm Email Simulator"
+        className="w-full max-w-2xl h-full bg-[#0d0d0d] border-l border-zinc-800 text-zinc-100 flex flex-col shadow-2xl"
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-[#121212]">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded bg-[#ff3c00]/10 text-[#ff3c00]">
               <Mail className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                Automated Mailbox Simulator
-                <span className="text-[10px] font-mono font-normal px-2 py-0.5 rounded bg-orange-950/80 text-orange-300 border border-orange-500/30">
-                  @firestorm-mail
-                </span>
-              </h3>
-              <p className="text-[11px] text-slate-400">
-                Inspect simulated welcome verification and security alerts dispatched by Firestorm.
+              <h2 className="font-bold text-white font-mono uppercase text-sm">
+                Firestorm Email Simulator
+              </h2>
+              <p className="text-[11px] text-zinc-400 font-mono">
+                Inspect simulated transaction emails, MFA codes &amp; tokens
               </p>
             </div>
           </div>
-
           <button
-            id="close-email-drawer-btn"
             type="button"
             onClick={closeEmailDrawer}
-            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Verification feedback banner */}
-        {verificationFeedback && (
-          <div className="p-3 bg-emerald-950/90 border-b border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-2 font-medium">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{verificationFeedback}</span>
+        {/* Verification Success Toast */}
+        {verifySuccess && (
+          <div className="bg-emerald-950 border-b border-emerald-500/40 text-emerald-400 p-2 text-xs font-mono text-center flex items-center justify-center gap-2">
+            <CheckCircle2 className="w-4 h-4" />
+            <span>{verifySuccess}</span>
           </div>
         )}
 
-        {/* Drawer Content: Split List & Viewer */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-          {/* Email List (Left Column) */}
-          <div className="w-full md:w-5/12 border-r border-slate-800 bg-slate-950/60 overflow-y-auto">
+        {/* Content Layout */}
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-5 overflow-hidden">
+          {/* Inbox List Column */}
+          <div className="md:col-span-2 border-r border-zinc-800/80 bg-[#0a0a0a] flex flex-col overflow-y-auto">
+            <div className="p-3 border-b border-zinc-800 flex items-center justify-between text-xs font-mono text-zinc-400">
+              <span className="flex items-center gap-1.5">
+                <Inbox className="w-3.5 h-3.5 text-[#ff3c00]" />
+                <span>Inbox ({emailsList.length})</span>
+              </span>
+            </div>
+
             {emailsList.length === 0 ? (
-              <div className="p-8 text-center text-xs text-slate-500 space-y-2">
-                <Mail className="w-8 h-8 mx-auto text-slate-600 stroke-1" />
-                <p>No automated emails dispatched yet.</p>
-                <p className="text-[11px]">Create an account or request password reset to generate emails.</p>
+              <div className="p-6 text-center text-xs font-mono text-zinc-500">
+                No simulated emails generated yet. Register or request verification to trigger emails.
               </div>
             ) : (
-              <div className="divide-y divide-slate-850">
+              <div className="divide-y divide-zinc-850">
                 {emailsList.map((email) => {
                   const isSelected = currentEmail?.id === email.id;
                   return (
                     <button
                       key={email.id}
                       type="button"
-                      onClick={() => handleSelectEmail(email)}
-                      className={`w-full text-left p-3 transition-colors cursor-pointer block ${
-                        isSelected
-                          ? 'bg-orange-950/40 border-l-2 border-orange-500'
-                          : 'hover:bg-slate-900'
+                      onClick={() => {
+                        setSelectedIdOverride(email.id);
+                        markEmailRead(email.id);
+                      }}
+                      className={`w-full text-left p-3 transition-colors ${
+                        isSelected ? 'bg-[#181818] border-l-2 border-[#ff3c00]' : 'hover:bg-zinc-900/60'
                       }`}
                     >
-                      <div className="flex items-center justify-between text-[11px] mb-1">
-                        <span className="font-semibold text-slate-300 truncate max-w-[130px]">
-                          {email.to}
+                      <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                        <span className="truncate max-w-[120px] font-bold text-zinc-300">
+                          {email.recipientName || email.to}
                         </span>
-                        <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                          <Clock className="w-2.5 h-2.5" />
-                          {new Date(email.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
+                        {!email.isRead && (
+                          <span className="w-2 h-2 rounded-full bg-[#ff3c00]" />
+                        )}
                       </div>
-                      <div className="text-xs font-medium text-slate-200 truncate mb-0.5">
+                      <div className="text-xs font-semibold text-zinc-100 truncate mt-0.5">
                         {email.subject}
                       </div>
-                      <div className="text-[11px] text-slate-500 truncate">
-                        {email.content.replace(/\n/g, ' ')}
+                      <div className="text-[10px] text-zinc-500 font-mono mt-1 flex items-center gap-1">
+                        <Clock className="w-2.5 h-2.5" />
+                        <span>{new Date(email.timestamp).toLocaleTimeString()}</span>
                       </div>
                     </button>
                   );
@@ -132,87 +150,94 @@ export default function EmailInboxDrawer() {
             )}
           </div>
 
-          {/* Email Body Viewer (Right Column) */}
-          <div className="w-full md:w-7/12 flex-1 p-5 overflow-y-auto bg-slate-900 flex flex-col justify-between">
+          {/* Email Preview Column */}
+          <div className="md:col-span-3 flex flex-col bg-[#0f0f0f] overflow-y-auto p-4">
             {currentEmail ? (
-              <div className="space-y-4">
-                {/* Meta details */}
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-400">To:</span>
-                    <strong className="text-slate-200">{currentEmail.recipientName} &lt;{currentEmail.to}&gt;</strong>
+              <div className="space-y-4 font-mono text-xs">
+                {/* Meta Header */}
+                <div className="p-3 rounded border border-zinc-800 bg-[#141414] space-y-1.5">
+                  <div className="flex justify-between items-start text-xs">
+                    <div>
+                      <span className="text-zinc-500">To: </span>
+                      <span className="text-zinc-200 font-bold">{currentEmail.recipientName}</span>{' '}
+                      <span className="text-zinc-400">&lt;{currentEmail.to}&gt;</span>
+                    </div>
+                    <span className="text-[10px] text-zinc-500">
+                      {new Date(currentEmail.timestamp).toLocaleString()}
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-400">From:</span>
-                    <span className="text-orange-400 font-medium">Firestorm Automated Identity Service</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Subject:</span>
-                    <strong className="text-slate-100">{currentEmail.subject}</strong>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-900">
-                    <span>Target User ID: {currentEmail.userId}</span>
-                    <span>{new Date(currentEmail.timestamp).toLocaleString()}</span>
+                  <div className="text-xs">
+                    <span className="text-zinc-500">Subject: </span>
+                    <span className="text-[#ff3c00] font-bold">{currentEmail.subject}</span>
                   </div>
                 </div>
 
-                {/* Email Body Template Card */}
-                <div className="p-6 rounded-2xl bg-slate-950 border border-orange-500/30 text-xs space-y-4 shadow-inner">
-                  <div className="flex items-center gap-2 pb-3 border-b border-slate-800">
-                    <Sparkles className="w-4 h-4 text-orange-400" />
-                    <span className="font-bold tracking-wider text-slate-200 uppercase font-mono">
-                      FIRESTORM IDENTITY DISPATCH
-                    </span>
-                  </div>
-
-                  <div className="text-slate-300 leading-relaxed whitespace-pre-line">
-                    {currentEmail.content}
-                  </div>
-
-                  {/* 6-Digit Code Highlight */}
-                  {currentEmail.verificationCode && (
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-orange-950/50 via-slate-900 to-red-950/50 border border-orange-500/40 text-center space-y-2">
-                      <div className="text-[11px] text-orange-300 font-semibold uppercase tracking-wider">
-                        Your Official 6-Digit Code:
-                      </div>
-                      <div className="text-2xl font-black font-mono tracking-widest text-orange-400 py-1 bg-slate-950 rounded-lg border border-orange-500/30 inline-block px-6 shadow-md">
+                {/* Quick Action Banner for Verification / Reset */}
+                {currentEmail.verificationCode && (
+                  <div className="p-3 rounded border border-amber-500/30 bg-amber-950/20 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] uppercase font-bold text-amber-400 flex items-center gap-1.5">
+                        <KeyRound className="w-3.5 h-3.5" />
+                        <span>6-Digit Verification Code</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(currentEmail.verificationCode!)}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px]"
+                      >
+                        {copiedCode === currentEmail.verificationCode ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-400" />
+                            <span>Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            <span>Copy Code</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-2xl font-black tracking-widest text-white font-mono">
                         {currentEmail.verificationCode}
                       </div>
-                    </div>
-                  )}
-
-                  {/* Direct 1-Click Verification CTA if welcome/verification email */}
-                  {currentEmail.type === 'welcome_verification' && (
-                    <div className="pt-2">
                       <button
-                        id="email-one-click-verify-btn"
                         type="button"
-                        onClick={() => handleDirect1ClickVerify(currentEmail)}
-                        className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs tracking-wide shadow-lg shadow-emerald-950/50 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        onClick={() => handleAutoVerify(currentEmail.verificationCode!, currentEmail.userId)}
+                        className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-xs uppercase tracking-wide transition-colors flex items-center gap-1"
                       >
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>Verify My Account (1-Click)</span>
-                        <ArrowRight className="w-4 h-4" />
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span>Auto-Verify Now</span>
                       </button>
-                      <p className="text-[10px] text-slate-500 text-center mt-1.5">
-                        Clicking this button simulates clicking the verification link inside the email.
-                      </p>
                     </div>
-                  )}
+                  </div>
+                )}
+
+                {/* Email Body */}
+                <div className="p-4 rounded border border-zinc-800 bg-[#121212] whitespace-pre-wrap leading-relaxed text-zinc-300 font-sans text-xs">
+                  {currentEmail.content}
                 </div>
               </div>
             ) : (
-              <div className="text-center py-16 text-xs text-slate-500">
-                Select an email from the left sidebar to preview message contents.
+              <div className="flex-1 flex flex-col items-center justify-center text-zinc-500 font-mono text-xs">
+                <Mail className="w-10 h-10 mb-2 opacity-30 text-[#ff3c00]" />
+                <span>Select an email from the inbox list to read</span>
               </div>
             )}
-
-            <div className="pt-4 mt-auto border-t border-slate-800 text-center">
-              <span className="text-[11px] text-slate-500">
-                Firestorm Automated Email Dispatch Engine &bull; Zero External Spam
-              </span>
-            </div>
           </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-3 border-t border-zinc-800 bg-[#0a0a0a] flex items-center justify-between text-xs font-mono text-zinc-500">
+          <span>Sandbox Mode Active</span>
+          <button
+            type="button"
+            onClick={closeEmailDrawer}
+            className="px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
+          >
+            Close Simulator
+          </button>
         </div>
       </div>
     </div>
