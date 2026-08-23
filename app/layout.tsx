@@ -1,29 +1,20 @@
-import type {Metadata} from 'next';
-import './globals.css'; // Global styles
-import Providers from '@/components/Providers';
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Firestorm — Identity & Authentication Portal',
-  description: 'Secure user identity portal with automated email verification, 12-digit alphanumeric ID generation, password reset, and optional multi-factor authentication.',
-  openGraph: {
-    title: 'Firestorm — Identity & Authentication Portal',
-    description: 'Secure user identity portal with automated email verification, 12-digit alphanumeric ID generation, password reset, and optional multi-factor authentication.',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Firestorm — Identity & Authentication Portal',
-    description: 'Secure user identity portal with automated email verification, 12-digit alphanumeric ID generation, password reset, and optional multi-factor authentication.',
-  },
+  title: 'Standalone Web Apps Hub',
+  description: 'Clean suite of standalone HTML applications: Music Search, Cold Pressed Game, and 7x7 Slots.',
 };
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body suppressHydrationWarning>
-        <Providers>
-          {children}
-        </Providers>
+    <html lang="en" className="h-full bg-[#09090b]">
+      <body className="h-full bg-[#09090b] text-zinc-100 antialiased font-sans flex flex-col" suppressHydrationWarning>
+        {children}
       </body>
     </html>
   );
