@@ -1,0 +1,38 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@layer utilities {
+  @keyframes fireShimmer {
+    0%, 100% {
+      background-position: 0% 50%;
+      filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.6)) drop-shadow(0 0 24px rgba(239, 68, 68, 0.4));
+    }
+    50% {
+      background-position: 100% 50%;
+      filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.8)) drop-shadow(0 0 35px rgba(220, 38, 38, 0.6));
+    }
+  }
+
+  @keyframes emberFloat {
+    0% {
+      transform: translateY(0) scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateY(-80px) scale(1.2);
+      opacity: 0;
+    }
+  }
+
+  .animate-fire-title {
+    background: linear-gradient(135deg, #ff4500, #ff8c00, #ffd700, #ff2a2a, #ff7b00);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fireShimmer 4s ease-in-out infinite;
+  }
+}
+
