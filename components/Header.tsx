@@ -11,7 +11,8 @@ export default function Header() {
     unreadEmailCount, 
     openEmailDrawer, 
     setDbModalOpen, 
-    usersList 
+    usersList,
+    isMounted
   } = useAuth();
 
   return (
@@ -70,7 +71,7 @@ export default function Header() {
             title="Inspect Stored Database Records"
           >
             <Database className="w-4 h-4 text-amber-400" />
-            <span>Database ({usersList.length})</span>
+            <span>Database ({isMounted ? usersList.length : 0})</span>
           </button>
 
           {/* User Session status */}

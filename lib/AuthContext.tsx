@@ -1,8 +1,18 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useSyncExternalStore } from 'react';
 import { User, EmailMessage } from './types';
 import { FirestormDatabase } from './db';
+
+const emptySubscribe = () => () => {};
+
+function useIsClientMounted(): boolean {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+}
 
 interface AuthContextType {
   currentUser: User | null;
@@ -14,6 +24,7 @@ interface AuthContextType {
   isEmailDrawerOpen: boolean;
   isDbModalOpen: boolean;
   selectedEmailForViewing: EmailMessage | null;
+  isMounted: boolean;
   
   // Actions
   signUp: (firstName: string, lastName: string, email: string, passwordPlain: string) => Promise<User>;
@@ -39,21 +50,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const CURRENT_USER_SESSION_KEY = 'firestorm_active_user_id';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [usersList, setUsersList] = useState<User[]>(() => {
-    if (typeof window === 'undefined') return [];
-    return FirestormDatabase.getAllUsers();
-  });
-  const [emailsList, setEmailsList] = useState<EmailMessage[]>(() => {
-    if (typeof window === 'undefined') return [];
-    return FirestormDatabase.getStoredEmails();
-  });
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const activeId = localStorage.getItem(CURRENT_USER_SESSION_KEY);
-    if (!activeId) return null;
-    const allUsers = FirestormDatabase.getAllUsers();
-    return allUsers.find(u => u.id === activeId) || null;
-  });
+  const isMounted = useIsClientMounted();
+  const [usersList, setUsersList] = useState<User[]>([]);
+  const [emailsList, setEmailsList] = useState<EmailMessage[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pendingMfaUserId, setPendingMfaUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isEmailDrawerOpen, setIsEmailDrawerOpen] = useState<boolean>(false);
@@ -74,6 +74,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, []);
+
+  // Initial client hydration sync
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      refreshData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [refreshData]);
 
   const unreadEmailCount = emailsList.filter(e => !e.isRead).length;
 
@@ -218,6 +226,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isEmailDrawerOpen,
         isDbModalOpen,
         selectedEmailForViewing,
+        isMounted,
         signUp,
         signIn,
         submitMfaCode,
