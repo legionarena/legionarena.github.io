@@ -1,6 +1,6 @@
 {
-  "name": "Standalone Web Apps",
-  "description": "Collection of standalone single-file HTML applications: YouTube Music Search & Player, Cold Pressed Arcade Game, and 7x7 Emoji Slots.",
+  "name": "Firestorm Tournaments",
+  "description": "Tactical Fortnite and Call of Duty inspired tournament battle arena with interactive HTML battle stations, tactical menu, and standalone window launch capabilities.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

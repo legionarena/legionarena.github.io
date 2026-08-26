@@ -5,34 +5,62 @@
   @keyframes fireShimmer {
     0%, 100% {
       background-position: 0% 50%;
-      filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.6)) drop-shadow(0 0 24px rgba(239, 68, 68, 0.4));
+      filter: drop-shadow(0 0 12px rgba(255, 60, 0, 0.6)) drop-shadow(0 0 24px rgba(255, 170, 0, 0.4));
     }
     50% {
       background-position: 100% 50%;
-      filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.8)) drop-shadow(0 0 35px rgba(220, 38, 38, 0.6));
+      filter: drop-shadow(0 0 20px rgba(255, 90, 0, 0.8)) drop-shadow(0 0 35px rgba(255, 200, 0, 0.6));
     }
   }
 
-  @keyframes emberFloat {
+  @keyframes hudScan {
     0% {
-      transform: translateY(0) scale(0.8);
-      opacity: 0;
-    }
-    50% {
-      opacity: 0.8;
+      transform: translateY(-100%);
     }
     100% {
-      transform: translateY(-80px) scale(1.2);
-      opacity: 0;
+      transform: translateY(1000%);
+    }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 0.9;
     }
   }
 
   .animate-fire-title {
-    background: linear-gradient(135deg, #ff4500, #ff8c00, #ffd700, #ff2a2a, #ff7b00);
+    background: linear-gradient(135deg, #ff2a00, #ff5500, #ffaa00, #ffd000, #ff3c00);
     background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: fireShimmer 4s ease-in-out infinite;
+    animation: fireShimmer 5s ease-in-out infinite;
+  }
+
+  .tactical-grid {
+    background-size: 32px 32px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+
+  .tactical-dots {
+    background-image: radial-gradient(rgba(255, 85, 0, 0.15) 1px, transparent 0);
+    background-size: 16px 16px;
+  }
+
+  .chamfer-edge {
+    clip-path: polygon(10px 0%, 100% 0%, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0% 100%, 0% 10px);
+  }
+
+  .chamfer-edge-sm {
+    clip-path: polygon(6px 0%, 100% 0%, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0% 100%, 0% 6px);
+  }
+
+  .hud-bracket {
+    position: relative;
   }
 }
 

@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Standalone Web Apps Hub',
-  description: 'Clean suite of standalone HTML applications: Music Search, Cold Pressed Game, and 7x7 Slots.',
+  title: 'FIRESTORM — Tournaments',
+  description: 'Fortnite and Call of Duty inspired tactical tournament arena with interactive battle stations and standalone window launch.',
 };
 
 export default function RootLayout({
