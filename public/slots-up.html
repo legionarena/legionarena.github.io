@@ -337,7 +337,7 @@
 
     <div class="top-nav">
         <span>7x7 Emoji Slots &bull; Arcade Module</span>
-        <a href="/">&larr; Return to Hub</a>
+        <span style="color: var(--text-muted); font-size: 11px;">Firestorm Supply Drop Matrix</span>
     </div>
 
     <header>
@@ -714,6 +714,79 @@
             credits += totalWin;
             const mult = totalWin > 0 ? (totalWin / currentBet).toFixed(1) : 1;
             updateHUD(mult);
+
+            // Record high score if credits or win is substantial
+            if (credits > 1000 || totalWin >= 100) {
+                saveFirestormScore(credits, `Peak Credits: ${credits} • Recent Win: +${totalWin} (${mult}x)`);
+            }
+        }
+
+        function showScoreNotificationToast(scoreText) {
+            let toast = document.getElementById('high-score-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'high-score-toast';
+                toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.95);border:1px solid #10b981;color:#34d399;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:bold;z-index:9999;box-shadow:0 10px 25px rgba(0,0,0,0.8);display:flex;align-items:center;gap:8px;transition:all 0.3s ease;pointer-events:none;';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `<span>🏆</span><span>Current High Score (${scoreText}) has been posted to the High Scores page!</span>`;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            
+            setTimeout(() => {
+                if (toast) {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(-50%) translateY(10px)';
+                }
+            }, 4000);
+        }
+
+        function saveFirestormScore(finalScore, details) {
+            try {
+                showScoreNotificationToast(finalScore.toLocaleString());
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'FIRESTORM_SAVE_SCORE',
+                        gameId: 'slots-up',
+                        gameName: '7x7 Supply Drop Matrix',
+                        score: finalScore,
+                        details: details
+                    }, '*');
+                }
+
+                const DB_KEY = 'firestorm_tournaments_db_v2';
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const db = JSON.parse(raw);
+                    const currentUser = db.currentUserId ? db.users.find(u => u.id === db.currentUserId) : null;
+                    const userId = currentUser ? currentUser.id : 'FS-OPERATIVE';
+                    const userCallsign = currentUser ? currentUser.callsign : 'Operative';
+
+                    if (!db.highScores) db.highScores = [];
+                    db.highScores.push({
+                        id: `hs-${Date.now()}`,
+                        gameId: 'slots-up',
+                        gameName: '7x7 Supply Drop Matrix',
+                        userId: userId,
+                        userCallsign: userCallsign,
+                        userUid: userId,
+                        score: finalScore,
+                        details: details,
+                        createdAt: new Date().toISOString()
+                    });
+
+                    if (currentUser) {
+                        if (!currentUser.highScores) currentUser.highScores = {};
+                        if (finalScore > (currentUser.highScores.slotsUp || 0)) {
+                            currentUser.highScores.slotsUp = finalScore;
+                            currentUser.rating = (currentUser.rating || 1000) + Math.min(150, Math.floor(finalScore / 20));
+                        }
+                    }
+                    localStorage.setItem(DB_KEY, JSON.stringify(db));
+                }
+            } catch (e) {
+                console.warn('Could not save high score:', e);
+            }
         }
 
         // Initialize on load

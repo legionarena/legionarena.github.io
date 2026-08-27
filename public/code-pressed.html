@@ -181,7 +181,7 @@
 
 <div class="top-nav">
     <span>Cold Pressed &bull; Arcade Catcher</span>
-    <a href="/">&larr; Return to Hub</a>
+    <span style="color: #64748b; font-size: 11px;">Firestorm Arena Module</span>
 </div>
 
 <div id="game-frame">
@@ -204,7 +204,11 @@
         <!-- Game Over Screen -->
         <div id="game-over-screen" class="overlay-screen">
             <h1 class="danger">BATCH SPOILED!</h1>
-            <p>You caught <span id="final-score">0</span> fruits!<br>Reached Level <span id="final-level">1</span></p>
+            <p style="margin-bottom: 12px;">You caught <span id="final-score">0</span> fruits!<br>Reached Level <span id="final-level">1</span></p>
+            <div style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.5); color: #34d399; font-size: 13px; font-weight: 600; padding: 10px 16px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; max-width: 340px;">
+                <span style="font-size: 16px;">🏆</span>
+                <span>Your high score has been posted to the High Scores page!</span>
+            </div>
             <button id="restart-btn" class="action-btn">Press Next Batch</button>
         </div>
 
@@ -559,6 +563,58 @@
         finalScoreEl.textContent = score;
         finalLevelEl.textContent = currentLevel;
         gameOverScreen.classList.add('active');
+
+        // Persist score to Firestorm Tournaments Database
+        saveFirestormScore(score, `Level ${currentLevel} • ${score} Targets Caught`);
+    }
+
+    function saveFirestormScore(finalScore, details) {
+        try {
+            // 1. Post message to parent frame if embedded
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'FIRESTORM_SAVE_SCORE',
+                    gameId: 'code-pressed',
+                    gameName: 'Cold Pressed Combat Arena',
+                    score: finalScore,
+                    details: details
+                }, '*');
+            }
+
+            // 2. Direct localStorage write for standalone window support
+            const DB_KEY = 'firestorm_tournaments_db_v2';
+            const raw = localStorage.getItem(DB_KEY);
+            if (raw) {
+                const db = JSON.parse(raw);
+                const currentUser = db.currentUserId ? db.users.find(u => u.id === db.currentUserId) : null;
+                const userId = currentUser ? currentUser.id : 'FS-OPERATIVE';
+                const userCallsign = currentUser ? currentUser.callsign : 'Operative';
+
+                if (!db.highScores) db.highScores = [];
+                db.highScores.push({
+                    id: `hs-${Date.now()}`,
+                    gameId: 'code-pressed',
+                    gameName: 'Cold Pressed Combat Arena',
+                    userId: userId,
+                    userCallsign: userCallsign,
+                    userUid: userId,
+                    score: finalScore,
+                    details: details,
+                    createdAt: new Date().toISOString()
+                });
+
+                if (currentUser) {
+                    if (!currentUser.highScores) currentUser.highScores = {};
+                    if (finalScore > (currentUser.highScores.codePressed || 0)) {
+                        currentUser.highScores.codePressed = finalScore;
+                        currentUser.rating = (currentUser.rating || 1000) + Math.min(100, Math.floor(finalScore / 5));
+                    }
+                }
+                localStorage.setItem(DB_KEY, JSON.stringify(db));
+            }
+        } catch (e) {
+            console.warn('Could not save high score:', e);
+        }
     }
 
     function startGame() {

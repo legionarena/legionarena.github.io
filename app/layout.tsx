@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'FIRESTORM — Tournaments',
-  description: 'Fortnite and Call of Duty inspired tactical tournament arena with interactive battle stations and standalone window launch.',
+  description: 'Fortnite and Call of Duty inspired tactical tournament arena with interactive battle stations, leaderboards, and tactical intel threads.',
 };
 
 export default function RootLayout({

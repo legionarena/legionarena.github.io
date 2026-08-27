@@ -1,6 +1,6 @@
 {
   "name": "Firestorm Tournaments",
-  "description": "Tactical Fortnite and Call of Duty inspired tournament battle arena with interactive HTML battle stations, tactical menu, and standalone window launch capabilities.",
+  "description": "Tactical Fortnite and Call of Duty inspired tournament battle arena with automated user registration, email verification, game high score leaderboards, and public intel communication threads with Base64 image attachments.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

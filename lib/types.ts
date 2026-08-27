@@ -11,6 +11,10 @@ export interface User {
   rank: string;
   rating: number;
   matchesWon: number;
+  highScores?: {
+    codePressed?: number;
+    slotsUp?: number;
+  };
   createdAt: string;
   lastLoginAt: string;
 }
@@ -26,8 +30,73 @@ export interface DispatchedEmail {
   isRead: boolean;
 }
 
+export interface GameHighScore {
+  id: string;
+  gameId: 'code-pressed' | 'slots-up';
+  gameName: string;
+  userId: string;
+  userCallsign: string;
+  userUid: string;
+  score: number;
+  details: string;
+  createdAt: string;
+}
+
+export interface PlaylistTrack {
+  id: string;
+  title: string;
+  thumb: string;
+  addedAt: string;
+}
+
+export interface UserPlaylist {
+  id: string;
+  userId: string;
+  userCallsign: string;
+  name: string;
+  tracks: PlaylistTrack[];
+  updatedAt: string;
+}
+
+export interface IntelThread {
+  id: string;
+  title: string;
+  callsignTag: string;
+  category: 'WARZONE_OPS' | 'FORTNITE_BR' | 'META_LOADOUT' | 'TACTICAL_RECON';
+  description: string;
+  briefing: string;
+  badge: string;
+  themeColor: string;
+  accentBorder: string;
+  postCount?: number;
+}
+
+export interface IntelPost {
+  id: string;
+  threadId: string;
+  userId: string;
+  userCallsign: string;
+  userRank: string;
+  userUid: string;
+  content: string;
+  imageBase64?: string; // base64 encoded image string (data:image/...)
+  imageName?: string;
+  reactions: {
+    fire: number;
+    target: number;
+    shield: number;
+    usersReacted: Record<string, string[]>; // reactionType -> array of userIds
+  };
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface DbState {
   users: User[];
   currentUserId: string | null;
   emailOutbox: DispatchedEmail[];
+  highScores: GameHighScore[];
+  playlists: UserPlaylist[];
+  posts: IntelPost[];
 }
+
