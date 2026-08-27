@@ -325,6 +325,17 @@ export function loadDatabase(): DbState {
     // Ensure all new fields exist
     if (!parsed.highScores || !Array.isArray(parsed.highScores)) {
       parsed.highScores = INITIAL_STATE.highScores;
+    } else {
+      // Deduplicate to ensure strictly 1 high score per user per game (keep peak record)
+      const uniqueScores = new Map<string, GameHighScore>();
+      for (const entry of parsed.highScores) {
+        const key = `${entry.userId || entry.userUid}_${entry.gameId}`;
+        const existing = uniqueScores.get(key);
+        if (!existing || entry.score > existing.score) {
+          uniqueScores.set(key, entry);
+        }
+      }
+      parsed.highScores = Array.from(uniqueScores.values());
     }
     if (!parsed.playlists || !Array.isArray(parsed.playlists)) {
       parsed.playlists = INITIAL_STATE.playlists;
@@ -370,21 +381,49 @@ export function saveGameHighScore(
 
   const gameName = gameId === 'code-pressed' ? 'Cold Pressed Combat Arena' : '7x7 Supply Drop Matrix';
 
-  const newScoreEntry: GameHighScore = {
-    id: `hs-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-    gameId,
-    gameName,
-    userId,
-    userCallsign,
-    userUid,
-    score,
-    details,
-    createdAt: new Date().toISOString()
-  };
-
-  state.highScores.push(newScoreEntry);
-
   let isNewPersonalBest = false;
+  let savedEntry: GameHighScore;
+
+  // RULE: ONLY POST 1 HIGH SCORE PER USER
+  // Check if this operative already has a posted score entry for this battle station
+  const existingScoreIndex = state.highScores.findIndex(
+    s => (s.userId === userId || (s.userUid && s.userUid === userUid)) && s.gameId === gameId
+  );
+
+  if (existingScoreIndex !== -1) {
+    const existing = state.highScores[existingScoreIndex];
+    if (score >= existing.score) {
+      isNewPersonalBest = true;
+      savedEntry = {
+        ...existing,
+        score,
+        details,
+        userCallsign,
+        userUid,
+        createdAt: new Date().toISOString()
+      };
+      state.highScores[existingScoreIndex] = savedEntry;
+    } else {
+      // Keep their higher personal best posted
+      savedEntry = existing;
+      isNewPersonalBest = false;
+    }
+  } else {
+    // First high score posted for this operative
+    isNewPersonalBest = true;
+    savedEntry = {
+      id: `hs-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      gameId,
+      gameName,
+      userId,
+      userCallsign,
+      userUid,
+      score,
+      details,
+      createdAt: new Date().toISOString()
+    };
+    state.highScores.push(savedEntry);
+  }
 
   // Update user's personal best & rating
   if (currentUser) {
@@ -396,7 +435,6 @@ export function saveGameHighScore(
       const currentBest = gameId === 'code-pressed' ? (user.highScores.codePressed || 0) : (user.highScores.slotsUp || 0);
 
       if (score > currentBest) {
-        isNewPersonalBest = true;
         if (gameId === 'code-pressed') user.highScores.codePressed = score;
         if (gameId === 'slots-up') user.highScores.slotsUp = score;
 
@@ -414,7 +452,7 @@ export function saveGameHighScore(
   }
 
   saveDatabase(state);
-  return { success: true, isNewPersonalBest, highScore: newScoreEntry };
+  return { success: true, isNewPersonalBest, highScore: savedEntry };
 }
 
 export function getHighScores(gameId?: 'code-pressed' | 'slots-up'): GameHighScore[] {
@@ -423,7 +461,16 @@ export function getHighScores(gameId?: 'code-pressed' | 'slots-up'): GameHighSco
   if (gameId) {
     scores = scores.filter(s => s.gameId === gameId);
   }
-  return scores.sort((a, b) => b.score - a.score);
+  // Guarantee strictly 1 high score per user in the returned list
+  const userBestMap = new Map<string, GameHighScore>();
+  for (const s of scores) {
+    const key = gameId ? `${s.userId || s.userUid}` : `${s.userId || s.userUid}_${s.gameId}`;
+    const existing = userBestMap.get(key);
+    if (!existing || s.score > existing.score) {
+      userBestMap.set(key, s);
+    }
+  }
+  return Array.from(userBestMap.values()).sort((a, b) => b.score - a.score);
 }
 
 export function getUserPersonalBests(userId: string): { codePressed: number; slotsUp: number } {

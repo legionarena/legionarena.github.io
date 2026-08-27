@@ -474,7 +474,7 @@ export default function IntelPostsView({
                         {post.imageName && (
                           <div className="text-[11px] font-mono text-slate-500 truncate flex items-center gap-1.5">
                             <ImageIcon className="w-3 h-3 text-orange-400" />
-                            {post.imageName} (Base64 Decoded)
+                            {post.imageName}
                           </div>
                         )}
                       </div>
@@ -550,7 +550,7 @@ export default function IntelPostsView({
             <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-start gap-2.5 text-xs text-slate-400">
               <Info className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
               <div>
-                <strong>Tactical Protocol:</strong> Each operative may hold <strong>1 active message per thread</strong>. You can attach <strong>1 image</strong> which is stored in Base64 encoding.
+                <strong>Tactical Protocol:</strong> Each operative may hold <strong>1 active message per thread</strong>. You can attach <strong>1 tactical image</strong> to your briefing.
               </div>
             </div>
 
@@ -595,7 +595,7 @@ export default function IntelPostsView({
                 <label className="text-xs font-mono font-bold text-slate-300 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <ImageIcon className="w-3.5 h-3.5 text-orange-400" />
-                    IMAGE ATTACHMENT (1 MAX • BASE64)
+                    IMAGE ATTACHMENT (1 MAX)
                   </span>
                   {imageBase64 && (
                     <button
@@ -618,7 +618,7 @@ export default function IntelPostsView({
                     />
                     <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 px-1">
                       <span className="truncate max-w-[200px]">{imageName}</span>
-                      <span className="text-emerald-400 font-bold">BASE64 READY</span>
+                      <span className="text-emerald-400 font-bold">READY TO TRANSMIT</span>
                     </div>
                   </div>
                 ) : (

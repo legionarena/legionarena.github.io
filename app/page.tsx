@@ -19,7 +19,11 @@ import {
   Crosshair,
   Mail,
   Inbox,
-  Radar
+  Radar,
+  Sparkles,
+  Info,
+  ExternalLink,
+  Cpu
 } from 'lucide-react';
 import { User, DispatchedEmail } from '@/lib/types';
 import {
@@ -123,6 +127,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('stations');
   const [activeStationId, setActiveStationId] = useState<string>('music-search');
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isGeminiInfoOpen, setIsGeminiInfoOpen] = useState<boolean>(false);
   const [sfxEnabled, setSfxEnabled] = useState<boolean>(true);
   const [ping, setPing] = useState<number>(24);
   const [isOutboxOpen, setIsOutboxOpen] = useState<boolean>(false);
@@ -434,6 +439,21 @@ export default function Home() {
 
           {/* Quick HUD Telemetry & Verified Operative Badge */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Gemini AI Studio Badge */}
+            <button
+              id="gemini-ai-studio-header-btn"
+              type="button"
+              onClick={() => {
+                setIsGeminiInfoOpen(true);
+                playTacticalSound('click');
+              }}
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-950/80 via-indigo-950/80 to-purple-950/80 hover:from-blue-900 hover:to-indigo-900 border border-indigo-500/50 hover:border-indigo-400 text-cyan-300 hover:text-white text-[11px] font-mono transition-all cursor-pointer shadow-[0_0_12px_rgba(99,102,241,0.25)]"
+              title="View Google Gemini AI Studio System Architecture"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+              <span>Created by Gemini AI Studio</span>
+            </button>
+
             {/* Operative Profile Badge */}
             <div className="flex items-center gap-2 px-2.5 py-1.5 rounded bg-[#10141d]/90 border border-zinc-800 text-xs font-mono">
               <div className="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-amber-600 text-black font-black flex items-center justify-center text-xs">
@@ -479,23 +499,15 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Slide-Over Tactical Hamburger Menu Drawer */}
+      {/* Slide-Over Tactical Hamburger Menu Drawer (OPENS ON THE LEFT) */}
       {isMenuOpen && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Firestorm Tactical Areas"
-          className="fixed inset-0 z-50 flex bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex justify-start bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
         >
-          <div
-            className="flex-1 cursor-pointer"
-            onClick={() => {
-              setIsMenuOpen(false);
-              playTacticalSound('menu');
-            }}
-          />
-
-          <div className="w-full max-w-lg bg-[#0a0d14] border-l border-zinc-800 text-zinc-100 flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.8)] h-full overflow-hidden relative">
+          <div className="w-full max-w-lg bg-[#0a0d14] border-r border-zinc-800 text-zinc-100 flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.8)] h-full overflow-hidden relative animate-in slide-in-from-left duration-200">
             <div className="absolute inset-0 tactical-grid pointer-events-none opacity-40" />
 
             {/* Drawer Header */}
@@ -668,7 +680,7 @@ export default function Home() {
               </div>
 
               {/* Tactical Comms Outbox button */}
-              <div className="pt-2 border-t border-zinc-800">
+              <div className="pt-2 border-t border-zinc-800 space-y-2">
                 <button
                   id="drawer-open-outbox-btn"
                   onClick={() => {
@@ -686,6 +698,45 @@ export default function Home() {
                     {outboxEmails.length}
                   </span>
                 </button>
+
+                {/* Gemini AI Studio Origin Card */}
+                <div className="p-3.5 rounded-xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/40 via-blue-950/30 to-[#0d1222] space-y-2">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <div className="flex items-center gap-2 text-cyan-400 font-bold">
+                      <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+                      <span>BUILT WITH GEMINI AI STUDIO</span>
+                    </div>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-500/40">
+                      DEEPMIND AI
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+                    Tactical arena engineered in Google AI Studio Build. Features Next.js 15, TypeScript, autoscaling game frames, and zero-loss local storage.
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsGeminiInfoOpen(true);
+                        setIsMenuOpen(false);
+                        playTacticalSound('click');
+                      }}
+                      className="flex-1 py-1.5 px-2.5 rounded bg-indigo-600/80 hover:bg-indigo-600 text-white font-mono text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Info className="w-3.5 h-3.5" />
+                      <span>System Specs</span>
+                    </button>
+                    <a
+                      href="https://ai.studio/build"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-1.5 px-2.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-mono text-[11px] font-bold flex items-center gap-1 transition-colors"
+                    >
+                      <span>Build</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -707,6 +758,15 @@ export default function Home() {
               </button>
             </div>
           </div>
+
+          {/* Clickable Backdrop on the RIGHT to dismiss drawer */}
+          <div
+            className="flex-1 cursor-pointer"
+            onClick={() => {
+              setIsMenuOpen(false);
+              playTacticalSound('menu');
+            }}
+          />
         </div>
       )}
 
@@ -831,7 +891,55 @@ export default function Home() {
 
           {/* Main Battle Station Viewport */}
           <main className="flex-1 flex flex-col p-2 sm:p-4 max-w-[1700px] w-full mx-auto relative z-10">
-            <div className="flex-1 flex flex-col rounded-xl border border-zinc-800 bg-[#080a0f] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.9)] transition-all relative min-h-[720px] h-[calc(100vh-145px)]">
+            {/* Google Gemini AI Studio System Banner */}
+            <div className="mb-3 px-4 py-3 rounded-xl border border-indigo-500/30 bg-gradient-to-r from-[#090d18] via-[#0d1224] to-[#090d18] shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs font-mono shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-cyan-400 shrink-0">
+                  <Sparkles className="w-5 h-5 animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-white tracking-wider uppercase font-mono">
+                      ENGINEERED WITH GOOGLE GEMINI AI STUDIO
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-indigo-950 border border-indigo-500/50 text-cyan-300 text-[10px] font-bold">
+                      AI STUDIO BUILD
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px]">
+                      GEMINI 3.5 &bull; NEXT.JS 15 &bull; TYPESCRIPT
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 mt-0.5 font-sans">
+                    Tactical tournament battle arena featuring dynamic autoscaling games, real-time postMessage event telemetry, 1-score operative leaderboards, and durable persistence.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsGeminiInfoOpen(true);
+                    playTacticalSound('click');
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                  <span>System Specs</span>
+                </button>
+                <a
+                  href="https://ai.studio/build"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-all"
+                >
+                  <span>AI Studio</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+
+            <div className="flex-1 flex flex-col rounded-xl border border-zinc-800 bg-[#080a0f] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.9)] transition-all relative min-h-[480px] h-[calc(100vh-210px)]">
               {/* Tactical HUD Header Bar Above Frame */}
               <div className="flex flex-wrap items-center justify-between px-3 sm:px-4 py-2 bg-[#0e121b] border-b border-zinc-800 text-xs font-mono text-zinc-400 shrink-0 gap-2">
                 <div className="flex items-center gap-2.5">
@@ -892,18 +1000,30 @@ export default function Home() {
         </main>
       )}
 
-      {/* Bottom Tournament Ticker */}
-      <footer className="border-t border-zinc-850 bg-[#08090d] px-4 py-1.5 shrink-0 relative z-20 text-[11px] font-mono text-zinc-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+      {/* Bottom Tournament Ticker & Gemini AI Studio Attribution */}
+      <footer className="border-t border-zinc-850 bg-[#08090d] px-4 py-2 shrink-0 relative z-20 text-[11px] font-mono text-zinc-500 flex flex-col md:flex-row items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping" />
           <span className="text-zinc-400 font-bold">FIRESTORM TOURNAMENTS</span>
           <span className="text-zinc-700">|</span>
-          <span className="text-zinc-500">
-            OPERATIVE {currentUser.callsign} &bull; CLEARANCE LEVEL 1 &bull; GITHUB PAGES PERSISTENCE
-          </span>
+          <span className="text-emerald-400 font-bold">● ONLINE</span>
+          <span className="text-zinc-700">|</span>
+          <button
+            type="button"
+            onClick={() => {
+              setIsGeminiInfoOpen(true);
+              playTacticalSound('click');
+            }}
+            className="flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-bold hover:underline cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Created by Google Gemini AI Studio (ai.studio/build)</span>
+          </button>
+          <span className="text-zinc-700">|</span>
+          <span className="text-zinc-400">OPERATIVE: {currentUser.callsign}</span>
         </div>
         <div className="flex items-center gap-3 text-zinc-500 text-[10px]">
-          <span>FORTNITE &amp; WARZONE HUD</span>
+          <span>POWERED BY GOOGLE DEEPMIND GEMINI</span>
           <span className="text-zinc-700">|</span>
           <span className="text-orange-400 font-bold">v4.5 PRO</span>
         </div>
@@ -976,6 +1096,146 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Google Gemini AI Studio Information Modal Dialog */}
+      {isGeminiInfoOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Google Gemini AI Studio System Architecture"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 font-mono"
+        >
+          <div
+            className="fixed inset-0 cursor-pointer"
+            onClick={() => {
+              setIsGeminiInfoOpen(false);
+              playTacticalSound('click');
+            }}
+          />
+          <div className="relative z-10 w-full max-w-2xl bg-[#0a0d16] border-2 border-indigo-500/60 rounded-2xl p-5 sm:p-7 text-zinc-100 shadow-[0_0_60px_rgba(99,102,241,0.3)] max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between border-b border-zinc-800 pb-4 mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] shrink-0">
+                  <Sparkles className="w-6 h-6 animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-base sm:text-lg font-black tracking-wider uppercase text-white">
+                      CREATED BY GEMINI AI STUDIO
+                    </h2>
+                    <span className="px-2 py-0.5 rounded bg-indigo-950 border border-indigo-500/50 text-cyan-300 text-[10px] font-bold">
+                      OFFICIAL SPEC
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 font-sans mt-0.5">
+                    Engineering and architecture overview generated via Google AI Studio Build
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsGeminiInfoOpen(false);
+                  playTacticalSound('click');
+                }}
+                className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer border border-zinc-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs font-sans text-zinc-300">
+              {/* Studio Overview */}
+              <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/30 space-y-2">
+                <div className="flex items-center gap-2 font-mono font-bold text-cyan-300">
+                  <Cpu className="w-4 h-4 text-cyan-400" />
+                  <span>PLATFORM &amp; INTELLIGENCE MODEL</span>
+                </div>
+                <p className="text-zinc-300 leading-relaxed">
+                  This entire application was prompted, architected, and engineered within <strong>Google AI Studio Build</strong> (
+                  <a href="https://ai.studio/build" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline font-mono">
+                    https://ai.studio/build
+                  </a>
+                  ), utilizing <strong>Google DeepMind Gemini reasoning and code generation models</strong>.
+                </p>
+              </div>
+
+              {/* Core Features Specification */}
+              <div className="space-y-2">
+                <div className="font-mono font-bold text-zinc-400 uppercase tracking-wider text-[11px]">
+                  IMPLEMENTED SYSTEM ARCHITECTURE
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-mono text-[11px]">
+                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-800">
+                    <div className="text-orange-400 font-bold mb-1">🎮 Dynamic Autoscaling Games</div>
+                    <div className="text-zinc-400 font-sans text-xs">
+                      Cold Pressed Combat Arena &amp; 7x7 Emoji Supply Drop dynamically scale canvas and DOM transform matrix to fit any viewport.
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-800">
+                    <div className="text-amber-400 font-bold mb-1">🏆 Single High Score Leaderboards</div>
+                    <div className="text-zinc-400 font-sans text-xs">
+                      Enforces strictly 1 high score record per operative per game. Updating scores updates personal best and tactical rating.
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-800">
+                    <div className="text-emerald-400 font-bold mb-1">⚡ Bi-Directional Telemetry</div>
+                    <div className="text-zinc-400 font-sans text-xs">
+                      Cross-frame postMessage listeners notify the operative of recorded high scores and broadcast new personal bests.
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-800">
+                    <div className="text-purple-400 font-bold mb-1">🛡️ Verified Auth &amp; Comms</div>
+                    <div className="text-zinc-400 font-sans text-xs">
+                      12-char UID generation, SHA-256 password hashing, email verification dispatcher, and intel forum with image attachments.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tech Stack Specs */}
+              <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-2 font-mono text-xs">
+                <div className="text-zinc-400 uppercase tracking-wider font-bold text-[11px]">
+                  PRODUCTION ENVIRONMENT
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-zinc-300">
+                  <div>Framework: <span className="text-cyan-300">Next.js 15+ App Router</span></div>
+                  <div>Language: <span className="text-cyan-300">TypeScript</span></div>
+                  <div>Styling: <span className="text-cyan-300">Tailwind CSS</span></div>
+                  <div>Runtime Port: <span className="text-cyan-300">Port 3000 (Cloud Run)</span></div>
+                  <div>Audio Engine: <span className="text-cyan-300">Web Audio API Synth</span></div>
+                  <div>Persistence: <span className="text-cyan-300">Durable Local Storage</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-zinc-800 flex items-center justify-between">
+              <a
+                href="https://ai.studio/build"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-mono text-xs font-bold flex items-center gap-2 shadow-lg transition-all"
+              >
+                <span>Explore Google AI Studio Build</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsGeminiInfoOpen(false);
+                  playTacticalSound('click');
+                }}
+                className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-mono text-xs font-bold transition-colors cursor-pointer"
+              >
+                Close Specification
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

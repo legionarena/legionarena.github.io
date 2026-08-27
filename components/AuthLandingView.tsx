@@ -341,7 +341,7 @@ export default function AuthLandingView({
                   <Radio className="w-4 h-4" />
                   <span>INTEL FEEDS</span>
                 </div>
-                <p className="text-xs text-zinc-400">1 post per thread with Base64 tactical image attachments.</p>
+                <p className="text-xs text-zinc-400">1 post per thread with tactical image attachments.</p>
               </div>
 
               <div className="p-3.5 rounded bg-[#0d111a] border border-zinc-800 space-y-1">
@@ -802,15 +802,24 @@ export default function AuthLandingView({
       )}
 
       {/* Footer */}
-      <footer className="border-t border-zinc-850 bg-[#08090d] px-4 py-2 shrink-0 relative z-20 text-[11px] font-mono text-zinc-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+      <footer className="border-t border-zinc-850 bg-[#08090d] px-4 py-2 shrink-0 relative z-20 text-[11px] font-mono text-zinc-500 flex flex-col md:flex-row items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping" />
           <span className="text-zinc-400 font-bold">FIRESTORM TOURNAMENTS</span>
           <span className="text-zinc-700">|</span>
-          <span>STANDALONE CLIENT DATABASE &amp; EMAIL RECOVERY READY</span>
+          <a
+            href="https://ai.studio/build"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-cyan-400 hover:text-cyan-300 font-bold hover:underline"
+          >
+            Created by Google Gemini AI Studio (ai.studio/build)
+          </a>
+          <span className="text-zinc-700">|</span>
+          <span>CLIENT DATABASE &amp; RECOVERY READY</span>
         </div>
         <div className="text-zinc-500 text-[10px]">
-          <span>FORTNITE &amp; WARZONE TOURNAMENT HUB</span>
+          <span>POWERED BY GOOGLE DEEPMIND GEMINI &bull; NEXT.JS 15</span>
         </div>
       </footer>
     </div>

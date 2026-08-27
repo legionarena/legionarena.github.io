@@ -26,13 +26,25 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 6px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .slots-scaler {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding: 20px;
-            overflow-x: hidden;
+            justify-content: center;
+            width: min(98vw, 720px);
+            transform-origin: center center;
+            flex-shrink: 0;
         }
 
         .top-nav {
@@ -335,75 +347,77 @@
 </head>
 <body>
 
-    <div class="top-nav">
-        <span>7x7 Emoji Slots &bull; Arcade Module</span>
-        <span style="color: var(--text-muted); font-size: 11px;">Firestorm Supply Drop Matrix</span>
-    </div>
-
-    <header>
-        <h1>7x7 Tic-Tac-Toe Slots</h1>
-        <div class="subtitle">Row/Column First-Item Anchor Rules + Progressive Bonus Pot</div>
-    </header>
-
-    <div class="game-container">
-        <!-- HUD Stats -->
-        <div class="hud">
-            <div class="hud-item">
-                <span class="hud-label">Credits</span>
-                <span id="creditsVal" class="hud-value gold">1000</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">Current Bet</span>
-                <span id="betVal" class="hud-value">10</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">Bonus Pot</span>
-                <span id="potVal" class="hud-value pink">150</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">Multiplier</span>
-                <span id="multiplierVal" class="hud-value neon">1×</span>
-            </div>
+    <div id="slots-scaler" class="slots-scaler">
+        <div class="top-nav">
+            <span>7x7 Emoji Slots &bull; Arcade Module</span>
+            <span style="color: var(--text-muted); font-size: 11px;">Firestorm Supply Drop Matrix</span>
         </div>
 
-        <!-- 7x7 Grid Machine -->
-        <div class="slot-machine" id="slotMachine">
-            <!-- Dynamically populated via JS -->
-        </div>
+        <header>
+            <h1>7x7 Tic-Tac-Toe Slots</h1>
+            <div class="subtitle">Row/Column First-Item Anchor Rules + Progressive Bonus Pot</div>
+        </header>
 
-        <!-- Notification Banner -->
-        <div class="message-banner" id="messageBanner">
-            Press SPIN to play! First item of each line acts as the strict match anchor.
-        </div>
-
-        <!-- Controls -->
-        <div class="controls">
-            <div class="control-row">
-                <div class="bet-selectors" id="betSelectors">
-                    <button class="btn-bet" data-bet="5">5</button>
-                    <button class="btn-bet active" data-bet="10">10</button>
-                    <button class="btn-bet" data-bet="25">25</button>
-                    <button class="btn-bet" data-bet="50">50</button>
-                    <button class="btn-bet" data-bet="100">100</button>
+        <div class="game-container">
+            <!-- HUD Stats -->
+            <div class="hud">
+                <div class="hud-item">
+                    <span class="hud-label">Credits</span>
+                    <span id="creditsVal" class="hud-value gold">1000</span>
                 </div>
-                <div class="toggles-row" style="gap: 15px;">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="soundToggle" checked> Sound
-                    </label>
+                <div class="hud-item">
+                    <span class="hud-label">Current Bet</span>
+                    <span id="betVal" class="hud-value">10</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Bonus Pot</span>
+                    <span id="potVal" class="hud-value pink">150</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Multiplier</span>
+                    <span id="multiplierVal" class="hud-value neon">1×</span>
                 </div>
             </div>
 
-            <div class="action-buttons">
-                <button class="btn btn-auto" id="autoBtn">Auto Spin</button>
-                <button class="btn btn-spin" id="spinBtn">SPIN</button>
+            <!-- 7x7 Grid Machine -->
+            <div class="slot-machine" id="slotMachine">
+                <!-- Dynamically populated via JS -->
             </div>
-        </div>
 
-        <!-- Paytable Hints -->
-        <div class="info-panel">
-            <div class="info-item">Rule: <span>First item is master anchor</span></div>
-            <div class="info-item">Win: <span>3+ consecutive matches</span></div>
-            <div class="info-item">Bonus Pot: <span>Fills on loss, hits on 5-in-a-row</span></div>
+            <!-- Notification Banner -->
+            <div class="message-banner" id="messageBanner">
+                Press SPIN to play! First item of each line acts as the strict match anchor.
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <div class="control-row">
+                    <div class="bet-selectors" id="betSelectors">
+                        <button class="btn-bet" data-bet="5">5</button>
+                        <button class="btn-bet active" data-bet="10">10</button>
+                        <button class="btn-bet" data-bet="25">25</button>
+                        <button class="btn-bet" data-bet="50">50</button>
+                        <button class="btn-bet" data-bet="100">100</button>
+                    </div>
+                    <div class="toggles-row" style="gap: 15px;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="soundToggle" checked> Sound
+                        </label>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-auto" id="autoBtn">Auto Spin</button>
+                    <button class="btn btn-spin" id="spinBtn">SPIN</button>
+                </div>
+            </div>
+
+            <!-- Paytable Hints -->
+            <div class="info-panel">
+                <div class="info-item">Rule: <span>First item is master anchor</span></div>
+                <div class="info-item">Win: <span>3+ consecutive matches</span></div>
+                <div class="info-item">Bonus Pot: <span>Fills on loss, hits on 5-in-a-row</span></div>
+            </div>
         </div>
     </div>
 
@@ -763,17 +777,30 @@
                     const userCallsign = currentUser ? currentUser.callsign : 'Operative';
 
                     if (!db.highScores) db.highScores = [];
-                    db.highScores.push({
-                        id: `hs-${Date.now()}`,
-                        gameId: 'slots-up',
-                        gameName: '7x7 Supply Drop Matrix',
-                        userId: userId,
-                        userCallsign: userCallsign,
-                        userUid: userId,
-                        score: finalScore,
-                        details: details,
-                        createdAt: new Date().toISOString()
-                    });
+                    // Only post 1 high score per user
+                    const existingIdx = db.highScores.findIndex(s => s.userId === userId && s.gameId === 'slots-up');
+                    if (existingIdx !== -1) {
+                        if (finalScore >= db.highScores[existingIdx].score) {
+                            db.highScores[existingIdx] = {
+                                ...db.highScores[existingIdx],
+                                score: finalScore,
+                                details: details,
+                                createdAt: new Date().toISOString()
+                            };
+                        }
+                    } else {
+                        db.highScores.push({
+                            id: `hs-${Date.now()}`,
+                            gameId: 'slots-up',
+                            gameName: '7x7 Supply Drop Matrix',
+                            userId: userId,
+                            userCallsign: userCallsign,
+                            userUid: userId,
+                            score: finalScore,
+                            details: details,
+                            createdAt: new Date().toISOString()
+                        });
+                    }
 
                     if (currentUser) {
                         if (!currentUser.highScores) currentUser.highScores = {};
@@ -789,9 +816,29 @@
             }
         }
 
+        // Autoscale game dynamically to fit available window height and width
+        function autoscaleSlots() {
+            const scaler = document.getElementById("slots-scaler");
+            if (!scaler) return;
+            scaler.style.transform = "none";
+            const naturalW = scaler.offsetWidth || 700;
+            const naturalH = scaler.offsetHeight || 720;
+            const availW = window.innerWidth - 12;
+            const availH = window.innerHeight - 12;
+            const scaleX = availW / naturalW;
+            const scaleY = availH / naturalH;
+            const targetScale = Math.min(1.25, Math.min(scaleX, scaleY));
+            scaler.style.transform = `scale(${Math.max(0.35, targetScale)})`;
+        }
+
+        window.addEventListener("resize", autoscaleSlots);
+        window.addEventListener("orientationchange", autoscaleSlots);
+        window.addEventListener("DOMContentLoaded", autoscaleSlots);
+
         // Initialize on load
         createGridDOM();
         updateHUD();
+        setTimeout(autoscaleSlots, 50);
     </script>
 </body>
 </html>

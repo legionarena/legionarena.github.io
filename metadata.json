@@ -1,6 +1,6 @@
 {
   "name": "Firestorm Tournaments",
-  "description": "Tactical Fortnite and Call of Duty inspired tournament battle arena with automated user registration, email verification, game high score leaderboards, and public intel communication threads with Base64 image attachments.",
+  "description": "Tactical Fortnite and Call of Duty inspired tournament battle arena created with Gemini AI Studio, featuring automated operative registration, email verification, 1-per-user high score leaderboards, and tactical intel forum with image attachments.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

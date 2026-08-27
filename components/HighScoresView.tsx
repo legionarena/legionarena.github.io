@@ -64,7 +64,7 @@ export default function HighScoresView({
   }, [loadData]);
 
   const filteredScores = useMemo(() => {
-    return scores
+    const list = scores
       .filter((s) => {
         if (selectedFilter === 'code-pressed' && s.gameId !== 'code-pressed') return false;
         if (selectedFilter === 'slots-up' && s.gameId !== 'slots-up') return false;
@@ -79,6 +79,20 @@ export default function HighScoresView({
         return true;
       })
       .sort((a, b) => b.score - a.score);
+
+    // Enforce strictly 1 high score per user
+    const seenUsers = new Set<string>();
+    const uniquePerUser: GameHighScore[] = [];
+    for (const item of list) {
+      const userKey = selectedFilter === 'all'
+        ? (item.userId || item.userUid)
+        : `${item.userId || item.userUid}_${item.gameId}`;
+      if (!seenUsers.has(userKey)) {
+        seenUsers.add(userKey);
+        uniquePerUser.push(item);
+      }
+    }
+    return uniquePerUser;
   }, [scores, selectedFilter, searchQuery]);
 
   const topThree = filteredScores.slice(0, 3);
