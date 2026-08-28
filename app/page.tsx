@@ -16,14 +16,19 @@ import {
   Activity,
   Trophy,
   MessageSquare,
-  Crosshair,
+  Play,
   Mail,
   Inbox,
-  Radar,
   Sparkles,
   Info,
   ExternalLink,
-  Cpu
+  Cpu,
+  Gamepad2,
+  Music,
+  Zap,
+  User as UserIcon,
+  CheckCircle2,
+  Boxes
 } from 'lucide-react';
 import { User, DispatchedEmail } from '@/lib/types';
 import {
@@ -42,62 +47,72 @@ interface StationInfo {
   name: string;
   url: string;
   icon: typeof Radio;
-  code: string;
-  sector: string;
+  tag: string;
+  category: string;
   themeColor: string;
   accentBg: string;
   borderAccent: string;
   badgeClass: string;
-  briefing: string;
+  description: string;
   status: string;
-  callsign: string;
 }
 
 const STATIONS: StationInfo[] = [
   {
-    id: 'music-search',
-    name: 'Music & Audio Recon Station',
-    url: '/music-search.html',
-    icon: Radio,
-    code: 'ALPHA-01',
-    sector: 'TACTICAL AUDIO & COMMS',
-    themeColor: 'text-amber-400',
-    accentBg: 'bg-amber-500/10',
-    borderAccent: 'border-amber-500/30',
-    badgeClass: 'bg-amber-950 text-amber-300 border-amber-500/40',
-    briefing: 'High-speed YouTube media search, battle playlist manager, and combat audio streaming console.',
-    status: 'ONLINE // READY',
-    callsign: 'AUDIO-OPS'
-  },
-  {
-    id: 'code-pressed',
-    name: 'Cold Pressed Combat Arena',
-    url: '/code-pressed.html',
-    icon: Swords,
-    code: 'BRAVO-02',
-    sector: 'REACTION & HAZARD SIM',
-    themeColor: 'text-orange-400',
-    accentBg: 'bg-orange-500/10',
-    borderAccent: 'border-orange-500/30',
-    badgeClass: 'bg-orange-950 text-orange-300 border-orange-500/40',
-    briefing: 'High-intensity survival reaction training. Dodge incoming sector hazards, unlock combo multipliers, and record high scores.',
-    status: 'SIMULATOR ARMED',
-    callsign: 'WARZONE-SIM'
-  },
-  {
-    id: 'slots-up',
-    name: '7x7 Supply Drop Matrix',
-    url: '/slots-up.html',
-    icon: Dices,
-    code: 'CHARLIE-03',
-    sector: 'SUPPLY RECON & JACKPOT',
+    id: 'block-drop',
+    name: 'Block Drop Matrix',
+    url: '/block-drop.html',
+    icon: Boxes,
+    tag: 'PUZZLE',
+    category: 'Scalable 5-Block Matrix',
     themeColor: 'text-cyan-400',
     accentBg: 'bg-cyan-500/10',
     borderAccent: 'border-cyan-500/30',
-    badgeClass: 'bg-cyan-950 text-cyan-300 border-cyan-500/40',
-    briefing: 'Multi-line 7x7 grid supply crate generator with progressive jackpot meters and instant high score sync.',
-    status: 'REELS CHARGED',
-    callsign: 'FORTNITE-DROP'
+    badgeClass: 'bg-cyan-900/60 text-cyan-200 border-cyan-500/40',
+    description: 'Dynamic scalable arena with 5-block pentominoes, level acceleration, compact controls, and shape-specific colors.',
+    status: 'ONLINE'
+  },
+  {
+    id: 'code-pressed',
+    name: 'Reaction Challenge',
+    url: '/code-pressed.html',
+    icon: Swords,
+    tag: 'ARCADE',
+    category: 'Reaction Dodger',
+    themeColor: 'text-orange-400',
+    accentBg: 'bg-orange-500/10',
+    borderAccent: 'border-orange-500/30',
+    badgeClass: 'bg-orange-900/60 text-orange-200 border-orange-500/40',
+    description: 'Fast-paced arcade dodge challenge. Avoid hazards, build score multipliers, and post records.',
+    status: 'ACTIVE'
+  },
+  {
+    id: 'slots-up',
+    name: 'Supply Grid',
+    url: '/slots-up.html',
+    icon: Dices,
+    tag: 'MATCH-3',
+    category: '7x7 Emoji Match',
+    themeColor: 'text-emerald-400',
+    accentBg: 'bg-emerald-500/10',
+    borderAccent: 'border-emerald-500/30',
+    badgeClass: 'bg-emerald-900/60 text-emerald-200 border-emerald-500/40',
+    description: '7x7 emoji match puzzle and jackpot roller with instant leaderboard sync.',
+    status: 'READY'
+  },
+  {
+    id: 'music-search',
+    name: 'Music Player',
+    url: '/music-search.html',
+    icon: Music,
+    tag: 'AUDIO',
+    category: 'Media & Playlists',
+    themeColor: 'text-blue-400',
+    accentBg: 'bg-blue-500/10',
+    borderAccent: 'border-blue-500/30',
+    badgeClass: 'bg-blue-900/60 text-blue-200 border-blue-500/40',
+    description: 'Search YouTube media, build custom gaming playlists, and stream background tracks.',
+    status: 'ONLINE'
   }
 ];
 
@@ -125,7 +140,7 @@ export default function Home() {
     () => false
   );
   const [activeTab, setActiveTab] = useState<ActiveTab>('stations');
-  const [activeStationId, setActiveStationId] = useState<string>('music-search');
+  const [activeStationId, setActiveStationId] = useState<string>('block-drop');
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isGeminiInfoOpen, setIsGeminiInfoOpen] = useState<boolean>(false);
   const [sfxEnabled, setSfxEnabled] = useState<boolean>(true);
@@ -156,53 +171,53 @@ export default function Home() {
 
       if (type === 'click') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
-        gain.gain.setValueAtTime(0.08, now);
+        osc.frequency.setValueAtTime(700, now);
+        osc.frequency.exponentialRampToValueAtTime(350, now + 0.05);
+        gain.gain.setValueAtTime(0.06, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
         osc.start(now);
         osc.stop(now + 0.05);
       } else if (type === 'switch') {
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(320, now);
-        osc.frequency.exponentialRampToValueAtTime(640, now + 0.08);
-        gain.gain.setValueAtTime(0.1, now);
+        osc.frequency.setValueAtTime(350, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.08);
+        gain.gain.setValueAtTime(0.08, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
         osc.start(now);
         osc.stop(now + 0.08);
       } else if (type === 'menu') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(450, now);
-        osc.frequency.exponentialRampToValueAtTime(750, now + 0.12);
-        gain.gain.setValueAtTime(0.07, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(650, now + 0.1);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
         osc.start(now);
-        osc.stop(now + 0.12);
+        osc.stop(now + 0.1);
       } else if (type === 'launch') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(280, now);
-        osc.frequency.exponentialRampToValueAtTime(950, now + 0.2);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.18);
+        gain.gain.setValueAtTime(0.09, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
         osc.start(now);
-        osc.stop(now + 0.2);
+        osc.stop(now + 0.18);
       } else if (type === 'success') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(523.25, now);
         osc.frequency.setValueAtTime(659.25, now + 0.08);
         osc.frequency.setValueAtTime(783.99, now + 0.16);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
         osc.start(now);
-        osc.stop(now + 0.3);
+        osc.stop(now + 0.28);
       } else if (type === 'alert') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(220, now);
-        osc.frequency.setValueAtTime(180, now + 0.1);
-        gain.gain.setValueAtTime(0.09, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(250, now);
+        osc.frequency.setValueAtTime(200, now + 0.1);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
         osc.start(now);
-        osc.stop(now + 0.25);
+        osc.stop(now + 0.2);
       }
     } catch {
       // Ignore audio synthesis errors
@@ -212,8 +227,8 @@ export default function Home() {
   // Sync Ping simulation
   useEffect(() => {
     const interval = setInterval(() => {
-      setPing(Math.floor(20 + Math.random() * 12));
-    }, 4000);
+      setPing(Math.floor(18 + Math.random() * 10));
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -231,7 +246,7 @@ export default function Home() {
           setHighScoreNotification({
             id: Date.now().toString(),
             gameId,
-            gameName: gameId === 'code-pressed' ? 'Cold Pressed Combat Arena' : '7x7 Supply Drop Matrix',
+            gameName: gameId === 'code-pressed' ? 'Reaction Challenge' : 'Supply Grid',
             score,
             details,
             isNewPersonalBest: res?.isNewPersonalBest
@@ -241,7 +256,7 @@ export default function Home() {
         const { name, tracks } = event.data;
         const activeUser = currentUser || getCurrentUser();
         if (Array.isArray(tracks)) {
-          saveUserPlaylist(name || 'Operative Combat Playlist', tracks, activeUser);
+          saveUserPlaylist(name || 'My Gaming Playlist', tracks, activeUser);
           playTacticalSound('success');
         }
       }
@@ -256,7 +271,7 @@ export default function Home() {
     if (!highScoreNotification) return;
     const timer = setTimeout(() => {
       setHighScoreNotification(null);
-    }, 7000);
+    }, 6000);
     return () => clearTimeout(timer);
   }, [highScoreNotification]);
 
@@ -286,10 +301,10 @@ export default function Home() {
 
   if (!isHydrated) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-[#060709] text-zinc-400 font-mono">
+      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-950 text-slate-300 font-sans">
         <div className="flex flex-col items-center gap-3">
-          <Radar className="w-8 h-8 text-orange-500 animate-spin" />
-          <span className="text-xs uppercase tracking-widest">INITIALIZING FIRESTORM DATABASE...</span>
+          <div className="w-9 h-9 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-semibold tracking-wide">Loading Firestorm...</span>
         </div>
       </div>
     );
@@ -313,23 +328,68 @@ export default function Home() {
   }
 
   // -------------------------------------------------------------
-  // VIEW B: AUTHENTICATED & VERIFIED TOURNAMENT ARENA
+  // VIEW B: AUTHENTICATED GAMING HUB
   // -------------------------------------------------------------
   const activeStation = STATIONS.find((s) => s.id === activeStationId) || STATIONS[0];
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-screen bg-[#060709] text-zinc-100 selection:bg-[#ff4400] selection:text-black font-sans relative overflow-x-hidden tactical-grid">
-      {/* Ambience */}
+    <div className="flex-1 flex flex-col h-full min-h-screen bg-slate-950 text-slate-100 selection:bg-blue-600 selection:text-white font-sans relative overflow-x-hidden modern-grid-pattern">
+      {/* Soft Ambient Background Highlights */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[350px] bg-gradient-to-b from-orange-600/10 via-red-700/5 to-transparent blur-3xl opacity-70" />
-        <div className="absolute top-0 right-1/4 w-[500px] h-[300px] bg-gradient-to-b from-cyan-600/10 via-blue-700/5 to-transparent blur-3xl opacity-50" />
+        <div className="absolute top-0 left-1/4 w-[500px] h-[300px] bg-blue-600/10 rounded-full blur-3xl opacity-70" />
+        <div className="absolute top-0 right-1/4 w-[450px] h-[280px] bg-orange-600/10 rounded-full blur-3xl opacity-60" />
       </div>
 
-      {/* Top Tactical HUD Navigation Bar */}
-      <header className="relative z-30 border-b border-zinc-800/80 bg-[#090b10]/95 backdrop-blur-md px-3 sm:px-6 py-2.5 shrink-0 shadow-2xl">
-        <div className="max-w-[1700px] mx-auto flex items-center justify-between gap-3">
+      {/* Made with Google Gemini AI Studio Disclaimer (VERY TOP) */}
+      <div
+        id="top-gemini-banner"
+        className="relative z-40 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border-b border-blue-700/50 px-4 py-2 text-xs font-sans text-slate-100 flex flex-wrap items-center justify-between gap-2 shadow-md"
+      >
+        <div className="max-w-7xl mx-auto w-full flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-500/30 text-cyan-300">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+            </span>
+            <span className="font-semibold text-white">
+              Made with Google Gemini AI Studio
+            </span>
+            <span className="hidden sm:inline-block text-blue-200">
+              &bull; Full-Stack React &amp; TypeScript Platform
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              id="top-specs-modal-btn"
+              type="button"
+              onClick={() => {
+                setIsGeminiInfoOpen(true);
+                playTacticalSound('click');
+              }}
+              className="px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Info className="w-3.5 h-3.5" />
+              <span>System Specs</span>
+            </button>
+            <a
+              id="top-ai-studio-link"
+              href="https://ai.studio/build"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs flex items-center gap-1 transition-colors"
+            >
+              <span>AI Studio</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Top Navigation Header */}
+      <header className="relative z-30 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md px-4 sm:px-6 py-3 shrink-0 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           
-          {/* Brand & Tactical Hamburger Menu Trigger */}
+          {/* Brand & Left Hamburger Trigger */}
           <div className="flex items-center gap-3 sm:gap-4">
             <button
               id="firestorm-hamburger-btn"
@@ -339,69 +399,61 @@ export default function Home() {
                 playTacticalSound('menu');
               }}
               aria-expanded={isMenuOpen}
-              aria-label="Open Tactical Area Menu"
-              className={`relative group px-3 py-2 rounded border flex items-center gap-2.5 transition-all cursor-pointer ${
+              aria-label="Open Navigation Menu"
+              className={`px-3 py-2 rounded-lg border flex items-center gap-2 text-sm font-semibold transition-all cursor-pointer ${
                 isMenuOpen
-                  ? 'bg-[#ff4400] text-black border-[#ff5500] shadow-[0_0_18px_rgba(255,68,0,0.5)]'
-                  : 'bg-[#10141d] hover:bg-[#181f2c] text-zinc-100 border-zinc-700/80 hover:border-orange-500/80'
+                  ? 'bg-blue-600 text-white border-blue-500 shadow-md'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
               }`}
             >
               {isMenuOpen ? (
-                <X className="w-5 h-5 transition-transform duration-200 rotate-90 group-hover:rotate-0" />
+                <X className="w-4 h-4" />
               ) : (
-                <Menu className="w-5 h-5 text-orange-400 group-hover:text-orange-300 transition-transform duration-200 group-hover:scale-110" />
+                <Menu className="w-4 h-4 text-blue-400" />
               )}
-              <div className="flex flex-col items-start text-left">
-                <span className="font-mono text-[11px] font-black tracking-wider uppercase leading-none">
-                  {isMenuOpen ? 'CLOSE MENU' : 'TACTICAL MENU'}
-                </span>
-                <span className={`font-mono text-[9px] uppercase tracking-widest leading-tight ${isMenuOpen ? 'text-black/80 font-bold' : 'text-orange-400'}`}>
-                  ALL SECTORS
-                </span>
-              </div>
+              <span>{isMenuOpen ? 'Close Menu' : 'All Games'}</span>
             </button>
 
-            <div className="hidden sm:block h-8 w-[1px] bg-zinc-800" />
-
-            {/* Firestorm Tournaments Main Title */}
-            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveTab('stations')}>
-              <div className="w-8 h-8 rounded bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-black font-black shadow-[0_0_16px_rgba(255,85,0,0.4)]">
-                <Flame className="w-5 h-5 text-black fill-black" />
+            {/* Firestorm Tournaments Main Logo */}
+            <div
+              className="flex items-center gap-2.5 cursor-pointer"
+              onClick={() => setActiveTab('stations')}
+            >
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-orange-500 flex items-center justify-center text-white font-bold shadow-md">
+                <Flame className="w-5 h-5 fill-white" />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl sm:text-2xl font-black font-mono tracking-tighter uppercase leading-none animate-fire-title">
-                    FIRESTORM
+                  <span className="text-xl font-bold tracking-tight text-white leading-none">
+                    Firestorm
                   </span>
-                  <span className="hidden md:inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-red-950/80 border border-red-500/40 text-red-400 uppercase tracking-widest">
-                    SEASON 4 LIVE
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] sm:text-xs font-black font-mono tracking-[0.25em] text-orange-400 uppercase leading-tight">
-                    TOURNAMENTS
+                  <span className="hidden md:inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                    Live Season
                   </span>
                 </div>
+                <span className="text-xs font-semibold text-slate-400 tracking-wide uppercase leading-tight">
+                  Tournaments
+                </span>
               </div>
             </div>
           </div>
 
           {/* Primary View Navigation Tabs */}
-          <div className="hidden md:flex items-center gap-1.5 bg-[#0e121a] p-1 rounded-xl border border-zinc-800">
+          <div className="hidden md:flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
             <button
               id="header-nav-tab-stations"
               onClick={() => {
                 playTacticalSound('switch');
                 setActiveTab('stations');
               }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
                 activeTab === 'stations'
-                  ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/20'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
             >
-              <Swords className="w-3.5 h-3.5" />
-              <span>ARENA STATIONS</span>
+              <Gamepad2 className="w-4 h-4" />
+              <span>Play Games</span>
             </button>
 
             <button
@@ -410,14 +462,14 @@ export default function Home() {
                 playTacticalSound('switch');
                 setActiveTab('high-scores');
               }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
                 activeTab === 'high-scores'
-                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'
+                  ? 'bg-orange-500 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
             >
-              <Trophy className="w-3.5 h-3.5" />
-              <span>HIGH SCORES</span>
+              <Trophy className="w-4 h-4" />
+              <span>High Scores</span>
             </button>
 
             <button
@@ -426,63 +478,48 @@ export default function Home() {
                 playTacticalSound('switch');
                 setActiveTab('intel-posts');
               }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
                 activeTab === 'intel-posts'
-                  ? 'bg-red-500 text-white shadow-md shadow-red-500/20'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
             >
-              <Radio className="w-3.5 h-3.5" />
-              <span>INTEL COMMS</span>
+              <MessageSquare className="w-4 h-4" />
+              <span>Community Posts</span>
             </button>
           </div>
 
-          {/* Quick HUD Telemetry & Verified Operative Badge */}
+          {/* Player Profile & Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Gemini AI Studio Badge */}
-            <button
-              id="gemini-ai-studio-header-btn"
-              type="button"
-              onClick={() => {
-                setIsGeminiInfoOpen(true);
-                playTacticalSound('click');
-              }}
-              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-950/80 via-indigo-950/80 to-purple-950/80 hover:from-blue-900 hover:to-indigo-900 border border-indigo-500/50 hover:border-indigo-400 text-cyan-300 hover:text-white text-[11px] font-mono transition-all cursor-pointer shadow-[0_0_12px_rgba(99,102,241,0.25)]"
-              title="View Google Gemini AI Studio System Architecture"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-              <span>Created by Gemini AI Studio</span>
-            </button>
-
-            {/* Operative Profile Badge */}
-            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded bg-[#10141d]/90 border border-zinc-800 text-xs font-mono">
-              <div className="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-amber-600 text-black font-black flex items-center justify-center text-xs">
+            {/* Player Profile Card */}
+            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-sm">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold flex items-center justify-center text-xs">
                 {currentUser.callsign.charAt(0).toUpperCase()}
               </div>
               <div className="flex flex-col items-start leading-none hidden sm:flex">
-                <span className="font-bold text-zinc-200">{currentUser.callsign}</span>
-                <span className="text-[10px] text-orange-400">{currentUser.id}</span>
+                <span className="font-bold text-white text-sm">{currentUser.callsign}</span>
+                <span className="text-xs text-blue-400">{currentUser.id}</span>
               </div>
             </div>
 
             {/* Live Server Ping */}
-            <div className="hidden xl:flex items-center gap-2 px-2.5 py-1.5 rounded bg-[#10141d]/80 border border-zinc-800 text-[11px] font-mono text-zinc-400">
-              <Activity className="w-3.5 h-3.5 text-orange-400" />
-              <span>PING: <strong className="text-zinc-200">{ping}ms</strong></span>
+            <div className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-300">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>{ping}ms</span>
             </div>
 
             {/* Sound Toggle */}
             <button
-              id="arena-sfx-btn"
+              id="sound-toggle-btn"
               type="button"
               onClick={() => {
                 setSfxEnabled(!sfxEnabled);
                 if (!sfxEnabled) playTacticalSound('click');
               }}
-              className="p-2 rounded bg-[#121620] hover:bg-[#1a2130] text-orange-400 border border-zinc-700/80 transition-colors cursor-pointer"
-              title={sfxEnabled ? 'SFX Active' : 'SFX Muted'}
+              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors cursor-pointer"
+              title={sfxEnabled ? 'Sound On' : 'Sound Muted'}
             >
-              {sfxEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-zinc-500" />}
+              {sfxEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
             </button>
 
             {/* Log Out Button */}
@@ -490,8 +527,8 @@ export default function Home() {
               id="firestorm-logout-btn"
               type="button"
               onClick={handleLogout}
-              className="p-2 rounded bg-zinc-900 hover:bg-red-950 text-zinc-400 hover:text-red-300 border border-zinc-800 hover:border-red-500/50 transition-colors cursor-pointer"
-              title="Log Out of Firestorm Arena"
+              className="p-2 rounded-lg bg-slate-800 hover:bg-red-900/60 text-slate-300 hover:text-red-200 border border-slate-700 hover:border-red-500/50 transition-colors cursor-pointer"
+              title="Log Out"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -499,34 +536,28 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Slide-Over Tactical Hamburger Menu Drawer (OPENS ON THE LEFT) */}
+      {/* Slide-Over Navigation Drawer (OPENS ON THE LEFT) */}
       {isMenuOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Firestorm Tactical Areas"
-          className="fixed inset-0 z-50 flex justify-start bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
+          aria-label="Navigation Menu"
+          className="fixed inset-0 z-50 flex justify-start bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200"
         >
-          <div className="w-full max-w-lg bg-[#0a0d14] border-r border-zinc-800 text-zinc-100 flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.8)] h-full overflow-hidden relative animate-in slide-in-from-left duration-200">
-            <div className="absolute inset-0 tactical-grid pointer-events-none opacity-40" />
-
+          <div className="w-full max-w-md bg-slate-900 border-r border-slate-800 text-slate-100 flex flex-col shadow-2xl h-full overflow-hidden relative animate-in slide-in-from-left duration-200">
+            
             {/* Drawer Header */}
-            <div className="p-4 sm:p-5 border-b border-zinc-800 bg-[#0e121b] flex items-center justify-between relative z-10">
+            <div className="p-5 border-b border-slate-800 bg-slate-850 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded bg-[#ff4400]/20 border border-[#ff4400]/40 flex items-center justify-center text-orange-400">
-                  <Radar className="w-5 h-5 animate-spin" style={{ animationDuration: '8s' }} />
+                <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                  <Gamepad2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base font-black font-mono tracking-wider uppercase text-white">
-                      FIRESTORM DIRECTORY
-                    </h2>
-                    <span className="px-1.5 py-0.2 text-[9px] font-mono font-bold bg-orange-950 border border-orange-500/50 text-orange-400">
-                      INDEX // 05
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-zinc-400 font-mono">
-                    Battle stations, leaderboards, and tactical comms
+                  <h2 className="text-base font-bold text-white">
+                    Game Directory
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    Play games, leaderboards &amp; community
                   </p>
                 </div>
               </div>
@@ -538,32 +569,34 @@ export default function Home() {
                   setIsMenuOpen(false);
                   playTacticalSound('menu');
                 }}
-                className="p-2 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700 transition-colors cursor-pointer"
+                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Close Menu (Esc)"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Operative Clearance Info */}
-            <div className="px-4 py-3 bg-[#121622] border-b border-zinc-800 text-xs font-mono flex items-center justify-between text-zinc-400 relative z-10">
+            {/* Player Info Strip */}
+            <div className="px-5 py-3 bg-slate-950 border-b border-slate-800 text-xs flex items-center justify-between text-slate-300">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-emerald-400" />
-                <span className="text-zinc-200 font-bold">OPERATIVE: {currentUser.callsign} ({currentUser.id})</span>
+                <span className="font-semibold text-white">Player: {currentUser.callsign} ({currentUser.id})</span>
               </div>
-              <span className="text-[10px] text-emerald-400 font-bold uppercase">VERIFIED</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                Verified
+              </span>
             </div>
 
-            {/* Navigation Drawer Sections */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-4 relative z-10">
+            {/* Navigation Drawer Content */}
+            <div className="flex-1 p-5 overflow-y-auto space-y-5">
               
-              {/* Quick Navigation Sections */}
+              {/* Quick Navigation Cards */}
               <div className="space-y-2">
-                <div className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider">
-                  PRIMARY SECTORS
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Main Views
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   <button
                     id="drawer-nav-high-scores"
                     onClick={() => {
@@ -571,16 +604,16 @@ export default function Home() {
                       setActiveTab('high-scores');
                       setIsMenuOpen(false);
                     }}
-                    className={`p-3 rounded-lg border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
+                    className={`p-3.5 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
                       activeTab === 'high-scores'
-                        ? 'bg-amber-500/20 border-amber-500 text-amber-300'
-                        : 'bg-zinc-900/80 border-zinc-800 hover:border-zinc-700 text-zinc-300'
+                        ? 'bg-orange-500/20 border-orange-500 text-orange-200 font-bold'
+                        : 'bg-slate-800/80 border-slate-700 hover:bg-slate-800 text-slate-200'
                     }`}
                   >
-                    <Trophy className="w-4 h-4 text-amber-400 shrink-0" />
+                    <Trophy className="w-5 h-5 text-orange-400 shrink-0" />
                     <div>
-                      <div className="text-xs font-bold font-mono">HIGH SCORES</div>
-                      <div className="text-[10px] text-zinc-500">Hall of Champions</div>
+                      <div className="text-sm font-bold">High Scores</div>
+                      <div className="text-xs text-slate-400">Leaderboards</div>
                     </div>
                   </button>
 
@@ -591,26 +624,26 @@ export default function Home() {
                       setActiveTab('intel-posts');
                       setIsMenuOpen(false);
                     }}
-                    className={`p-3 rounded-lg border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
+                    className={`p-3.5 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
                       activeTab === 'intel-posts'
-                        ? 'bg-orange-500/20 border-orange-500 text-orange-300'
-                        : 'bg-zinc-900/80 border-zinc-800 hover:border-zinc-700 text-zinc-300'
+                        ? 'bg-indigo-500/20 border-indigo-500 text-indigo-200 font-bold'
+                        : 'bg-slate-800/80 border-slate-700 hover:bg-slate-800 text-slate-200'
                     }`}
                   >
-                    <MessageSquare className="w-4 h-4 text-orange-400 shrink-0" />
+                    <MessageSquare className="w-5 h-5 text-indigo-400 shrink-0" />
                     <div>
-                      <div className="text-xs font-bold font-mono">INTEL COMMS</div>
-                      <div className="text-[10px] text-zinc-500">Public CoD/FN Feeds</div>
+                      <div className="text-sm font-bold">Community</div>
+                      <div className="text-xs text-slate-400">Posts &amp; Tips</div>
                     </div>
                   </button>
                 </div>
               </div>
 
-              {/* List of Battle Stations */}
-              <div className="space-y-2 pt-2 border-t border-zinc-800">
-                <div className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                  <span>ARENA BATTLE STATIONS</span>
-                  <span className="text-[10px] text-orange-400 font-mono">3 SITES</span>
+              {/* List of Game Stations */}
+              <div className="space-y-3 pt-2 border-t border-slate-800">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>Available Games</span>
+                  <span className="text-xs text-blue-400 font-semibold">4 Games</span>
                 </div>
 
                 {STATIONS.map((station) => {
@@ -620,67 +653,61 @@ export default function Home() {
                   return (
                     <div
                       key={station.id}
-                      className={`rounded-lg border p-3.5 transition-all ${
+                      className={`rounded-xl border p-4 transition-all ${
                         isSelected
-                          ? 'bg-[#131926] border-orange-500 shadow-[0_0_20px_rgba(255,85,0,0.2)]'
-                          : 'bg-[#0c0f17] hover:bg-[#10141f] border-zinc-800 hover:border-zinc-700'
+                          ? 'bg-slate-800 border-blue-500 shadow-md'
+                          : 'bg-slate-850 hover:bg-slate-800 border-slate-750'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-mono font-black text-orange-400 px-1.5 py-0.5 rounded bg-orange-950/80 border border-orange-500/40">
-                            {station.code}
-                          </span>
-                          <span className="text-[11px] font-mono text-zinc-400 font-bold uppercase">
-                            {station.sector}
-                          </span>
-                        </div>
-                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded border font-bold uppercase ${station.badgeClass}`}>
+                        <span className="text-xs font-bold text-blue-400 px-2 py-0.5 rounded bg-blue-950/80 border border-blue-500/30">
+                          {station.tag}
+                        </span>
+                        <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                           {station.status}
                         </span>
                       </div>
 
-                      <div className="flex items-start gap-3 mb-2">
-                        <div className={`p-2 rounded border ${station.accentBg} ${station.borderAccent} ${station.themeColor} shrink-0 mt-0.5`}>
-                          <Icon className="w-4 h-4" />
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className={`p-2.5 rounded-xl border ${station.accentBg} ${station.borderAccent} ${station.themeColor} shrink-0 mt-0.5`}>
+                          <Icon className="w-5 h-5" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-mono font-bold text-sm text-white tracking-tight">
+                          <h3 className="font-bold text-sm text-white">
                             {station.name}
                           </h3>
-                          <p className="text-xs text-zinc-400 font-sans mt-0.5 line-clamp-2">
-                            {station.briefing}
+                          <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                            {station.description}
                           </p>
                         </div>
                       </div>
 
-                      <div className="pt-2.5 mt-2 border-t border-zinc-800/80">
-                        <button
-                          id={`deploy-${station.id}-btn`}
-                          type="button"
-                          onClick={() => {
-                            setActiveTab('stations');
-                            setActiveStationId(station.id);
-                            setIsMenuOpen(false);
-                            playTacticalSound('switch');
-                          }}
-                          className={`w-full py-2 px-3 rounded font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                            isSelected
-                              ? 'bg-orange-500/20 text-orange-300 border border-orange-500/50'
-                              : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
-                          }`}
-                        >
-                          <Crosshair className="w-3.5 h-3.5" />
-                          <span>{isSelected ? 'CURRENTLY ACTIVE' : 'DEPLOY BATTLE STATION'}</span>
-                        </button>
-                      </div>
+                      <button
+                        id={`deploy-${station.id}-btn`}
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('stations');
+                          setActiveStationId(station.id);
+                          setIsMenuOpen(false);
+                          playTacticalSound('switch');
+                        }}
+                        className={`w-full py-2 px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-600 text-white shadow-sm'
+                            : 'bg-slate-750 hover:bg-slate-700 text-slate-200'
+                        }`}
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>{isSelected ? 'Currently Playing' : 'Play Now'}</span>
+                      </button>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Tactical Comms Outbox button */}
-              <div className="pt-2 border-t border-zinc-800 space-y-2">
+              {/* Email Outbox quick link */}
+              <div className="pt-2 border-t border-slate-800 space-y-3">
                 <button
                   id="drawer-open-outbox-btn"
                   onClick={() => {
@@ -688,30 +715,30 @@ export default function Home() {
                     setIsOutboxOpen(true);
                     playTacticalSound('click');
                   }}
-                  className="w-full p-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 flex items-center justify-between text-xs font-mono text-zinc-300 cursor-pointer"
+                  className="w-full p-3.5 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 flex items-center justify-between text-xs text-slate-200 cursor-pointer"
                 >
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-orange-400" />
-                    <span>Tactical Comms Verification Outbox</span>
+                  <div className="flex items-center gap-2.5">
+                    <Mail className="w-4 h-4 text-blue-400" />
+                    <span className="font-semibold">Email Verification Outbox</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded bg-orange-950 text-orange-400 font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-200 font-bold border border-blue-500/30">
                     {outboxEmails.length}
                   </span>
                 </button>
 
-                {/* Gemini AI Studio Origin Card */}
-                <div className="p-3.5 rounded-xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/40 via-blue-950/30 to-[#0d1222] space-y-2">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <div className="flex items-center gap-2 text-cyan-400 font-bold">
+                {/* Gemini AI Studio Card */}
+                <div className="p-4 rounded-xl border border-blue-700/40 bg-gradient-to-br from-blue-950/40 to-slate-900 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2 text-cyan-300 font-bold">
                       <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
-                      <span>BUILT WITH GEMINI AI STUDIO</span>
+                      <span>Built with Gemini AI Studio</span>
                     </div>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-500/40">
-                      DEEPMIND AI
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-blue-900 text-blue-200 font-bold">
+                      Google DeepMind
                     </span>
                   </div>
-                  <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
-                    Tactical arena engineered in Google AI Studio Build. Features Next.js 15, TypeScript, autoscaling game frames, and zero-loss local storage.
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Automated full-stack tournament application created with Gemini AI Studio Build, Next.js 15, TypeScript, and durable storage.
                   </p>
                   <div className="flex items-center gap-2 pt-1">
                     <button
@@ -721,7 +748,7 @@ export default function Home() {
                         setIsMenuOpen(false);
                         playTacticalSound('click');
                       }}
-                      className="flex-1 py-1.5 px-2.5 rounded bg-indigo-600/80 hover:bg-indigo-600 text-white font-mono text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      className="flex-1 py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <Info className="w-3.5 h-3.5" />
                       <span>System Specs</span>
@@ -730,7 +757,7 @@ export default function Home() {
                       href="https://ai.studio/build"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="py-1.5 px-2.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-mono text-[11px] font-bold flex items-center gap-1 transition-colors"
+                      className="py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1 transition-colors"
                     >
                       <span>Build</span>
                       <ExternalLink className="w-3 h-3" />
@@ -741,10 +768,10 @@ export default function Home() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-4 border-t border-zinc-800 bg-[#0c0f17] relative z-10 flex items-center justify-between text-xs font-mono text-zinc-500">
+            <div className="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs text-slate-400">
               <span className="flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-orange-400" />
-                <span>FIRESTORM TOURNAMENT ENGINE</span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>Firestorm Tournament Hub</span>
               </span>
               <button
                 type="button"
@@ -752,9 +779,9 @@ export default function Home() {
                   setIsMenuOpen(false);
                   playTacticalSound('menu');
                 }}
-                className="text-orange-400 hover:underline font-bold cursor-pointer"
+                className="text-blue-400 hover:underline font-bold cursor-pointer"
               >
-                DISMISS
+                Close Menu
               </button>
             </div>
           </div>
@@ -770,32 +797,32 @@ export default function Home() {
         </div>
       )}
 
-      {/* Tactical Comms Outbox Drawer (When Opened) */}
+      {/* Email Outbox Modal Dialog */}
       {isOutboxOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Tactical Comms Outbox"
-          className="fixed inset-0 z-50 flex bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+          aria-label="Email Verification Outbox"
+          className="fixed inset-0 z-50 flex bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200"
         >
           <div className="flex-1 cursor-pointer" onClick={() => setIsOutboxOpen(false)} />
-          <div className="w-full max-w-md bg-[#0a0d14] border-l border-zinc-800 text-zinc-100 flex flex-col h-full shadow-2xl relative">
-            <div className="p-4 border-b border-zinc-800 bg-[#0e121b] flex items-center justify-between">
+          <div className="w-full max-w-md bg-slate-900 border-l border-slate-800 text-slate-100 flex flex-col h-full shadow-2xl relative">
+            <div className="p-4 border-b border-slate-800 bg-slate-850 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Inbox className="w-5 h-5 text-orange-400" />
+                <Inbox className="w-5 h-5 text-blue-400" />
                 <div>
-                  <h2 className="text-sm font-mono font-bold uppercase text-white">
-                    TACTICAL COMMS OUTBOX
+                  <h2 className="text-sm font-bold text-white">
+                    Verification Outbox
                   </h2>
-                  <p className="text-[11px] text-zinc-400 font-mono">
-                    Simulated email dispatcher for verification &amp; recovery
+                  <p className="text-xs text-slate-400">
+                    Dispatched verification and recovery codes
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOutboxOpen(false)}
-                className="p-1.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
+                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -803,39 +830,39 @@ export default function Home() {
 
             <div className="flex-1 p-4 overflow-y-auto space-y-3">
               {outboxEmails.length === 0 ? (
-                <div className="text-center py-12 text-zinc-500 font-mono text-xs">
-                  No dispatched transmissions.
+                <div className="text-center py-12 text-slate-400 text-sm">
+                  No dispatched emails found.
                 </div>
               ) : (
                 outboxEmails.map((em) => (
                   <div
                     key={em.id}
-                    className="p-3.5 rounded-lg border border-zinc-800 bg-[#0d1017] space-y-2"
+                    className="p-4 rounded-xl border border-slate-800 bg-slate-850 space-y-2"
                   >
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-orange-400 font-bold px-1.5 py-0.2 rounded bg-orange-950 border border-orange-500/40">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-blue-300 font-bold px-2 py-0.5 rounded bg-blue-950 border border-blue-500/40">
                         {em.type}
                       </span>
-                      <span className="text-zinc-500">{new Date(em.sentAt).toLocaleTimeString()}</span>
+                      <span className="text-slate-400">{new Date(em.sentAt).toLocaleTimeString()}</span>
                     </div>
-                    <div className="text-xs font-mono font-bold text-zinc-200">{em.subject}</div>
-                    <div className="text-[11px] text-zinc-400 font-mono">TO: {em.to}</div>
-                    <div className="p-2 rounded bg-black/60 border border-zinc-800 font-mono text-xs text-orange-300">
-                      CODE: <strong className="text-base text-white tracking-widest">{em.code}</strong>
+                    <div className="text-sm font-bold text-white">{em.subject}</div>
+                    <div className="text-xs text-slate-300">To: {em.to}</div>
+                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-750 text-xs text-blue-300">
+                      Code: <strong className="text-base text-white font-mono tracking-widest">{em.code}</strong>
                     </div>
                   </div>
                 ))
               )}
             </div>
 
-            <div className="p-3 border-t border-zinc-800 bg-[#0c0f17] flex items-center justify-between text-xs font-mono text-zinc-500">
-              <span>LOCAL DISPATCH LOGS</span>
+            <div className="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs text-slate-400">
+              <span>Local Outbox Log</span>
               <button
                 type="button"
                 onClick={() => setIsOutboxOpen(false)}
-                className="text-orange-400 hover:underline font-bold cursor-pointer"
+                className="text-blue-400 hover:underline font-bold cursor-pointer"
               >
-                CLOSE
+                Close Outbox
               </button>
             </div>
           </div>
@@ -845,12 +872,12 @@ export default function Home() {
       {/* Main Views Container */}
       {activeTab === 'stations' && (
         <>
-          {/* Tactical Sub-Navbar: Station Quick Switcher & Controls */}
-          <nav className="relative z-20 border-b border-zinc-800/80 bg-[#0d1017]/90 px-3 sm:px-6 py-2 shrink-0">
-            <div className="max-w-[1700px] mx-auto flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-0.5">
-                <span className="text-[10px] font-mono uppercase font-black text-zinc-500 mr-1 hidden sm:inline">
-                  STATIONS:
+          {/* Sub-Navbar: Game Quick Switcher */}
+          <nav className="relative z-20 border-b border-slate-800 bg-slate-900/90 px-4 sm:px-6 py-2.5 shrink-0">
+            <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 overflow-x-auto py-0.5">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline mr-1">
+                  Games:
                 </span>
                 {STATIONS.map((station) => {
                   const Icon = station.icon;
@@ -864,107 +891,46 @@ export default function Home() {
                         setActiveStationId(station.id);
                         playTacticalSound('switch');
                       }}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded font-mono text-xs transition-all shrink-0 cursor-pointer ${
+                      className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer ${
                         isActive
-                          ? 'bg-gradient-to-r from-orange-600/30 to-red-600/20 text-orange-300 border border-orange-500/70 font-black shadow-[0_0_14px_rgba(255,85,0,0.25)]'
-                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 border border-transparent'
+                          ? 'bg-blue-600 text-white shadow-md font-bold'
+                          : 'text-slate-300 hover:text-white hover:bg-slate-800'
                       }`}
                     >
-                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-orange-400' : 'text-zinc-500'}`} />
-                      <span className="tracking-wide">{station.name}</span>
-                      <span className={`text-[9px] px-1 py-0.1 rounded border font-bold ${station.badgeClass}`}>
-                        {station.code}
-                      </span>
+                      <Icon className="w-4 h-4" />
+                      <span>{station.name}</span>
                     </button>
                   );
                 })}
               </div>
 
               <div className="flex items-center gap-2 ml-auto">
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#10141e] border border-zinc-800 text-xs font-mono">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[11px] text-emerald-400 font-bold tracking-wider uppercase">{activeStation.status}</span>
+                  <span>{activeStation.status}</span>
                 </div>
               </div>
             </div>
           </nav>
 
-          {/* Main Battle Station Viewport */}
-          <main className="flex-1 flex flex-col p-2 sm:p-4 max-w-[1700px] w-full mx-auto relative z-10">
-            {/* Google Gemini AI Studio System Banner */}
-            <div className="mb-3 px-4 py-3 rounded-xl border border-indigo-500/30 bg-gradient-to-r from-[#090d18] via-[#0d1224] to-[#090d18] shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs font-mono shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-cyan-400 shrink-0">
-                  <Sparkles className="w-5 h-5 animate-pulse" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-white tracking-wider uppercase font-mono">
-                      ENGINEERED WITH GOOGLE GEMINI AI STUDIO
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-indigo-950 border border-indigo-500/50 text-cyan-300 text-[10px] font-bold">
-                      AI STUDIO BUILD
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px]">
-                      GEMINI 3.5 &bull; NEXT.JS 15 &bull; TYPESCRIPT
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-zinc-400 mt-0.5 font-sans">
-                    Tactical tournament battle arena featuring dynamic autoscaling games, real-time postMessage event telemetry, 1-score operative leaderboards, and durable persistence.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsGeminiInfoOpen(true);
-                    playTacticalSound('click');
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md"
-                >
-                  <Info className="w-3.5 h-3.5" />
-                  <span>System Specs</span>
-                </button>
-                <a
-                  href="https://ai.studio/build"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-all"
-                >
-                  <span>AI Studio</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-            </div>
-
-            <div className="flex-1 flex flex-col rounded-xl border border-zinc-800 bg-[#080a0f] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.9)] transition-all relative min-h-[480px] h-[calc(100vh-210px)]">
-              {/* Tactical HUD Header Bar Above Frame */}
-              <div className="flex flex-wrap items-center justify-between px-3 sm:px-4 py-2 bg-[#0e121b] border-b border-zinc-800 text-xs font-mono text-zinc-400 shrink-0 gap-2">
+          {/* Main Game Viewport */}
+          <main className="flex-1 flex flex-col p-3 sm:p-6 max-w-7xl w-full mx-auto relative z-10">
+            <div className="flex-1 flex flex-col rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-2xl relative min-h-[500px] h-[calc(100vh-210px)]">
+              {/* Game Viewport Header Bar */}
+              <div className="flex flex-wrap items-center justify-between px-4 py-3 bg-slate-850 border-b border-slate-850 text-sm text-slate-300 shrink-0 gap-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex items-center gap-1.5 text-orange-400">
-                    <Crosshair className="w-4 h-4 animate-pulse" />
-                    <span className="font-bold uppercase tracking-wider">{activeStation.callsign}</span>
-                  </div>
-                  <span className="text-zinc-700">|</span>
-                  <span className="text-zinc-200 font-bold">{activeStation.name}</span>
-                  <span className="text-zinc-500 hidden md:inline">&mdash; {activeStation.sector}</span>
+                  <span className="font-bold text-white text-base">{activeStation.name}</span>
+                  <span className="text-slate-500">&bull;</span>
+                  <span className="text-slate-400 text-xs hidden sm:inline">{activeStation.category}</span>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[11px] text-emerald-400 font-bold">{activeStation.status}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400 hidden md:inline">{activeStation.description}</span>
                 </div>
               </div>
 
-              {/* Interactive Battle Station Frame Viewport */}
-              <div className="flex-1 relative w-full h-full bg-black">
-                <div className="absolute top-2 left-2 z-20 pointer-events-none w-4 h-4 border-t-2 border-l-2 border-orange-500/60" />
-                <div className="absolute top-2 right-2 z-20 pointer-events-none w-4 h-4 border-t-2 border-r-2 border-orange-500/60" />
-                <div className="absolute bottom-2 left-2 z-20 pointer-events-none w-4 h-4 border-b-2 border-l-2 border-orange-500/60" />
-                <div className="absolute bottom-2 right-2 z-20 pointer-events-none w-4 h-4 border-b-2 border-r-2 border-orange-500/60" />
-
+              {/* Interactive Game Frame Viewport */}
+              <div className="flex-1 relative w-full h-full bg-slate-950">
                 <iframe
                   key={activeStation.id}
                   src={activeStation.url}
@@ -990,7 +956,7 @@ export default function Home() {
         </main>
       )}
 
-      {/* INTEL & PUBLIC POSTS VIEW */}
+      {/* COMMUNITY POSTS VIEW */}
       {activeTab === 'intel-posts' && (
         <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto relative z-10">
           <IntelPostsView
@@ -1000,68 +966,66 @@ export default function Home() {
         </main>
       )}
 
-      {/* Bottom Tournament Ticker & Gemini AI Studio Attribution */}
-      <footer className="border-t border-zinc-850 bg-[#08090d] px-4 py-2 shrink-0 relative z-20 text-[11px] font-mono text-zinc-500 flex flex-col md:flex-row items-center justify-between gap-2">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping" />
-          <span className="text-zinc-400 font-bold">FIRESTORM TOURNAMENTS</span>
-          <span className="text-zinc-700">|</span>
-          <span className="text-emerald-400 font-bold">● ONLINE</span>
-          <span className="text-zinc-700">|</span>
+      {/* Bottom Footer & Gemini Attribution */}
+      <footer className="border-t border-slate-800 bg-slate-900 px-4 py-3 shrink-0 relative z-20 text-xs text-slate-400 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+          <span className="text-white font-bold">Firestorm Tournaments</span>
+          <span className="text-slate-600">|</span>
           <button
             type="button"
             onClick={() => {
               setIsGeminiInfoOpen(true);
               playTacticalSound('click');
             }}
-            className="flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-bold hover:underline cursor-pointer"
+            className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 font-semibold hover:underline cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Created by Google Gemini AI Studio (ai.studio/build)</span>
+            <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+            <span>Created with Google Gemini AI Studio (ai.studio/build)</span>
           </button>
-          <span className="text-zinc-700">|</span>
-          <span className="text-zinc-400">OPERATIVE: {currentUser.callsign}</span>
+          <span className="text-slate-600">|</span>
+          <span>Player: {currentUser.callsign}</span>
         </div>
-        <div className="flex items-center gap-3 text-zinc-500 text-[10px]">
-          <span>POWERED BY GOOGLE DEEPMIND GEMINI</span>
-          <span className="text-zinc-700">|</span>
-          <span className="text-orange-400 font-bold">v4.5 PRO</span>
+        <div className="flex items-center gap-3 text-slate-400 text-xs">
+          <span>Google DeepMind Gemini</span>
+          <span className="text-slate-600">|</span>
+          <span className="text-blue-400 font-semibold">Live System</span>
         </div>
       </footer>
 
-      {/* High Score Recorded HUD Notification Toast */}
+      {/* High Score Recorded Toast Notification */}
       <AnimatePresence>
         {highScoreNotification && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-12 right-4 sm:right-6 z-50 max-w-md w-[calc(100vw-2rem)] bg-zinc-950/95 border-2 border-emerald-500/80 rounded-xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_25px_rgba(16,185,129,0.35)] backdrop-blur-md text-white font-mono"
+            className="fixed bottom-12 right-4 sm:right-6 z-50 max-w-md w-[calc(100vw-2rem)] bg-slate-900 border-2 border-emerald-500 rounded-2xl p-4 shadow-2xl backdrop-blur-md text-white font-sans"
           >
             <div className="flex items-start gap-3">
-              <div className="p-2.5 bg-emerald-500/20 border border-emerald-500/50 rounded-lg text-emerald-400 shrink-0">
+              <div className="p-2.5 bg-emerald-500/20 border border-emerald-500/40 rounded-xl text-emerald-400 shrink-0">
                 <Trophy className="w-5 h-5 text-emerald-400 animate-pulse" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/40">
-                    High Score Recorded
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/40">
+                    High Score
                   </span>
                   {highScoreNotification.isNewPersonalBest && (
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300 bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-500/50">
-                      New Personal Best! 🔥
+                    <span className="text-xs font-bold uppercase tracking-wider text-orange-300 bg-orange-950 px-2 py-0.5 rounded border border-orange-500/40">
+                      Personal Best! 🔥
                     </span>
                   )}
                 </div>
-                <p className="text-sm font-sans font-bold text-zinc-100 mt-1">
-                  Your current high score has been posted to the High Scores page!
+                <p className="text-sm font-bold text-white mt-1">
+                  Your high score has been saved to the leaderboard!
                 </p>
-                <div className="text-xs text-zinc-400 mt-1 flex items-center gap-2">
-                  <span className="text-emerald-300 font-bold font-mono text-sm">
-                    {highScoreNotification.score.toLocaleString()} PTS
+                <div className="text-xs text-slate-300 mt-1 flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold text-sm">
+                    {highScoreNotification.score.toLocaleString()} Points
                   </span>
                   <span>&bull;</span>
-                  <span className="truncate text-zinc-300">{highScoreNotification.gameName}</span>
+                  <span className="truncate text-slate-300">{highScoreNotification.gameName}</span>
                 </div>
                 <div className="mt-3 flex items-center gap-2">
                   <button
@@ -1071,15 +1035,14 @@ export default function Home() {
                       setHighScoreNotification(null);
                       playTacticalSound('switch');
                     }}
-                    className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-bold text-xs rounded-lg transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer"
                   >
-                    <Trophy className="w-3.5 h-3.5" />
-                    <span>View High Scores Leaderboard</span>
+                    View Scores
                   </button>
                   <button
                     type="button"
                     onClick={() => setHighScoreNotification(null)}
-                    className="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs rounded-lg transition-colors cursor-pointer"
+                    className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-lg transition-colors cursor-pointer"
                   >
                     Dismiss
                   </button>
@@ -1088,7 +1051,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setHighScoreNotification(null)}
-                className="text-zinc-500 hover:text-zinc-300 p-1 cursor-pointer"
+                className="text-slate-400 hover:text-white p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1103,7 +1066,7 @@ export default function Home() {
           role="dialog"
           aria-modal="true"
           aria-label="Google Gemini AI Studio System Architecture"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 font-mono"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200 font-sans"
         >
           <div
             className="fixed inset-0 cursor-pointer"
@@ -1112,23 +1075,23 @@ export default function Home() {
               playTacticalSound('click');
             }}
           />
-          <div className="relative z-10 w-full max-w-2xl bg-[#0a0d16] border-2 border-indigo-500/60 rounded-2xl p-5 sm:p-7 text-zinc-100 shadow-[0_0_60px_rgba(99,102,241,0.3)] max-h-[90vh] overflow-y-auto">
-            <div className="flex items-start justify-between border-b border-zinc-800 pb-4 mb-5">
+          <div className="relative z-10 w-full max-w-2xl bg-slate-900 border-2 border-blue-500/60 rounded-2xl p-6 sm:p-8 text-slate-100 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-4 mb-5">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] shrink-0">
-                  <Sparkles className="w-6 h-6 animate-pulse" />
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-md shrink-0">
+                  <Sparkles className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-base sm:text-lg font-black tracking-wider uppercase text-white">
-                      CREATED BY GEMINI AI STUDIO
+                    <h2 className="text-lg font-bold text-white">
+                      Google Gemini AI Studio
                     </h2>
-                    <span className="px-2 py-0.5 rounded bg-indigo-950 border border-indigo-500/50 text-cyan-300 text-[10px] font-bold">
-                      OFFICIAL SPEC
+                    <span className="px-2 py-0.5 rounded-full bg-blue-900/60 border border-blue-500/40 text-cyan-300 text-xs font-bold">
+                      Platform Spec
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                    Engineering and architecture overview generated via Google AI Studio Build
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Architecture and system capabilities generated via Google AI Studio Build
                   </p>
                 </div>
               </div>
@@ -1138,88 +1101,88 @@ export default function Home() {
                   setIsGeminiInfoOpen(false);
                   playTacticalSound('click');
                 }}
-                className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer border border-zinc-800"
+                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4 text-xs font-sans text-zinc-300">
+            <div className="space-y-4 text-sm text-slate-300">
               {/* Studio Overview */}
-              <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/30 space-y-2">
-                <div className="flex items-center gap-2 font-mono font-bold text-cyan-300">
+              <div className="p-4 rounded-xl bg-blue-950/40 border border-blue-700/40 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-cyan-300 text-sm">
                   <Cpu className="w-4 h-4 text-cyan-400" />
-                  <span>PLATFORM &amp; INTELLIGENCE MODEL</span>
+                  <span>Platform &amp; Model</span>
                 </div>
-                <p className="text-zinc-300 leading-relaxed">
-                  This entire application was prompted, architected, and engineered within <strong>Google AI Studio Build</strong> (
-                  <a href="https://ai.studio/build" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline font-mono">
+                <p className="text-slate-200 leading-relaxed text-sm">
+                  This entire application was prompted, designed, and built within <strong>Google AI Studio Build</strong> (
+                  <a href="https://ai.studio/build" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                     https://ai.studio/build
                   </a>
-                  ), utilizing <strong>Google DeepMind Gemini reasoning and code generation models</strong>.
+                  ), utilizing <strong>Google DeepMind Gemini reasoning models</strong>.
                 </p>
               </div>
 
               {/* Core Features Specification */}
               <div className="space-y-2">
-                <div className="font-mono font-bold text-zinc-400 uppercase tracking-wider text-[11px]">
-                  IMPLEMENTED SYSTEM ARCHITECTURE
+                <div className="font-bold text-slate-400 uppercase tracking-wider text-xs">
+                  Implemented Features
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-mono text-[11px]">
-                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-800">
-                    <div className="text-orange-400 font-bold mb-1">🎮 Dynamic Autoscaling Games</div>
-                    <div className="text-zinc-400 font-sans text-xs">
-                      Cold Pressed Combat Arena &amp; 7x7 Emoji Supply Drop dynamically scale canvas and DOM transform matrix to fit any viewport.
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="p-3.5 rounded-xl bg-slate-800 border border-slate-700">
+                    <div className="text-blue-400 font-bold text-sm mb-1">🎮 Autoscaling Games</div>
+                    <div className="text-slate-300 leading-relaxed">
+                      Embedded arcade dodger, 7x7 emoji puzzle matrix, and music search console scaling seamlessly to all viewports.
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-800">
-                    <div className="text-amber-400 font-bold mb-1">🏆 Single High Score Leaderboards</div>
-                    <div className="text-zinc-400 font-sans text-xs">
-                      Enforces strictly 1 high score record per operative per game. Updating scores updates personal best and tactical rating.
+                  <div className="p-3.5 rounded-xl bg-slate-800 border border-slate-700">
+                    <div className="text-orange-400 font-bold text-sm mb-1">🏆 Verified Leaderboards</div>
+                    <div className="text-slate-300 leading-relaxed">
+                      Enforces strictly 1 high score record per player per game, updating personal best records automatically.
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-800">
-                    <div className="text-emerald-400 font-bold mb-1">⚡ Bi-Directional Telemetry</div>
-                    <div className="text-zinc-400 font-sans text-xs">
-                      Cross-frame postMessage listeners notify the operative of recorded high scores and broadcast new personal bests.
+                  <div className="p-3.5 rounded-xl bg-slate-800 border border-slate-700">
+                    <div className="text-emerald-400 font-bold text-sm mb-1">💬 Community Posts</div>
+                    <div className="text-slate-300 leading-relaxed">
+                      Full-featured community discussions with image attachment encoding, 1-post-per-thread limit, and live reactions.
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-800">
-                    <div className="text-purple-400 font-bold mb-1">🛡️ Verified Auth &amp; Comms</div>
-                    <div className="text-zinc-400 font-sans text-xs">
-                      12-char UID generation, SHA-256 password hashing, email verification dispatcher, and intel forum with image attachments.
+                  <div className="p-3.5 rounded-xl bg-slate-800 border border-slate-700">
+                    <div className="text-purple-400 font-bold text-sm mb-1">🛡️ Player Accounts</div>
+                    <div className="text-slate-300 leading-relaxed">
+                      Player ID generation, secure password hashing, simulated email verification outbox, and password recovery.
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Tech Stack Specs */}
-              <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-2 font-mono text-xs">
-                <div className="text-zinc-400 uppercase tracking-wider font-bold text-[11px]">
-                  PRODUCTION ENVIRONMENT
+              <div className="p-4 rounded-xl bg-slate-800 border border-slate-700 space-y-2 text-xs">
+                <div className="text-slate-400 uppercase tracking-wider font-bold">
+                  Technology Stack
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-zinc-300">
-                  <div>Framework: <span className="text-cyan-300">Next.js 15+ App Router</span></div>
-                  <div>Language: <span className="text-cyan-300">TypeScript</span></div>
-                  <div>Styling: <span className="text-cyan-300">Tailwind CSS</span></div>
-                  <div>Runtime Port: <span className="text-cyan-300">Port 3000 (Cloud Run)</span></div>
-                  <div>Audio Engine: <span className="text-cyan-300">Web Audio API Synth</span></div>
-                  <div>Persistence: <span className="text-cyan-300">Durable Local Storage</span></div>
+                <div className="grid grid-cols-2 gap-2 text-slate-200">
+                  <div>Framework: <span className="text-blue-300 font-semibold">Next.js 15+ App Router</span></div>
+                  <div>Language: <span className="text-blue-300 font-semibold">TypeScript</span></div>
+                  <div>Styling: <span className="text-blue-300 font-semibold">Tailwind CSS</span></div>
+                  <div>Theme: <span className="text-blue-300 font-semibold">Blue, Orange &amp; Slate</span></div>
+                  <div>Audio: <span className="text-blue-300 font-semibold">Web Audio API</span></div>
+                  <div>Storage: <span className="text-blue-300 font-semibold">Durable Local Storage</span></div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-zinc-800 flex items-center justify-between">
+            <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
               <a
                 href="https://ai.studio/build"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-mono text-xs font-bold flex items-center gap-2 shadow-lg transition-all"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 shadow-md transition-all"
               >
-                <span>Explore Google AI Studio Build</span>
+                <span>AI Studio</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
               <button
@@ -1228,9 +1191,9 @@ export default function Home() {
                   setIsGeminiInfoOpen(false);
                   playTacticalSound('click');
                 }}
-                className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-mono text-xs font-bold transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors cursor-pointer"
               >
-                Close Specification
+                Close Spec
               </button>
             </div>
           </div>

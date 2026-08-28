@@ -30,62 +30,73 @@ function hashPassword(password: string): string {
   return `h_${Math.abs(hash)}_${password.length}`;
 }
 
-// Pre-defined Fortnite & Call of Duty tactical threads
+// Pre-defined Community Discussion Threads
 export const THEMED_THREADS: IntelThread[] = [
   {
-    id: 'verdansk-intel-drop',
-    title: 'Verdansk Air Drop & Sector Recon',
-    callsignTag: 'WARZONE // SECTOR 01',
+    id: 'general-gaming-lounge',
+    title: 'General Gaming',
+    callsignTag: '#GAMING-01',
     category: 'WARZONE_OPS',
-    description: 'Classified drop coordinates, sector sweep intel, and high-ground vantage points across Warzone.',
-    briefing: 'Post weapon tuning, buy-station strategies, and UAV positioning guides.',
-    badge: 'WARZONE AIR RECON',
-    themeColor: 'text-amber-400',
-    accentBorder: 'border-amber-500/50'
+    description: 'Community chat, game recommendations, gear setups, and friendly matchmaking.',
+    briefing: 'Share gaming setups, favorite moments, and connect with players.',
+    badge: 'General Chat',
+    themeColor: 'text-blue-500',
+    accentBorder: 'border-blue-500/40'
   },
   {
-    id: 'tilted-towers-ops',
-    title: 'Tilted Towers & Zero-Build Flank Ops',
-    callsignTag: 'FORTNITE BR // GRID T-4',
-    category: 'FORTNITE_BR',
-    description: 'Hot-drop survival doctrines, mythic vault breaches, and storm-circle rotations in Fortnite Battle Royale.',
-    briefing: 'Share tactical positioning, shockwave mobility routes, and loadout pairings.',
-    badge: 'ROYALE COMBAT',
-    themeColor: 'text-orange-500',
-    accentBorder: 'border-orange-500/50'
-  },
-  {
-    id: 'gulag-meta-loadouts',
-    title: 'Gulag 1v1 Protocol & Weapon Meta',
-    callsignTag: 'TACTICAL // LOADOUTS',
-    category: 'META_LOADOUT',
-    description: 'Optimal attachment tuning, recoil stabilization setups, and 1v1 clutch psychology.',
-    briefing: 'Share your tested class setups, laser alignments, and slide-cancel corner breaks.',
-    badge: 'GULAG SURVIVOR',
-    themeColor: 'text-red-400',
-    accentBorder: 'border-red-500/50'
-  },
-  {
-    id: 'loot-lake-supply-run',
-    title: 'Loot Lake & Supply Vault Drops',
-    callsignTag: 'FORTNITE // CACHE RUN',
-    category: 'FORTNITE_BR',
-    description: 'Caches, mythic chests, and supply drop timing matrices.',
-    briefing: 'Debrief drop coordinates, vault keys, and tactical supply crate distribution.',
-    badge: 'VAULT INFILTRATION',
-    themeColor: 'text-cyan-400',
-    accentBorder: 'border-cyan-500/50'
-  },
-  {
-    id: 'victory-royale-debrief',
-    title: 'Victory Royale & Warzone Champion Debriefs',
-    callsignTag: 'COMMAND // POST-ACTION',
+    id: 'block-drop-tactics',
+    title: 'Block Drop Matrix',
+    callsignTag: '#MATRIX-02',
     category: 'TACTICAL_RECON',
-    description: 'Squad victory screenshots, final circle clutches, and tactical post-match reports.',
-    briefing: 'Upload your highest elimination cards, final zone holds, and championship match debriefs.',
-    badge: 'CHAMPIONS CIRCLE',
-    themeColor: 'text-emerald-400',
-    accentBorder: 'border-emerald-500/50'
+    description: 'Scalable 5-block pentomino matrix strategies, combos, and line clear records.',
+    briefing: 'Post rotation tactics, hold slot strategies, and level 15+ gameplay tips.',
+    badge: 'Block Drop',
+    themeColor: 'text-cyan-500',
+    accentBorder: 'border-cyan-500/40'
+  },
+  {
+    id: 'reaction-arcade-tips',
+    title: 'Reaction Challenge',
+    callsignTag: '#ARCADE-03',
+    category: 'TACTICAL_RECON',
+    description: 'Tips and high-score strategies for the Cold Pressed reaction dodger game.',
+    briefing: 'Post dodge techniques, jar positioning tips, and multiplier guides.',
+    badge: 'Arcade Tips',
+    themeColor: 'text-orange-500',
+    accentBorder: 'border-orange-500/40'
+  },
+  {
+    id: 'supply-matrix-combos',
+    title: 'Supply Grid',
+    callsignTag: '#GRID-04',
+    category: 'FORTNITE_BR',
+    description: '7x7 emoji match combinations, multiplier triggers, and jackpot celebrations.',
+    briefing: 'Share slot line records, bonus pot screenshots, and credit milestones.',
+    badge: 'Supply Drops',
+    themeColor: 'text-emerald-500',
+    accentBorder: 'border-emerald-500/40'
+  },
+  {
+    id: 'music-playlists-vibes',
+    title: 'Music & Playlists',
+    callsignTag: '#AUDIO-05',
+    category: 'META_LOADOUT',
+    description: 'Share your favorite gaming beats, lofi study tunes, and tournament tracks.',
+    briefing: 'Post playlist links, artist recommendations, and music player discoveries.',
+    badge: 'Music Lounge',
+    themeColor: 'text-indigo-500',
+    accentBorder: 'border-indigo-500/40'
+  },
+  {
+    id: 'champion-highlights-hall',
+    title: 'Highlights Hall',
+    callsignTag: '#CHAMPS-06',
+    category: 'TACTICAL_RECON',
+    description: 'Victory moments, leaderboard milestones, and player achievements.',
+    briefing: 'Upload high score screenshots, clutch clips, and celebration posts.',
+    badge: 'Hall of Fame',
+    themeColor: 'text-amber-500',
+    accentBorder: 'border-amber-500/40'
   }
 ];
 
@@ -105,7 +116,8 @@ const INITIAL_STATE: DbState = {
       matchesWon: 48,
       highScores: {
         codePressed: 142,
-        slotsUp: 2850
+        slotsUp: 2850,
+        blockDrop: 14800
       },
       createdAt: new Date(Date.now() - 604800000).toISOString(),
       lastLoginAt: new Date().toISOString()
@@ -123,7 +135,8 @@ const INITIAL_STATE: DbState = {
       matchesWon: 34,
       highScores: {
         codePressed: 118,
-        slotsUp: 1980
+        slotsUp: 1980,
+        blockDrop: 9200
       },
       createdAt: new Date(Date.now() - 500000000).toISOString(),
       lastLoginAt: new Date().toISOString()
@@ -141,7 +154,8 @@ const INITIAL_STATE: DbState = {
       matchesWon: 41,
       highScores: {
         codePressed: 165,
-        slotsUp: 3400
+        slotsUp: 3400,
+        blockDrop: 21500
       },
       createdAt: new Date(Date.now() - 400000000).toISOString(),
       lastLoginAt: new Date().toISOString()
@@ -152,74 +166,107 @@ const INITIAL_STATE: DbState = {
     {
       id: 'em-init-01',
       to: 'player@firestorm.gg',
-      subject: '🔥 Firestorm Tournaments: Welcome Commander GhostRider',
+      subject: 'Firestorm Tournaments: Welcome Player GhostRider',
       type: 'VERIFICATION',
       code: '772910',
-      body: 'Welcome to Firestorm Tournaments! Your tactical clearance UID is FS-9842-1204. Your verification code is 772910.',
+      body: 'Welcome to Firestorm Tournaments! Your player ID is FS-9842-1204. Your verification code is 772910.',
       sentAt: new Date(Date.now() - 604800000).toISOString(),
       isRead: true
     }
   ],
   highScores: [
     {
+      id: 'hs-bd-01',
+      gameId: 'block-drop',
+      gameName: 'Block Drop Matrix',
+      userId: 'FS-3199-5520',
+      userCallsign: 'ShadowRecon',
+      userUid: 'FS-3199-5520',
+      score: 21500,
+      details: '38 lines cleared • Level 8 • 4x Quad Clears',
+      createdAt: new Date(Date.now() - 36000000).toISOString()
+    },
+    {
+      id: 'hs-bd-02',
+      gameId: 'block-drop',
+      gameName: 'Block Drop Matrix',
+      userId: 'FS-9842-1204',
+      userCallsign: 'GhostRider',
+      userUid: 'FS-9842-1204',
+      score: 14800,
+      details: '26 lines cleared • Level 6 • Fast Drop Multiplier',
+      createdAt: new Date(Date.now() - 72000000).toISOString()
+    },
+    {
+      id: 'hs-bd-03',
+      gameId: 'block-drop',
+      gameName: 'Block Drop Matrix',
+      userId: 'FS-4412-8801',
+      userCallsign: 'ApexViper',
+      userUid: 'FS-4412-8801',
+      score: 9200,
+      details: '18 lines cleared • Level 4 • Combo Streak',
+      createdAt: new Date(Date.now() - 108000000).toISOString()
+    },
+    {
       id: 'hs-cp-01',
       gameId: 'code-pressed',
-      gameName: 'Cold Pressed Combat Arena',
+      gameName: 'Reaction Challenge',
       userId: 'FS-3199-5520',
       userCallsign: 'ShadowRecon',
       userUid: 'FS-3199-5520',
       score: 165,
-      details: 'Level 7 • 165 Targets Pressed • Flawless Jar Movement',
+      details: 'Level 7 • 165 Targets Caught • Flawless Movement',
       createdAt: new Date(Date.now() - 86400000).toISOString()
     },
     {
       id: 'hs-cp-02',
       gameId: 'code-pressed',
-      gameName: 'Cold Pressed Combat Arena',
+      gameName: 'Reaction Challenge',
       userId: 'FS-9842-1204',
       userCallsign: 'GhostRider',
       userUid: 'FS-9842-1204',
       score: 142,
-      details: 'Level 6 • 142 Targets Pressed • Rapid Dodge Protocol',
+      details: 'Level 6 • 142 Targets Caught • Streak Bonus',
       createdAt: new Date(Date.now() - 172800000).toISOString()
     },
     {
       id: 'hs-cp-03',
       gameId: 'code-pressed',
-      gameName: 'Cold Pressed Combat Arena',
+      gameName: 'Reaction Challenge',
       userId: 'FS-4412-8801',
       userCallsign: 'ApexViper',
       userUid: 'FS-4412-8801',
       score: 118,
-      details: 'Level 5 • 118 Targets Pressed',
+      details: 'Level 5 • 118 Targets Caught',
       createdAt: new Date(Date.now() - 259200000).toISOString()
     },
     {
       id: 'hs-sl-01',
       gameId: 'slots-up',
-      gameName: '7x7 Supply Drop Matrix',
+      gameName: 'Supply Grid',
       userId: 'FS-3199-5520',
       userCallsign: 'ShadowRecon',
       userUid: 'FS-3199-5520',
       score: 3400,
-      details: '3,400 Credits • 6-Crown Anchor Jackpot Hit',
+      details: '3,400 Credits • 6-Crown Jackpot Hit',
       createdAt: new Date(Date.now() - 43200000).toISOString()
     },
     {
       id: 'hs-sl-02',
       gameId: 'slots-up',
-      gameName: '7x7 Supply Drop Matrix',
+      gameName: 'Supply Grid',
       userId: 'FS-9842-1204',
       userCallsign: 'GhostRider',
       userUid: 'FS-9842-1204',
       score: 2850,
-      details: '2,850 Credits • 5-Diamond Alignment & Bonus Pot',
+      details: '2,850 Credits • 5-Diamond Alignment',
       createdAt: new Date(Date.now() - 129600000).toISOString()
     },
     {
       id: 'hs-sl-03',
       gameId: 'slots-up',
-      gameName: '7x7 Supply Drop Matrix',
+      gameName: 'Supply Grid',
       userId: 'FS-4412-8801',
       userCallsign: 'ApexViper',
       userUid: 'FS-4412-8801',
@@ -254,52 +301,52 @@ const INITIAL_STATE: DbState = {
   posts: [
     {
       id: 'post-init-01',
-      threadId: 'verdansk-intel-drop',
+      threadId: 'general-gaming-lounge',
       userId: 'FS-9842-1204',
       userCallsign: 'GhostRider',
-      userRank: 'Elite Commander',
+      userRank: 'Pro Player',
       userUid: 'FS-9842-1204',
-      content: '⚡ Verdansk High-Ground Protocol: When pushing Airport Tower or Stadium roof, always coordinate suppression smoke with a portable radar sweep before ascending zip-lines. Keep high-mobility SMG as secondary.',
-      imageBase64: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340"><rect width="100%" height="100%" fill="%230f172a"/><rect x="20" y="20" width="560" height="300" rx="12" fill="%231e293b" stroke="%23f59e0b" stroke-width="2"/><text x="300" y="140" fill="%23fbbf24" font-family="monospace" font-size="22" font-weight="bold" text-anchor="middle">VERDANSK RADAR SCAN</text><text x="300" y="180" fill="%2394a3b8" font-family="monospace" font-size="14" text-anchor="middle">SECTOR 04 // AIRPORT TOWER LZ</text><circle cx="300" cy="240" r="30" fill="none" stroke="%23ef4444" stroke-width="3"/><circle cx="300" cy="240" r="10" fill="%23ef4444"/></svg>',
-      imageName: 'verdansk_radar_scan.svg',
+      content: 'Welcome everyone to the PlayStorm community hub! Feel free to share your setups, game records, and connect with other players for casual and tournament matches.',
+      imageBase64: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340"><rect width="100%" height="100%" fill="%230f172a"/><rect x="20" y="20" width="560" height="300" rx="12" fill="%231e293b" stroke="%233b82f6" stroke-width="2"/><text x="300" y="140" fill="%2360a5fa" font-family="sans-serif" font-size="22" font-weight="bold" text-anchor="middle">PLAYSTORM GAMING HUB</text><text x="300" y="180" fill="%2394a3b8" font-family="sans-serif" font-size="14" text-anchor="middle">COMMUNITY LOUNGE &bull; TOURNAMENTS</text><circle cx="300" cy="240" r="25" fill="%233b82f6"/><polygon points="295,230 310,240 295,250" fill="%23ffffff"/></svg>',
+      imageName: 'welcome_hub.svg',
       reactions: {
-        fire: 7,
-        target: 4,
-        shield: 2,
+        fire: 8,
+        target: 5,
+        shield: 3,
         usersReacted: { fire: ['FS-4412-8801', 'FS-3199-5520'] }
       },
       createdAt: new Date(Date.now() - 72000000).toISOString()
     },
     {
       id: 'post-init-02',
-      threadId: 'tilted-towers-ops',
+      threadId: 'reaction-arcade-tips',
       userId: 'FS-3199-5520',
       userCallsign: 'ShadowRecon',
-      userRank: 'Tactical Captain',
+      userRank: 'Arcade Ace',
       userUid: 'FS-3199-5520',
-      content: '🎯 Tilted Towers Zero-Build Flank: Land on the Clock Tower terrace, grab the guaranteed floor loot shotgun, then zip across to Big Red rooftop. You hold 360-degree vision over central courtyards without building exposure.',
-      imageBase64: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340"><rect width="100%" height="100%" fill="%230b0f19"/><rect x="20" y="20" width="560" height="300" rx="12" fill="%23131b2e" stroke="%23ff5500" stroke-width="2"/><text x="300" y="130" fill="%23ff6600" font-family="monospace" font-size="22" font-weight="bold" text-anchor="middle">TILTED TOWERS VANTAGE</text><text x="300" y="170" fill="%2338bdf8" font-family="monospace" font-size="14" text-anchor="middle">CLOCK TOWER &bull; ZERO-BUILD HIGH GROUND</text><path d="M 220 250 L 300 200 L 380 250 Z" fill="%23f97316"/></svg>',
-      imageName: 'tilted_clock_tower_intel.svg',
+      content: 'Reaction Challenge Tip: Keep your paddle centered around the lower-middle zone during wave transitions. Focus on tracking the red hazard pulses early to maintain your combo streak!',
+      imageBase64: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340"><rect width="100%" height="100%" fill="%230f172a"/><rect x="20" y="20" width="560" height="300" rx="12" fill="%231e293b" stroke="%23f97316" stroke-width="2"/><text x="300" y="130" fill="%23fb923c" font-family="sans-serif" font-size="22" font-weight="bold" text-anchor="middle">REACTION ARCADE</text><text x="300" y="170" fill="%2394a3b8" font-family="sans-serif" font-size="14" text-anchor="middle">DODGE PROTOCOL &bull; HIGH SCORE SETUP</text><circle cx="300" cy="240" r="28" fill="%23ea580c"/></svg>',
+      imageName: 'reaction_tips.svg',
       reactions: {
-        fire: 9,
-        target: 5,
-        shield: 3,
+        fire: 11,
+        target: 6,
+        shield: 4,
         usersReacted: { fire: ['FS-9842-1204'] }
       },
       createdAt: new Date(Date.now() - 54000000).toISOString()
     },
     {
       id: 'post-init-03',
-      threadId: 'gulag-meta-loadouts',
+      threadId: 'supply-matrix-combos',
       userId: 'FS-4412-8801',
       userCallsign: 'ApexViper',
-      userRank: 'Master Sergeant',
+      userRank: 'Champion',
       userUid: 'FS-4412-8801',
-      content: '🔥 Gulag Clutch Tip: Center your crosshair at head-height around the center flag partition right at the 3-second spawn mark. Pre-cook stun grenade off the back wall for guaranteed 80ms advantage.',
+      content: 'Hit a 5-crown combo on the Supply Grid today! If you build up the multiplier meter before max bet, the bonus payout activates with double points.',
       reactions: {
-        fire: 5,
-        target: 8,
-        shield: 1,
+        fire: 9,
+        target: 7,
+        shield: 2,
         usersReacted: {}
       },
       createdAt: new Date(Date.now() - 28000000).toISOString()
@@ -367,7 +414,7 @@ export function saveDatabase(state: DbState): void {
 // ==========================================
 
 export function saveGameHighScore(
-  gameId: 'code-pressed' | 'slots-up',
+  gameId: 'code-pressed' | 'slots-up' | 'block-drop',
   score: number,
   details: string,
   userOverride?: User | null
@@ -379,7 +426,9 @@ export function saveGameHighScore(
   const userCallsign = currentUser ? currentUser.callsign : 'TacticalOperative';
   const userUid = currentUser ? currentUser.id : 'FS-GUEST';
 
-  const gameName = gameId === 'code-pressed' ? 'Cold Pressed Combat Arena' : '7x7 Supply Drop Matrix';
+  let gameName = 'Block Drop Matrix';
+  if (gameId === 'code-pressed') gameName = 'Reaction Challenge';
+  if (gameId === 'slots-up') gameName = 'Supply Grid';
 
   let isNewPersonalBest = false;
   let savedEntry: GameHighScore;
@@ -432,11 +481,15 @@ export function saveGameHighScore(
       const user = state.users[userIndex];
       if (!user.highScores) user.highScores = {};
 
-      const currentBest = gameId === 'code-pressed' ? (user.highScores.codePressed || 0) : (user.highScores.slotsUp || 0);
+      let currentBest = 0;
+      if (gameId === 'code-pressed') currentBest = user.highScores.codePressed || 0;
+      else if (gameId === 'slots-up') currentBest = user.highScores.slotsUp || 0;
+      else if (gameId === 'block-drop') currentBest = user.highScores.blockDrop || 0;
 
       if (score > currentBest) {
         if (gameId === 'code-pressed') user.highScores.codePressed = score;
-        if (gameId === 'slots-up') user.highScores.slotsUp = score;
+        else if (gameId === 'slots-up') user.highScores.slotsUp = score;
+        else if (gameId === 'block-drop') user.highScores.blockDrop = score;
 
         // Give rating boost for breaking personal records
         user.rating = (user.rating || 1000) + Math.min(150, Math.floor(score / 5));
@@ -455,7 +508,7 @@ export function saveGameHighScore(
   return { success: true, isNewPersonalBest, highScore: savedEntry };
 }
 
-export function getHighScores(gameId?: 'code-pressed' | 'slots-up'): GameHighScore[] {
+export function getHighScores(gameId?: 'code-pressed' | 'slots-up' | 'block-drop'): GameHighScore[] {
   const state = loadDatabase();
   let scores = state.highScores || [];
   if (gameId) {
@@ -473,12 +526,13 @@ export function getHighScores(gameId?: 'code-pressed' | 'slots-up'): GameHighSco
   return Array.from(userBestMap.values()).sort((a, b) => b.score - a.score);
 }
 
-export function getUserPersonalBests(userId: string): { codePressed: number; slotsUp: number } {
+export function getUserPersonalBests(userId: string): { codePressed: number; slotsUp: number; blockDrop: number } {
   const state = loadDatabase();
   const user = state.users.find(u => u.id === userId);
   return {
     codePressed: user?.highScores?.codePressed || 0,
-    slotsUp: user?.highScores?.slotsUp || 0
+    slotsUp: user?.highScores?.slotsUp || 0,
+    blockDrop: user?.highScores?.blockDrop || 0
   };
 }
 

@@ -2,12 +2,10 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
-  Radio,
   Send,
   Image as ImageIcon,
   X,
   Flame,
-  Crosshair,
   Shield,
   Trash2,
   Edit3,
@@ -17,18 +15,17 @@ import {
   Maximize2,
   MessageSquare,
   Sparkles,
-  Info,
   Clock,
-  Layers,
-  Terminal,
-  ZoomIn
+  ThumbsUp,
+  Award,
+  Gamepad2,
+  Radio,
+  FileImage
 } from 'lucide-react';
 import { User, IntelThread, IntelPost } from '@/lib/types';
 import {
   getIntelThreads,
-  getPostsForThread,
   getAllPosts,
-  getUserPostInThread,
   createOrUpdateIntelPost,
   deleteIntelPost,
   togglePostReaction
@@ -49,7 +46,7 @@ export default function IntelPostsView({
     }
     return [];
   });
-  const [activeThreadId, setActiveThreadId] = useState<string>('verdansk-intel-drop');
+  const [activeThreadId, setActiveThreadId] = useState<string>('general-gaming-lounge');
   const [allPosts, setAllPosts] = useState<IntelPost[]>(() => {
     if (typeof window !== 'undefined') {
       return getAllPosts();
@@ -57,7 +54,7 @@ export default function IntelPostsView({
     return [];
   });
   
-  // New Post Form
+  // Post Form State
   const [postContent, setPostContent] = useState<string>('');
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imageName, setImageName] = useState<string>('');
@@ -65,15 +62,19 @@ export default function IntelPostsView({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  // Image Modal / Lightbox
+  // Lightbox Modal State
   const [lightboxImage, setLightboxImage] = useState<{ src: string; title: string; callsign: string } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const loadData = React.useCallback(() => {
-    setThreads(getIntelThreads());
+    const ths = getIntelThreads();
+    setThreads(ths);
     setAllPosts(getAllPosts());
-  }, []);
+    if (ths.length > 0 && !ths.some(t => t.id === activeThreadId)) {
+      setActiveThreadId(ths[0].id);
+    }
+  }, [activeThreadId]);
 
   useEffect(() => {
     const handleDbUpdate = () => {
@@ -84,7 +85,12 @@ export default function IntelPostsView({
   }, [loadData]);
 
   const activeThread = useMemo(() => {
-    return threads.find((t) => t.id === activeThreadId) || threads[0];
+    return threads.find((t) => t.id === activeThreadId) || threads[0] || {
+      id: 'general-gaming-lounge',
+      name: 'General Gaming Hub',
+      category: 'General Discussion',
+      description: 'Connect with fellow players, share setup photos, and discuss tournaments.'
+    };
   }, [threads, activeThreadId]);
 
   const threadPosts = useMemo(() => {
@@ -103,14 +109,14 @@ export default function IntelPostsView({
     setPostContent(post.content);
     if (post.imageBase64) {
       setImageBase64(post.imageBase64);
-      setImageName(post.imageName || 'attached_intel.png');
+      setImageName(post.imageName || 'attached_image.png');
     } else {
       setImageBase64(null);
       setImageName('');
     }
     setFormFeedback({
       type: 'success',
-      message: 'Editing your active transmission in this thread. Updating will replace your briefing.'
+      message: 'Editing your post in this thread. Submitting will update your existing message.'
     });
   };
 
@@ -119,16 +125,15 @@ export default function IntelPostsView({
     if (!file.type.startsWith('image/')) {
       setFormFeedback({
         type: 'error',
-        message: 'Invalid file format. Only image files (PNG, JPG, SVG, WebP) are authorized.'
+        message: 'Invalid file format. Please upload PNG, JPG, SVG, or WebP images.'
       });
       return;
     }
 
-    // Limit image size to 2.5MB for fast client-side localStorage performance
     if (file.size > 2.5 * 1024 * 1024) {
       setFormFeedback({
         type: 'error',
-        message: 'Image size exceeds tactical bandwidth limit (2.5MB max).'
+        message: 'Image size exceeds maximum allowed limit (2.5MB max).'
       });
       return;
     }
@@ -146,7 +151,7 @@ export default function IntelPostsView({
     reader.onerror = () => {
       setFormFeedback({
         type: 'error',
-        message: 'Failed to encode tactical image to Base64 data.'
+        message: 'Failed to read image file.'
       });
     };
     reader.readAsDataURL(file);
@@ -159,12 +164,14 @@ export default function IntelPostsView({
     }
   };
 
+  // Drag & drop file upload handlers
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
   };
 
-  const handleDragLeave = () => {
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
     setIsDragging(false);
   };
 
@@ -177,23 +184,15 @@ export default function IntelPostsView({
     }
   };
 
-  const handleRemoveImage = () => {
-    setImageBase64(null);
-    setImageName('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    playTacticalSound('click');
-  };
-
-  const handleSubmitPost = (e: React.FormEvent) => {
+  // Handle Post Submit (Create or Update)
+  const handlePostSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser) return;
+    setFormFeedback(null);
 
     if (!postContent.trim()) {
       setFormFeedback({
         type: 'error',
-        message: 'Please write a message for the tactical briefing.'
+        message: 'Please write a message before posting.'
       });
       playTacticalSound('alert');
       return;
@@ -201,44 +200,43 @@ export default function IntelPostsView({
 
     setIsSubmitting(true);
 
-    const res = createOrUpdateIntelPost(
-      activeThreadId,
-      postContent,
-      imageBase64 || undefined,
-      imageName || undefined,
-      currentUser
-    );
+    try {
+      const savedPost = createOrUpdateIntelPost(
+        activeThreadId,
+        currentUser,
+        postContent.trim(),
+        imageBase64 || undefined,
+        imageName || undefined
+      );
 
-    setIsSubmitting(false);
-
-    if (res.success) {
-      playTacticalSound('success');
-      setFormFeedback({
-        type: 'success',
-        message: res.message
-      });
+      setIsSubmitting(false);
       setPostContent('');
       setImageBase64(null);
       setImageName('');
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      setFormFeedback({
+        type: 'success',
+        message: existingUserPostInActiveThread ? 'Post updated successfully!' : 'Post published to the community thread!'
+      });
+      playTacticalSound('success');
       loadData();
-    } else {
-      playTacticalSound('alert');
+    } catch {
+      setIsSubmitting(false);
       setFormFeedback({
         type: 'error',
-        message: res.message
+        message: 'An error occurred while saving your post.'
       });
+      playTacticalSound('alert');
     }
   };
 
+  // Handle Post Delete
   const handleDeletePost = (postId: string) => {
-    if (!currentUser) return;
-    playTacticalSound('alert');
+    playTacticalSound('click');
     const res = deleteIntelPost(postId, currentUser.id);
     if (res.success) {
       setFormFeedback({
         type: 'success',
-        message: res.message
+        message: 'Post deleted successfully.'
       });
       loadData();
     } else {
@@ -246,13 +244,14 @@ export default function IntelPostsView({
         type: 'error',
         message: res.message
       });
+      playTacticalSound('alert');
     }
   };
 
-  const handleReaction = (postId: string, reactionType: 'fire' | 'target' | 'shield') => {
-    if (!currentUser) return;
+  // Handle Reactions (Fire, Target, Shield)
+  const handleReactionClick = (postId: string, reactionType: 'fire' | 'target' | 'shield') => {
     playTacticalSound('click');
-    togglePostReaction(postId, reactionType, currentUser.id);
+    togglePostReaction(postId, currentUser.id, reactionType);
     loadData();
   };
 
@@ -271,430 +270,449 @@ export default function IntelPostsView({
   };
 
   return (
-    <div id="intel-posts-page-container" className="w-full space-y-6">
+    <div id="intel-posts-container" className="w-full space-y-6 font-sans">
       {/* Header Banner */}
       <div
-        id="intel-feed-header"
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-orange-950/40 p-6 md:p-8 border border-orange-500/30 shadow-xl"
+        id="intel-posts-header"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 md:p-8 border border-indigo-700/50 shadow-xl"
       >
-        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500/40 text-orange-400 text-xs font-mono font-bold tracking-wider">
-            <Radio className="w-3.5 h-3.5 animate-pulse" />
-            COMMUNITY TACTICAL COMMS
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold uppercase tracking-wider">
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Community Threads</span>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+              Community Posts
+            </h1>
+            <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
+              Share game setups, arcade records, gameplay tips, and tournament strategies with the PlayStorm community.
+            </p>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white flex items-center gap-3">
-            TACTICAL INTEL &amp; PUBLIC FEEDS
-          </h1>
-          <p className="text-sm text-slate-300 max-w-2xl">
-            CoD Warzone &amp; Fortnite Battle Royale community threads. Operatives are authorized for <strong>1 transmission per thread</strong> with <strong>1 tactical image attachment</strong>.
-          </p>
+
+          <div className="flex items-center gap-3 bg-slate-900 border border-slate-750 p-4 rounded-xl shadow-md min-w-[240px]">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-300">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-400 uppercase">Posting Rule</div>
+              <div className="text-xs font-semibold text-white mt-0.5">1 Post Per Thread</div>
+              <div className="text-[11px] text-slate-400">Edit or replace anytime</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Thread Category Tabs */}
-      <div id="threads-tab-bar" className="space-y-2">
-        <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-orange-400" />
-          SELECT ACTIVE MISSION THREAD
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {threads.map((t) => {
-            const isActive = t.id === activeThreadId;
-            return (
-              <button
-                key={t.id}
-                id={`thread-tab-${t.id}`}
-                onClick={() => {
-                  playTacticalSound('switch');
-                  setActiveThreadId(t.id);
-                  setFormFeedback(null);
-                }}
-                className={`p-4 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
-                  isActive
-                    ? 'bg-slate-800 border-orange-500/80 shadow-lg shadow-orange-500/10'
-                    : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 hover:bg-slate-850'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-[10px] font-mono font-bold text-slate-400 tracking-wider">
-                    {t.callsignTag}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-950 border border-slate-700 font-mono text-orange-400">
-                    {t.postCount || 0} msgs
-                  </span>
-                </div>
-                <div className={`font-bold text-sm mt-1.5 ${isActive ? 'text-orange-400' : 'text-white'}`}>
-                  {t.title}
-                </div>
-                <p className="text-xs text-slate-400 mt-1 line-clamp-2">{t.description}</p>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {/* Main Grid: Left Threads List & Right Thread Posts & Form */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Left Column: Thread Categories */}
+        <div className="lg:col-span-4 space-y-3">
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">
+            Thread Channels
+          </div>
 
-      {/* Main Layout: Active Thread Posts + Transmission Dispatch Form */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Posts Feed (8 Cols) */}
-        <div id="thread-messages-column" className="lg:col-span-7 space-y-4">
-          {/* Active Thread Banner */}
-          {activeThread && (
-            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
-              <div>
-                <div className="text-[11px] font-mono text-orange-400 font-bold tracking-wider">
-                  CURRENT CHANNEL: {activeThread.badge}
-                </div>
-                <div className="text-base font-bold text-white mt-0.5">{activeThread.title}</div>
-                <div className="text-xs text-slate-400 mt-1">{activeThread.briefing}</div>
-              </div>
-              <div className="text-right">
-                <span className="text-xs font-mono px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-slate-300">
-                  {threadPosts.length} Transmission{threadPosts.length !== 1 ? 's' : ''}
-                </span>
-              </div>
-            </div>
-          )}
+          <div className="space-y-2">
+            {threads.map((thread) => {
+              const isSelected = thread.id === activeThreadId;
+              const postCount = allPosts.filter((p) => p.threadId === thread.id).length;
 
-          {/* Posts List */}
-          {threadPosts.length === 0 ? (
-            <div
-              id="empty-posts-state"
-              className="bg-slate-900/60 border border-dashed border-slate-800 rounded-xl p-12 text-center space-y-3"
-            >
-              <div className="w-12 h-12 rounded-full bg-slate-800 text-slate-500 mx-auto flex items-center justify-center">
-                <MessageSquare className="w-6 h-6" />
-              </div>
-              <div className="text-base font-bold text-slate-300">No intel transmissions yet</div>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                Be the first operative to dispatch recon info, weapon tuning, or screenshot debriefs in this thread!
-              </p>
-            </div>
-          ) : (
-            <div id="posts-list-wrapper" className="space-y-4">
-              {threadPosts.map((post) => {
-                const isOwnPost = currentUser && post.userId === currentUser.id;
-                const hasReactedFire = post.reactions.usersReacted?.fire?.includes(currentUser.id);
-                const hasReactedTarget = post.reactions.usersReacted?.target?.includes(currentUser.id);
-                const hasReactedShield = post.reactions.usersReacted?.shield?.includes(currentUser.id);
-
-                return (
-                  <div
-                    key={post.id}
-                    id={`post-card-${post.id}`}
-                    className={`bg-slate-900/90 border rounded-xl p-5 space-y-4 shadow-lg transition-all ${
-                      isOwnPost
-                        ? 'border-amber-500/60 bg-gradient-to-b from-amber-950/20 to-slate-900/90'
-                        : 'border-slate-800'
-                    }`}
-                  >
-                    {/* Post Header */}
-                    <div className="flex items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 flex items-center justify-center font-black text-xs text-orange-400 font-mono">
-                          {post.userCallsign.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm text-white">{post.userCallsign}</span>
-                            {isOwnPost && (
-                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 border border-amber-500/40 text-amber-400 font-mono">
-                                YOUR BRIEFING
-                              </span>
-                            )}
-                            <span className="text-[11px] text-slate-400 font-mono">
-                              ({post.userRank || 'Operative'})
-                            </span>
-                          </div>
-                          <div className="text-[11px] font-mono text-slate-500 mt-0.5">
-                            UID: {post.userUid} • {formatDate(post.createdAt)}
-                            {post.updatedAt && ' (Edited)'}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Own Post Actions */}
-                      {isOwnPost && (
-                        <div className="flex items-center gap-1">
-                          <button
-                            id={`edit-post-btn-${post.id}`}
-                            onClick={() => handleEditExistingPost(post)}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-300 text-xs transition-all cursor-pointer"
-                            title="Edit your single transmission in this thread"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            id={`delete-post-btn-${post.id}`}
-                            onClick={() => handleDeletePost(post.id)}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-red-500 hover:text-white text-slate-400 text-xs transition-all cursor-pointer"
-                            title="Delete this transmission"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Post Content */}
-                    <div className="text-sm text-slate-200 leading-relaxed whitespace-pre-line">
-                      {post.content}
-                    </div>
-
-                    {/* Decoded Base64 Image Attachment */}
-                    {post.imageBase64 && (
-                      <div className="space-y-1.5">
-                        <div className="relative rounded-lg overflow-hidden border border-slate-700/80 bg-slate-950 group">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={post.imageBase64}
-                            alt={post.imageName || 'Tactical Attachment'}
-                            className="w-full max-h-96 object-contain bg-slate-950 cursor-pointer hover:opacity-95 transition-opacity"
-                            onClick={() =>
-                              setLightboxImage({
-                                src: post.imageBase64!,
-                                title: post.imageName || 'Tactical Image Preview',
-                                callsign: post.userCallsign
-                              })
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              setLightboxImage({
-                                src: post.imageBase64!,
-                                title: post.imageName || 'Tactical Image Preview',
-                                callsign: post.userCallsign
-                              })
-                            }
-                            className="absolute bottom-2 right-2 px-2.5 py-1 rounded bg-slate-950/80 hover:bg-orange-500 hover:text-slate-950 text-white text-[11px] font-mono flex items-center gap-1 backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                          >
-                            <ZoomIn className="w-3 h-3" /> Zoom Preview
-                          </button>
-                        </div>
-                        {post.imageName && (
-                          <div className="text-[11px] font-mono text-slate-500 truncate flex items-center gap-1.5">
-                            <ImageIcon className="w-3 h-3 text-orange-400" />
-                            {post.imageName}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Reactions & Engagement HUD */}
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-800/60">
-                      <button
-                        id={`react-fire-btn-${post.id}`}
-                        onClick={() => handleReaction(post.id, 'fire')}
-                        className={`px-3 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                          hasReactedFire
-                            ? 'bg-red-500/20 text-red-400 border border-red-500/40'
-                            : 'bg-slate-950 hover:bg-slate-800 text-slate-400 border border-slate-800'
-                        }`}
-                      >
-                        <Flame className={`w-3.5 h-3.5 ${hasReactedFire ? 'fill-red-400' : ''}`} />
-                        <span>{post.reactions.fire || 0}</span>
-                      </button>
-
-                      <button
-                        id={`react-target-btn-${post.id}`}
-                        onClick={() => handleReaction(post.id, 'target')}
-                        className={`px-3 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                          hasReactedTarget
-                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                            : 'bg-slate-950 hover:bg-slate-800 text-slate-400 border border-slate-800'
-                        }`}
-                      >
-                        <Crosshair className="w-3.5 h-3.5" />
-                        <span>{post.reactions.target || 0}</span>
-                      </button>
-
-                      <button
-                        id={`react-shield-btn-${post.id}`}
-                        onClick={() => handleReaction(post.id, 'shield')}
-                        className={`px-3 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                          hasReactedShield
-                            ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40'
-                            : 'bg-slate-950 hover:bg-slate-800 text-slate-400 border border-slate-800'
-                        }`}
-                      >
-                        <Shield className="w-3.5 h-3.5" />
-                        <span>{post.reactions.shield || 0}</span>
-                      </button>
-                    </div>
+              return (
+                <button
+                  key={thread.id}
+                  id={`thread-select-${thread.id}`}
+                  type="button"
+                  onClick={() => {
+                    setActiveThreadId(thread.id);
+                    setFormFeedback(null);
+                    playTacticalSound('switch');
+                  }}
+                  className={`w-full text-left p-4 rounded-xl border transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-slate-800 border-indigo-500 shadow-md'
+                      : 'bg-slate-900 hover:bg-slate-850 border-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-bold text-indigo-400 px-2 py-0.5 rounded bg-indigo-950 border border-indigo-500/30">
+                      {thread.category}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-400">
+                      {postCount} {postCount === 1 ? 'post' : 'posts'}
+                    </span>
                   </div>
-                );
-              })}
-            </div>
-          )}
+
+                  <div className="font-bold text-sm text-white">{thread.name}</div>
+                  <p className="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">
+                    {thread.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Right Column: Dispatch Transmission Box (5 Cols) */}
-        <div id="dispatch-transmission-column" className="lg:col-span-5 space-y-4 lg:sticky lg:top-20">
+        {/* Right Column: Active Thread Posts + Composer */}
+        <div className="lg:col-span-8 space-y-6">
+          
+          {/* Active Thread Banner */}
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2 shadow-md">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                Current Channel
+              </span>
+              <span className="text-xs text-slate-400">
+                {threadPosts.length} total messages
+              </span>
+            </div>
+            <h2 className="text-xl font-bold text-white">{activeThread.name}</h2>
+            <p className="text-xs text-slate-300 leading-relaxed">{activeThread.description}</p>
+          </div>
+
+          {/* Post Composer Form (1 Post Per User Enforced) */}
           <div
-            id="dispatch-form-card"
-            className="bg-slate-900/95 border border-slate-800 rounded-xl p-5 space-y-4 shadow-xl"
+            id="intel-post-composer-card"
+            className="rounded-2xl border border-slate-800 bg-slate-900 p-5 space-y-4 shadow-xl"
           >
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <Send className="w-4 h-4 text-orange-400" />
-                <span className="font-bold text-sm text-white uppercase tracking-wider font-mono">
-                  {existingUserPostInActiveThread ? 'UPDATE YOUR BRIEFING' : 'DISPATCH TRANSMISSION'}
+                <div className="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-300 text-xs font-bold">
+                  {currentUser.callsign.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-white">
+                    {existingUserPostInActiveThread ? 'Update Your Post' : 'Create New Post'}
+                  </span>
+                  <span className="text-[11px] text-slate-400 block">
+                    Posting as: {currentUser.callsign} ({currentUser.id})
+                  </span>
+                </div>
+              </div>
+
+              {existingUserPostInActiveThread && (
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-500/40">
+                  Replacing Existing Post
                 </span>
-              </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30">
-                1 POST / THREAD
-              </span>
+              )}
             </div>
 
-            {/* Operational Rules Info Note */}
-            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-start gap-2.5 text-xs text-slate-400">
-              <Info className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
-              <div>
-                <strong>Tactical Protocol:</strong> Each operative may hold <strong>1 active message per thread</strong>. You can attach <strong>1 tactical image</strong> to your briefing.
-              </div>
-            </div>
-
-            {/* Feedback message */}
+            {/* Feedback Alert */}
             {formFeedback && (
               <div
-                className={`p-3 rounded-lg text-xs flex items-center gap-2 ${
+                className={`p-3.5 rounded-xl border text-xs font-semibold flex items-start gap-2.5 ${
                   formFeedback.type === 'success'
-                    ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
-                    : 'bg-red-950/60 border border-red-500/40 text-red-300'
+                    ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-200'
+                    : 'bg-red-950/80 border-red-500/50 text-red-200'
                 }`}
               >
                 {formFeedback.type === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 )}
                 <span>{formFeedback.message}</span>
               </div>
             )}
 
-            {/* Form */}
-            <form onSubmit={handleSubmitPost} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono font-bold text-slate-300 flex justify-between">
-                  <span>MESSAGE BRIEFING</span>
-                  <span className="text-slate-500">{postContent.length}/600 chars</span>
-                </label>
-                <textarea
-                  id="post-content-textarea"
-                  rows={4}
-                  maxLength={600}
-                  placeholder={`Share class setups, drop routes, or clutch strategies for ${activeThread?.title}...`}
-                  value={postContent}
-                  onChange={(e) => setPostContent(e.target.value)}
-                  className="w-full p-3 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 resize-none leading-relaxed"
-                />
-              </div>
+            <form onSubmit={handlePostSubmit} className="space-y-3.5">
+              <textarea
+                id="post-content-textarea"
+                rows={3}
+                required
+                value={postContent}
+                onChange={(e) => setPostContent(e.target.value)}
+                placeholder="Share your thoughts, tips, or tournament feedback with players..."
+                className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 leading-relaxed transition-colors"
+              />
 
-              {/* Single Image Attachment (Drag & Drop or Manual Picker) */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono font-bold text-slate-300 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5 text-orange-400" />
-                    IMAGE ATTACHMENT (1 MAX)
-                  </span>
-                  {imageBase64 && (
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="text-[11px] text-red-400 hover:underline flex items-center gap-0.5 cursor-pointer"
-                    >
-                      <X className="w-3 h-3" /> Remove
-                    </button>
-                  )}
-                </label>
-
-                {imageBase64 ? (
-                  <div className="relative p-2 bg-slate-950 border border-slate-700 rounded-lg space-y-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* Image Preview if selected */}
+              {imageBase64 && (
+                <div className="relative rounded-xl border border-slate-700 bg-slate-800 p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     <img
                       src={imageBase64}
-                      alt="Uploaded preview"
-                      className="w-full h-36 object-contain rounded bg-slate-900"
+                      alt="Upload Preview"
+                      className="w-14 h-14 object-cover rounded-lg border border-slate-700"
                     />
-                    <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 px-1">
-                      <span className="truncate max-w-[200px]">{imageName}</span>
-                      <span className="text-emerald-400 font-bold">READY TO TRANSMIT</span>
+                    <div>
+                      <div className="text-xs font-bold text-white truncate max-w-xs">
+                        {imageName || 'Attached Image'}
+                      </div>
+                      <div className="text-[11px] text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Ready to upload</span>
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  <div
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageBase64(null);
+                      setImageName('');
+                      playTacticalSound('click');
+                    }}
+                    className="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/60 text-slate-300 hover:text-red-200 transition-colors cursor-pointer"
+                    title="Remove Photo"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Drag and Drop Area / Controls */}
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`p-3 rounded-xl border border-dashed transition-all flex flex-wrap items-center justify-between gap-3 ${
+                  isDragging
+                    ? 'border-indigo-400 bg-indigo-950/30'
+                    : 'border-slate-700 bg-slate-850'
+                }`}
+              >
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <FileImage className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <span className="hidden sm:inline">Drag image here or select manually</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    id="attach-image-btn"
+                    type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-all ${
-                      isDragging
-                        ? 'border-orange-500 bg-orange-500/10'
-                        : 'border-slate-700 bg-slate-950/60 hover:border-slate-600 hover:bg-slate-950'
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-200 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Upload Image</span>
+                  </button>
+
+                  <button
+                    id="submit-post-btn"
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition-colors cursor-pointer"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>{existingUserPostInActiveThread ? 'Update Post' : 'Publish Post'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Posts Feed for this thread */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider px-1">
+              <span>Thread Messages</span>
+              <span>{threadPosts.length} posts</span>
+            </div>
+
+            {threadPosts.length === 0 ? (
+              <div className="p-12 text-center rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 text-sm">
+                No posts in this channel yet. Be the first player to start the discussion!
+              </div>
+            ) : (
+              threadPosts.map((post) => {
+                const isAuthor = currentUser && (post.userId === currentUser.id || post.userUid === currentUser.id);
+                const hasReactedFire = post.reactions.usersReacted.fire?.includes(currentUser.id);
+                const hasReactedTarget = post.reactions.usersReacted.target?.includes(currentUser.id);
+                const hasReactedShield = post.reactions.usersReacted.shield?.includes(currentUser.id);
+
+                return (
+                  <div
+                    key={post.id}
+                    id={`post-card-${post.id}`}
+                    className={`rounded-2xl border p-5 space-y-4 shadow-lg transition-all ${
+                      isAuthor
+                        ? 'bg-slate-900 border-indigo-600/60'
+                        : 'bg-slate-900 border-slate-800'
                     }`}
                   >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
-                    <div className="text-xs font-bold text-slate-300">
-                      Drop tactical screenshot here or <span className="text-orange-400 underline">browse</span>
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-1">PNG, JPG, SVG up to 2.5MB</div>
-                  </div>
-                )}
-              </div>
+                    {/* Post Header */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-md">
+                          {post.userCallsign.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-white text-sm">{post.userCallsign}</span>
+                            {isAuthor && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-600 text-white font-bold">
+                                You
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-400 flex items-center gap-2">
+                            <span>{post.userUid || post.userId}</span>
+                            <span>&bull;</span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDate(post.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
 
-              {/* Submit Button */}
-              <button
-                id="submit-intel-post-btn"
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-2.5 rounded-lg bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-slate-950 text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Send className="w-4 h-4" />
-                {existingUserPostInActiveThread ? 'Update Thread Briefing' : 'Dispatch Transmission'}
-              </button>
-            </form>
+                      {/* Author Actions */}
+                      {isAuthor && (
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleEditExistingPost(post)}
+                            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                            title="Edit Post"
+                          >
+                            <Edit3 className="w-4 h-4 text-indigo-400" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePost(post.id)}
+                            className="p-2 rounded-lg bg-slate-800 hover:bg-red-900/60 text-slate-300 hover:text-red-200 transition-colors cursor-pointer"
+                            title="Delete Post"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Post Body Content */}
+                    <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">
+                      {post.content}
+                    </p>
+
+                    {/* Attached Image (if present) */}
+                    {post.imageBase64 && (
+                      <div className="rounded-xl overflow-hidden border border-slate-750 bg-slate-950 relative group">
+                        <img
+                          src={post.imageBase64}
+                          alt={post.imageName || 'Post Attachment'}
+                          className="w-full max-h-96 object-cover cursor-pointer transition-transform group-hover:scale-[1.01]"
+                          onClick={() =>
+                            setLightboxImage({
+                              src: post.imageBase64!,
+                              title: post.imageName || 'Attachment',
+                              callsign: post.userCallsign
+                            })
+                          }
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setLightboxImage({
+                              src: post.imageBase64!,
+                              title: post.imageName || 'Attachment',
+                              callsign: post.userCallsign
+                            })
+                          }
+                          className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-slate-900 text-white text-xs font-bold flex items-center gap-1 backdrop-blur-sm border border-slate-700 transition-colors cursor-pointer"
+                        >
+                          <Maximize2 className="w-3.5 h-3.5" />
+                          <span>Full View</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Reaction Buttons */}
+                    <div className="pt-2 border-t border-slate-800 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleReactionClick(post.id, 'fire')}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          hasReactedFire
+                            ? 'bg-orange-500/20 border-orange-500 text-orange-300'
+                            : 'bg-slate-800 border-slate-750 hover:bg-slate-750 text-slate-300'
+                        }`}
+                      >
+                        <Flame className={`w-3.5 h-3.5 ${hasReactedFire ? 'fill-orange-400 text-orange-400' : 'text-orange-400'}`} />
+                        <span>{post.reactions.fire}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleReactionClick(post.id, 'target')}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          hasReactedTarget
+                            ? 'bg-blue-500/20 border-blue-500 text-blue-300'
+                            : 'bg-slate-800 border-slate-750 hover:bg-slate-750 text-slate-300'
+                        }`}
+                      >
+                        <ThumbsUp className={`w-3.5 h-3.5 ${hasReactedTarget ? 'fill-blue-400 text-blue-400' : 'text-blue-400'}`} />
+                        <span>{post.reactions.target}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleReactionClick(post.id, 'shield')}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          hasReactedShield
+                            ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
+                            : 'bg-slate-800 border-slate-750 hover:bg-slate-750 text-slate-300'
+                        }`}
+                      >
+                        <Shield className={`w-3.5 h-3.5 ${hasReactedShield ? 'fill-emerald-400 text-emerald-400' : 'text-emerald-400'}`} />
+                        <span>{post.reactions.shield}</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
 
-      {/* Lightbox / Zoom Image Modal */}
+      {/* Full Screen Lightbox Modal */}
       {lightboxImage && (
         <div
-          id="intel-lightbox-modal"
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
-          onClick={() => setLightboxImage(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image Preview"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-200"
         >
           <div
-            className="relative max-w-4xl w-full max-h-[90vh] bg-slate-900 border border-slate-700 rounded-2xl p-4 flex flex-col items-center space-y-3"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-full flex items-center justify-between border-b border-slate-800 pb-2">
-              <div className="text-xs font-mono text-slate-300 flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-orange-400" />
-                <span>{lightboxImage.title}</span>
-                <span className="text-slate-500">• Posted by {lightboxImage.callsign}</span>
+            className="fixed inset-0 cursor-pointer"
+            onClick={() => setLightboxImage(null)}
+          />
+          <div className="relative z-10 max-w-4xl w-full bg-slate-900 border border-slate-750 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-slate-800 bg-slate-850 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white">{lightboxImage.title}</h3>
+                <p className="text-xs text-slate-400">Uploaded by {lightboxImage.callsign}</p>
               </div>
               <button
+                type="button"
                 onClick={() => setLightboxImage(null)}
-                className="p-1 rounded bg-slate-800 text-slate-400 hover:text-white cursor-pointer"
+                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="w-full flex items-center justify-center overflow-auto max-h-[75vh]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+            <div className="p-4 flex items-center justify-center bg-slate-950 max-h-[75vh] overflow-hidden">
               <img
                 src={lightboxImage.src}
                 alt={lightboxImage.title}
-                className="max-h-[70vh] object-contain rounded-lg shadow-2xl"
+                className="max-h-[70vh] w-auto object-contain rounded-lg"
               />
+            </div>
+            <div className="p-4 border-t border-slate-800 bg-slate-850 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setLightboxImage(null)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl cursor-pointer"
+              >
+                Close Image
+              </button>
             </div>
           </div>
         </div>

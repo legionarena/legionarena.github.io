@@ -7,9 +7,7 @@ import {
   Volume2,
   VolumeX,
   Shield,
-  Radio,
   Trophy,
-  Terminal,
   LogIn,
   UserPlus,
   Lock,
@@ -18,7 +16,11 @@ import {
   AlertCircle,
   X,
   Inbox,
-  RefreshCw
+  Sparkles,
+  Gamepad2,
+  Music,
+  Zap,
+  Users
 } from 'lucide-react';
 import { User, DispatchedEmail } from '@/lib/types';
 import {
@@ -85,7 +87,7 @@ export default function AuthLandingView({
     setAuthSuccess(null);
 
     if (!loginIdentifier || !loginPassword) {
-      setAuthError('Please enter your operative callsign or email and password.');
+      setAuthError('Please enter your username or email and password.');
       playTacticalSound('alert');
       return;
     }
@@ -107,7 +109,7 @@ export default function AuthLandingView({
     }
 
     if (res.user) {
-      setAuthSuccess(`Clearance granted. Welcome Commander ${res.user.callsign}!`);
+      setAuthSuccess(`Welcome back, ${res.user.callsign}!`);
       playTacticalSound('success');
       onAuthSuccess(res.user);
     }
@@ -172,7 +174,7 @@ export default function AuthLandingView({
     }
 
     if (res.user) {
-      setAuthSuccess('Email verified! Clearance granted.');
+      setAuthSuccess('Email verified successfully! Welcome to PlayStorm.');
       playTacticalSound('success');
       onAuthSuccess(res.user);
     }
@@ -196,7 +198,7 @@ export default function AuthLandingView({
     }
   };
 
-  // 5. Handle Forgot Password Request (Email Only)
+  // 5. Handle Forgot Password Request
   const handleForgotRequest = (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
@@ -249,31 +251,54 @@ export default function AuthLandingView({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#060709] text-zinc-100 font-sans relative overflow-x-hidden tactical-grid selection:bg-[#ff4400] selection:text-black">
-      {/* Ambience */}
+    <div className="flex-1 flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans relative overflow-x-hidden modern-grid-pattern selection:bg-blue-600 selection:text-white">
+      {/* Soft Ambient Background Highlights */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-[700px] h-[400px] bg-gradient-to-b from-orange-600/15 via-red-700/5 to-transparent blur-3xl opacity-80" />
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[350px] bg-gradient-to-t from-red-600/10 via-amber-600/5 to-transparent blur-3xl opacity-60" />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[350px] bg-blue-600/10 rounded-full blur-3xl opacity-70" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[300px] bg-orange-600/10 rounded-full blur-3xl opacity-60" />
       </div>
 
-      {/* Top Header */}
-      <header className="relative z-30 border-b border-zinc-800/80 bg-[#090b10]/95 backdrop-blur-md px-4 sm:px-8 py-3 shrink-0">
+      {/* Top Disclaimer Banner */}
+      <div
+        id="landing-gemini-disclaimer"
+        className="relative z-40 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border-b border-blue-700/50 px-4 py-2 text-xs text-slate-100 flex items-center justify-between shadow-sm"
+      >
+        <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-cyan-300 animate-pulse" />
+            <span className="font-semibold text-white">
+              Made with Google Gemini AI Studio
+            </span>
+          </div>
+          <a
+            href="https://ai.studio/build"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-blue-300 hover:text-white font-bold hover:underline"
+          >
+            Explore Build
+          </a>
+        </div>
+      </div>
+
+      {/* Navigation Header */}
+      <header className="relative z-30 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md px-4 sm:px-8 py-3.5 shrink-0 shadow-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-black font-black shadow-[0_0_18px_rgba(255,85,0,0.4)]">
-              <Flame className="w-5 h-5 text-black fill-black" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-orange-500 flex items-center justify-center text-white font-bold shadow-md">
+              <Flame className="w-6 h-6 fill-white" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-black font-mono tracking-tighter uppercase leading-none">
-                FIRESTORM
+              <span className="text-xl font-bold tracking-tight text-white leading-none">
+                PlayStorm
               </span>
-              <span className="text-[10px] sm:text-xs font-black font-mono tracking-[0.25em] text-orange-400 uppercase leading-tight">
-                TOURNAMENTS
+              <span className="text-xs font-semibold text-orange-400 tracking-wide uppercase leading-tight">
+                Tournaments
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-3">
             <button
               id="landing-outbox-btn"
               type="button"
@@ -282,12 +307,12 @@ export default function AuthLandingView({
                 setIsOutboxOpen(true);
                 playTacticalSound('click');
               }}
-              className="px-3 py-1.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-mono text-zinc-300 hover:text-orange-400 transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
-              title="View simulated email verification codes & recovery inbox"
+              className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-xs font-bold text-slate-200 hover:text-white transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+              title="View verification and recovery emails"
             >
-              <Mail className="w-3.5 h-3.5 text-orange-400" />
-              <span className="hidden sm:inline">Tactical Comms Inbox</span>
-              <span className="px-1.5 py-0.2 rounded bg-orange-950 border border-orange-500/40 text-[10px] font-bold text-orange-400">
+              <Mail className="w-4 h-4 text-blue-400" />
+              <span className="hidden sm:inline">Verification Outbox</span>
+              <span className="px-2 py-0.5 rounded-full bg-blue-900/60 border border-blue-500/40 text-xs font-bold text-blue-200">
                 {outboxEmails.length}
               </span>
             </button>
@@ -296,69 +321,72 @@ export default function AuthLandingView({
               id="landing-sfx-btn"
               type="button"
               onClick={onToggleSfx}
-              className="p-2 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              title={sfxEnabled ? 'SFX Active' : 'SFX Muted'}
+              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              title={sfxEnabled ? 'Sound On' : 'Sound Muted'}
             >
-              {sfxEnabled ? <Volume2 className="w-4 h-4 text-orange-400" /> : <VolumeX className="w-4 h-4 text-zinc-500" />}
+              {sfxEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Grid */}
+      {/* Main Hero & Auth Section */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 flex flex-col justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left Briefing */}
+          
+          {/* Left Hero Content */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-orange-950/60 border border-orange-500/40 text-orange-400 font-mono text-xs font-bold uppercase tracking-wider">
-              <Flame className="w-3.5 h-3.5 animate-pulse" />
-              <span>SEASON 4 CHAMPIONSHIP REGISTRATION LIVE</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-bold uppercase tracking-wider">
+              <Zap className="w-3.5 h-3.5 text-blue-400" />
+              <span>Gaming Tournaments</span>
             </div>
 
-            <div className="space-y-2">
-              <h1 className="text-4xl sm:text-6xl font-black font-mono tracking-tight uppercase text-white leading-none">
-                FIRESTORM
+            <div className="space-y-3">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+                Play, Compete &amp; Climb Leaderboards
               </h1>
-              <div className="text-2xl sm:text-4xl font-black font-mono text-orange-400 tracking-[0.2em] uppercase">
-                TOURNAMENTS
-              </div>
-              <p className="text-base sm:text-lg text-zinc-400 max-w-xl leading-relaxed pt-2">
-                Fortnite and Call of Duty inspired tournament arena. Register with automated email verification, save game high scores, curate tactical playlists, and share intel in public threads.
+              <p className="text-base sm:text-lg text-slate-300 max-w-xl leading-relaxed">
+                Join PlayStorm to play arcade games, track your verified high scores, stream music playlists, and share tips with the player community.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-              <div className="p-3.5 rounded bg-[#0d111a] border border-zinc-800 space-y-1">
-                <div className="flex items-center gap-2 text-orange-400 font-mono font-bold text-xs">
-                  <Shield className="w-4 h-4" />
-                  <span>SECURE ID</span>
+            {/* Feature Highlights */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2">
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 shadow-sm">
+                <div className="flex items-center gap-2 text-blue-400 font-bold text-sm">
+                  <Gamepad2 className="w-4 h-4" />
+                  <span>Arcade Games</span>
                 </div>
-                <p className="text-xs text-zinc-400">12-char UID registration &amp; email verification.</p>
+                <p className="text-xs text-slate-300 leading-relaxed">Play Reaction Challenge &amp; Supply Grid in your browser.</p>
               </div>
 
-              <div className="p-3.5 rounded bg-[#0d111a] border border-zinc-800 space-y-1">
-                <div className="flex items-center gap-2 text-amber-400 font-mono font-bold text-xs">
-                  <Radio className="w-4 h-4" />
-                  <span>INTEL FEEDS</span>
-                </div>
-                <p className="text-xs text-zinc-400">1 post per thread with tactical image attachments.</p>
-              </div>
-
-              <div className="p-3.5 rounded bg-[#0d111a] border border-zinc-800 space-y-1">
-                <div className="flex items-center gap-2 text-cyan-400 font-mono font-bold text-xs">
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 shadow-sm">
+                <div className="flex items-center gap-2 text-orange-400 font-bold text-sm">
                   <Trophy className="w-4 h-4" />
-                  <span>LEADERBOARDS</span>
+                  <span>High Scores</span>
                 </div>
-                <p className="text-xs text-zinc-400">Save high scores and compete for championship ranks.</p>
+                <p className="text-xs text-slate-300 leading-relaxed">Save your personal best records on verified leaderboards.</p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 shadow-sm">
+                <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                  <Users className="w-4 h-4" />
+                  <span>Community Hub</span>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">Discuss strategies and share game screenshots with players.</p>
               </div>
             </div>
 
-            <div className="p-3 rounded bg-zinc-900/60 border border-zinc-800 text-xs font-mono text-zinc-400 flex flex-wrap items-center justify-between gap-2">
+            {/* Demo Account Quick Button */}
+            <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 flex flex-wrap items-center justify-between gap-3 shadow-sm">
               <div className="flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-orange-400" />
-                <span>DEMO OPERATIVE: <strong className="text-zinc-200">player@firestorm.gg</strong> / <strong className="text-zinc-200">password123</strong></span>
+                <span className="font-bold text-white">Demo Account:</span>
+                <span className="text-slate-300 font-medium">player@firestorm.gg</span>
+                <span className="text-slate-500">&bull;</span>
+                <span className="text-slate-300 font-medium">password123</span>
               </div>
               <button
+                id="demo-fill-btn"
                 type="button"
                 onClick={() => {
                   setLoginIdentifier('player@firestorm.gg');
@@ -366,17 +394,18 @@ export default function AuthLandingView({
                   setAuthMode('LOGIN');
                   playTacticalSound('click');
                 }}
-                className="px-2.5 py-1 rounded bg-orange-600/30 hover:bg-orange-600 text-orange-300 hover:text-white border border-orange-500/40 text-[11px] font-bold uppercase transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors cursor-pointer"
               >
-                Auto-Fill Demo
+                Demo Fill
               </button>
             </div>
           </div>
 
-          {/* Right Auth Card */}
+          {/* Right Auth Form Card */}
           <div className="lg:col-span-5">
-            <div className="bg-[#0b0e15] border-2 border-zinc-800 rounded-xl overflow-hidden shadow-2xl relative">
-              <div className="flex border-b border-zinc-800 bg-[#0d111a]">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
+              {/* Top Tabs */}
+              <div className="flex border-b border-slate-800 bg-slate-850">
                 <button
                   id="tab-login-btn"
                   type="button"
@@ -386,14 +415,14 @@ export default function AuthLandingView({
                     setAuthSuccess(null);
                     playTacticalSound('switch');
                   }}
-                  className={`flex-1 py-3 px-4 font-mono font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`flex-1 py-3.5 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     authMode === 'LOGIN' || authMode === 'FORGOT_PASSWORD' || authMode === 'RESET_CONFIRM'
-                      ? 'bg-[#121622] text-orange-400 border-b-2 border-orange-500'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
+                      ? 'bg-slate-900 text-blue-400 border-b-2 border-blue-500'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
                   }`}
                 >
-                  <LogIn className="w-3.5 h-3.5" />
-                  <span>OPERATIVE LOGIN</span>
+                  <LogIn className="w-4 h-4" />
+                  <span>Log In</span>
                 </button>
                 <button
                   id="tab-register-btn"
@@ -404,37 +433,37 @@ export default function AuthLandingView({
                     setAuthSuccess(null);
                     playTacticalSound('switch');
                   }}
-                  className={`flex-1 py-3 px-4 font-mono font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`flex-1 py-3.5 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     authMode === 'REGISTER' || authMode === 'VERIFY'
-                      ? 'bg-[#121622] text-orange-400 border-b-2 border-orange-500'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
+                      ? 'bg-slate-900 text-blue-400 border-b-2 border-blue-500'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
                   }`}
                 >
-                  <UserPlus className="w-3.5 h-3.5" />
-                  <span>NEW REGISTRATION</span>
+                  <UserPlus className="w-4 h-4" />
+                  <span>Sign Up</span>
                 </button>
               </div>
 
               {/* Feedback messages */}
               {authError && (
-                <div className="m-4 p-3 rounded bg-red-950/80 border border-red-500/50 text-red-300 text-xs font-mono flex items-start gap-2">
+                <div className="m-4 p-3.5 rounded-xl bg-red-950/80 border border-red-500/50 text-red-200 text-xs font-semibold flex items-start gap-2.5">
                   <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                   <span>{authError}</span>
                 </div>
               )}
               {authSuccess && (
-                <div className="m-4 p-3 rounded bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs font-mono flex items-start gap-2">
+                <div className="m-4 p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 text-xs font-semibold flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>{authSuccess}</span>
                 </div>
               )}
 
-              {/* Login Form */}
+              {/* 1. Login Form */}
               {authMode === 'LOGIN' && (
-                <form onSubmit={handleLoginSubmit} className="p-5 sm:p-6 space-y-4">
+                <form onSubmit={handleLoginSubmit} className="p-6 space-y-4">
                   <div>
-                    <label className="block text-xs font-mono uppercase font-bold text-zinc-400 mb-1.5">
-                      Callsign or Email Address
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Username / Email
                     </label>
                     <input
                       id="login-id-input"
@@ -443,13 +472,13 @@ export default function AuthLandingView({
                       value={loginIdentifier}
                       onChange={(e) => setLoginIdentifier(e.target.value)}
                       placeholder="GhostRider or player@firestorm.gg"
-                      className="w-full px-3.5 py-2.5 rounded bg-[#131824] border border-zinc-700 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 font-mono transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-mono uppercase font-bold text-zinc-400">
+                      <label className="block text-xs font-bold uppercase text-slate-300">
                         Password
                       </label>
                       <button
@@ -460,7 +489,7 @@ export default function AuthLandingView({
                           setAuthSuccess(null);
                           playTacticalSound('click');
                         }}
-                        className="text-[11px] font-mono text-orange-400 hover:underline cursor-pointer"
+                        className="text-xs text-blue-400 hover:text-blue-300 font-semibold cursor-pointer"
                       >
                         Forgot Password?
                       </button>
@@ -472,27 +501,27 @@ export default function AuthLandingView({
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-3.5 py-2.5 rounded bg-[#131824] border border-zinc-700 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 font-mono transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
 
                   <button
                     id="submit-login-btn"
                     type="submit"
-                    className="w-full py-3 rounded bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-mono font-black text-sm uppercase tracking-wider transition-all shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer mt-2"
                   >
-                    <Lock className="w-4 h-4" />
-                    <span>AUTHENTICATE &amp; ENTER ARENA</span>
+                    <LogIn className="w-4 h-4" />
+                    <span>Log In</span>
                   </button>
                 </form>
               )}
 
-              {/* Register Form */}
+              {/* 2. Register Form */}
               {authMode === 'REGISTER' && (
-                <form onSubmit={handleRegisterSubmit} className="p-5 sm:p-6 space-y-3.5">
+                <form onSubmit={handleRegisterSubmit} className="p-6 space-y-4">
                   <div>
-                    <label className="block text-xs font-mono uppercase font-bold text-zinc-400 mb-1.5">
-                      Operative Callsign
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Player Username
                     </label>
                     <input
                       id="register-callsign-input"
@@ -500,14 +529,14 @@ export default function AuthLandingView({
                       required
                       value={registerCallsign}
                       onChange={(e) => setRegisterCallsign(e.target.value)}
-                      placeholder="e.g. ShadowViper"
-                      className="w-full px-3.5 py-2.5 rounded bg-[#131824] border border-zinc-700 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 font-mono"
+                      placeholder="e.g. PixelWarrior"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-mono uppercase font-bold text-zinc-400 mb-1.5">
-                      Email Address (For Verification)
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Email Address
                     </label>
                     <input
                       id="register-email-input"
@@ -515,14 +544,14 @@ export default function AuthLandingView({
                       required
                       value={registerEmail}
                       onChange={(e) => setRegisterEmail(e.target.value)}
-                      placeholder="operative@domain.com"
-                      className="w-full px-3.5 py-2.5 rounded bg-[#131824] border border-zinc-700 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 font-mono"
+                      placeholder="player@example.com"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-mono uppercase font-bold text-zinc-400 mb-1.5">
+                      <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
                         Password
                       </label>
                       <input
@@ -531,12 +560,12 @@ export default function AuthLandingView({
                         required
                         value={registerPassword}
                         onChange={(e) => setRegisterPassword(e.target.value)}
-                        placeholder="Min 6 chars"
-                        className="w-full px-3 py-2.5 rounded bg-[#131824] border border-zinc-700 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 font-mono"
+                        placeholder="6+ characters"
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-mono uppercase font-bold text-zinc-400 mb-1.5">
+                      <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
                         Confirm Password
                       </label>
                       <input
@@ -546,7 +575,7 @@ export default function AuthLandingView({
                         value={registerConfirmPassword}
                         onChange={(e) => setRegisterConfirmPassword(e.target.value)}
                         placeholder="Repeat password"
-                        className="w-full px-3 py-2.5 rounded bg-[#131824] border border-zinc-700 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 font-mono"
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -554,20 +583,24 @@ export default function AuthLandingView({
                   <button
                     id="submit-register-btn"
                     type="submit"
-                    className="w-full py-3 rounded bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-mono font-black text-sm uppercase tracking-wider transition-all shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer mt-2"
+                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer mt-2"
                   >
                     <UserPlus className="w-4 h-4" />
-                    <span>CREATE OPERATIVE ID &amp; DISPATCH CODE</span>
+                    <span>Create Account</span>
                   </button>
                 </form>
               )}
 
-              {/* Verify Form */}
+              {/* 3. Verification Form */}
               {authMode === 'VERIFY' && (
-                <form onSubmit={handleVerifySubmit} className="p-5 sm:p-6 space-y-4">
+                <form onSubmit={handleVerifySubmit} className="p-6 space-y-4">
+                  <div className="p-3.5 rounded-xl bg-blue-950/40 border border-blue-500/40 text-xs text-blue-200 leading-relaxed">
+                    A 6-digit verification code has been dispatched to <strong>{verifyEmailAddress}</strong>. Enter it below to activate your account.
+                  </div>
+
                   <div>
-                    <label className="block text-xs font-mono uppercase font-bold text-zinc-400 mb-1.5">
-                      Target Email
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Email Address
                     </label>
                     <input
                       id="verify-email-input"
@@ -575,52 +608,56 @@ export default function AuthLandingView({
                       required
                       value={verifyEmailAddress}
                       onChange={(e) => setVerifyEmailAddress(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded bg-[#131824] border border-zinc-700 text-sm text-white font-mono"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-mono uppercase font-bold text-zinc-400">
-                        6-Digit Verification PIN
-                      </label>
-                      <button
-                        type="button"
-                        onClick={handleResendCode}
-                        className="text-[11px] font-mono text-orange-400 hover:underline cursor-pointer"
-                      >
-                        Resend Code
-                      </button>
-                    </div>
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      6-Digit Code
+                    </label>
                     <input
-                      id="verify-pin-input"
+                      id="verify-code-input"
                       type="text"
-                      maxLength={6}
                       required
+                      maxLength={6}
                       value={verifyPinCode}
                       onChange={(e) => setVerifyPinCode(e.target.value)}
-                      placeholder="e.g. 772910"
-                      className="w-full px-3.5 py-2.5 rounded bg-[#131824] border border-zinc-700 text-base tracking-[0.2em] text-center font-bold text-orange-400 placeholder-zinc-600 focus:outline-none focus:border-orange-500 font-mono"
+                      placeholder="123456"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-base font-mono tracking-widest text-center text-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
-                  <button
-                    id="submit-verify-btn"
-                    type="submit"
-                    className="w-full py-3 rounded bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-mono font-black text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>CONFIRM CLEARANCE &amp; ENTER</span>
-                  </button>
+                  <div className="flex gap-2.5 pt-1">
+                    <button
+                      id="submit-verify-btn"
+                      type="submit"
+                      className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition-colors cursor-pointer"
+                    >
+                      Verify Email
+                    </button>
+                    <button
+                      id="resend-code-btn"
+                      type="button"
+                      onClick={handleResendCode}
+                      className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+                    >
+                      Resend Code
+                    </button>
+                  </div>
                 </form>
               )}
 
-              {/* Forgot Password Form */}
+              {/* 4. Forgot Password Request */}
               {authMode === 'FORGOT_PASSWORD' && (
-                <form onSubmit={handleForgotRequest} className="p-5 sm:p-6 space-y-4">
+                <form onSubmit={handleForgotRequest} className="p-6 space-y-4">
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Enter your registered email address to receive a 6-digit password recovery code.
+                  </p>
+
                   <div>
-                    <label className="block text-xs font-mono uppercase font-bold text-zinc-400 mb-1.5">
-                      Registered Email Address
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Email Address
                     </label>
                     <input
                       id="forgot-email-input"
@@ -628,56 +665,51 @@ export default function AuthLandingView({
                       required
                       value={forgotEmailAddress}
                       onChange={(e) => setForgotEmailAddress(e.target.value)}
-                      placeholder="operative@domain.com"
-                      className="w-full px-3.5 py-2.5 rounded bg-[#131824] border border-zinc-700 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 font-mono"
+                      placeholder="player@firestorm.gg"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
-                  <div className="flex items-center gap-2 pt-2">
+                  <div className="flex gap-2.5 pt-1">
                     <button
                       id="submit-forgot-btn"
                       type="submit"
-                      className="flex-1 py-2.5 rounded bg-orange-600 hover:bg-orange-500 text-white font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md transition-colors cursor-pointer"
                     >
-                      <Mail className="w-3.5 h-3.5" />
-                      <span>DISPATCH RECOVERY CODE</span>
+                      Send Code
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        setAuthMode('LOGIN');
-                        setAuthError(null);
-                        setAuthSuccess(null);
-                      }}
-                      className="px-4 py-2.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-mono text-xs uppercase font-bold cursor-pointer"
+                      onClick={() => setAuthMode('LOGIN')}
+                      className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 font-bold text-xs cursor-pointer"
                     >
-                      CANCEL
+                      Back Login
                     </button>
                   </div>
                 </form>
               )}
 
-              {/* Reset Confirm Form */}
+              {/* 5. Reset Password Confirm */}
               {authMode === 'RESET_CONFIRM' && (
-                <form onSubmit={handleResetConfirm} className="p-5 sm:p-6 space-y-4">
+                <form onSubmit={handleResetConfirm} className="p-6 space-y-4">
                   <div>
-                    <label className="block text-xs font-mono uppercase font-bold text-zinc-400 mb-1.5">
-                      6-Digit Recovery Code
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+                      Recovery Code
                     </label>
                     <input
                       id="reset-code-input"
                       type="text"
-                      maxLength={6}
                       required
+                      maxLength={6}
                       value={resetRecoveryCode}
                       onChange={(e) => setResetRecoveryCode(e.target.value)}
-                      placeholder="e.g. 748291"
-                      className="w-full px-3.5 py-2.5 rounded bg-[#131824] border border-zinc-700 text-base tracking-[0.2em] text-center font-bold text-orange-400 placeholder-zinc-600 focus:outline-none focus:border-orange-500 font-mono"
+                      placeholder="6-digit code"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-base font-mono tracking-widest text-center text-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-mono uppercase font-bold text-zinc-400 mb-1.5">
+                    <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
                       New Password
                     </label>
                     <input
@@ -686,18 +718,17 @@ export default function AuthLandingView({
                       required
                       value={resetNewPassword}
                       onChange={(e) => setResetNewPassword(e.target.value)}
-                      placeholder="Minimum 6 characters"
-                      className="w-full px-3.5 py-2.5 rounded bg-[#131824] border border-zinc-700 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 font-mono"
+                      placeholder="At least 6 characters"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
                   <button
                     id="submit-reset-confirm-btn"
                     type="submit"
-                    className="w-full py-3 rounded bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-mono font-black text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition-colors cursor-pointer"
                   >
-                    <KeyRound className="w-4 h-4" />
-                    <span>SAVE NEW PASSWORD &amp; LOG IN</span>
+                    Update Password
                   </button>
                 </form>
               )}
@@ -706,32 +737,32 @@ export default function AuthLandingView({
         </div>
       </main>
 
-      {/* Tactical Comms Outbox Drawer */}
+      {/* Outbox Modal (When open on unauthenticated view) */}
       {isOutboxOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Tactical Comms Outbox"
-          className="fixed inset-0 z-50 flex bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+          aria-label="Email Verification Outbox"
+          className="fixed inset-0 z-50 flex bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200"
         >
           <div className="flex-1 cursor-pointer" onClick={() => setIsOutboxOpen(false)} />
-          <div className="w-full max-w-md bg-[#0a0d14] border-l border-zinc-800 text-zinc-100 flex flex-col h-full shadow-2xl relative">
-            <div className="p-4 border-b border-zinc-800 bg-[#0e121b] flex items-center justify-between">
+          <div className="w-full max-w-md bg-slate-900 border-l border-slate-800 text-slate-100 flex flex-col h-full shadow-2xl relative">
+            <div className="p-4 border-b border-slate-800 bg-slate-850 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Inbox className="w-5 h-5 text-orange-400" />
+                <Inbox className="w-5 h-5 text-blue-400" />
                 <div>
-                  <h2 className="text-sm font-mono font-bold uppercase text-white">
-                    TACTICAL COMMS OUTBOX
+                  <h2 className="text-sm font-bold text-white">
+                    Verification Outbox
                   </h2>
-                  <p className="text-[11px] text-zinc-400 font-mono">
-                    Simulated email dispatcher for verification &amp; password recovery
+                  <p className="text-xs text-slate-400">
+                    Dispatched verification &amp; reset codes
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOutboxOpen(false)}
-                className="p-1.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
+                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -739,89 +770,44 @@ export default function AuthLandingView({
 
             <div className="flex-1 p-4 overflow-y-auto space-y-3">
               {outboxEmails.length === 0 ? (
-                <div className="text-center py-12 text-zinc-500 font-mono text-xs">
-                  No dispatched comms found. Register an account or request password recovery to see emails here.
+                <div className="text-center py-12 text-slate-400 text-sm">
+                  No dispatched emails found.
                 </div>
               ) : (
                 outboxEmails.map((em) => (
                   <div
                     key={em.id}
-                    className="p-3.5 rounded-lg border border-zinc-800 bg-[#0d1017] space-y-2 hover:border-orange-500/40 transition-colors"
+                    className="p-4 rounded-xl border border-slate-800 bg-slate-850 space-y-2"
                   >
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-orange-400 font-bold px-1.5 py-0.2 rounded bg-orange-950 border border-orange-500/40">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-blue-300 font-bold px-2 py-0.5 rounded bg-blue-950 border border-blue-500/40">
                         {em.type}
                       </span>
-                      <span className="text-zinc-500">
-                        {new Date(em.sentAt).toLocaleTimeString()}
-                      </span>
+                      <span className="text-slate-400">{new Date(em.sentAt).toLocaleTimeString()}</span>
                     </div>
-                    <div className="text-xs font-mono font-bold text-zinc-200">
-                      {em.subject}
+                    <div className="text-sm font-bold text-white">{em.subject}</div>
+                    <div className="text-xs text-slate-300">To: {em.to}</div>
+                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-750 text-xs text-blue-300">
+                      Code: <strong className="text-base text-white font-mono tracking-widest">{em.code}</strong>
                     </div>
-                    <div className="text-[11px] text-zinc-400 font-mono">
-                      TO: <strong className="text-zinc-300">{em.to}</strong>
-                    </div>
-                    <div className="p-2 rounded bg-black/60 border border-zinc-800 font-mono text-xs text-orange-300 flex items-center justify-between">
-                      <span>CODE: <strong className="text-base text-white tracking-widest">{em.code}</strong></span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setVerifyEmailAddress(em.to);
-                          setVerifyPinCode(em.code);
-                          setForgotEmailAddress(em.to);
-                          setResetRecoveryCode(em.code);
-                          setIsOutboxOpen(false);
-                          playTacticalSound('click');
-                        }}
-                        className="px-2 py-0.5 rounded bg-orange-600 hover:bg-orange-500 text-white text-[10px] font-bold uppercase cursor-pointer"
-                      >
-                        Auto-Fill
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-zinc-500 font-sans whitespace-pre-line leading-relaxed">
-                      {em.body}
-                    </p>
                   </div>
                 ))
               )}
             </div>
 
-            <div className="p-3 border-t border-zinc-800 bg-[#0c0f17] flex items-center justify-between text-xs font-mono text-zinc-500">
-              <span>100% GITHUB PAGES COMPATIBLE</span>
+            <div className="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs text-slate-400">
+              <span>Local Outbox Log</span>
               <button
                 type="button"
                 onClick={() => setIsOutboxOpen(false)}
-                className="text-orange-400 hover:underline font-bold cursor-pointer"
+                className="text-blue-400 hover:underline font-bold cursor-pointer"
               >
-                CLOSE
+                Close Outbox
               </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="border-t border-zinc-850 bg-[#08090d] px-4 py-2 shrink-0 relative z-20 text-[11px] font-mono text-zinc-500 flex flex-col md:flex-row items-center justify-between gap-2">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping" />
-          <span className="text-zinc-400 font-bold">FIRESTORM TOURNAMENTS</span>
-          <span className="text-zinc-700">|</span>
-          <a
-            href="https://ai.studio/build"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-cyan-400 hover:text-cyan-300 font-bold hover:underline"
-          >
-            Created by Google Gemini AI Studio (ai.studio/build)
-          </a>
-          <span className="text-zinc-700">|</span>
-          <span>CLIENT DATABASE &amp; RECOVERY READY</span>
-        </div>
-        <div className="text-zinc-500 text-[10px]">
-          <span>POWERED BY GOOGLE DEEPMIND GEMINI &bull; NEXT.JS 15</span>
-        </div>
-      </footer>
     </div>
   );
 }

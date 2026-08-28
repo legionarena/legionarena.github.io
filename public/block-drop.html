@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Block Drop Matrix • Firestorm Tournaments</title>
+  <style>
+    :root {
+      --bg-base: #090d16;
+      --bg-panel: #0f172a;
+      --bg-card: #1e293b;
+      --border-color: #334155;
+      --accent-blue: #3b82f6;
+      --accent-orange: #f97316;
+      --accent-cyan: #06b6d4;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    /* Top Brand Header */
+    .top-nav {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .top-nav .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+    }
+
+    .top-nav .brand-tag {
+      background: linear-gradient(135deg, #f97316, #ef4444);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .top-nav .meta {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    /* Main Container */
+    .game-container {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Left Stats Sidebar */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 180px;
+    }
+
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .mini-canvas-container {
+      width: 100%;
+      height: 80px;
+      background: #060913;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Center Matrix Frame: Scalable with User View */
+    .matrix-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg-panel);
+      border: 2px solid #3b82f6;
+      border-radius: 14px;
+      padding: 8px;
+      box-shadow: 0 0 24px rgba(59, 130, 246, 0.3), inset 0 0 14px rgba(0, 0, 0, 0.85);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .matrix-header-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 4px 6px 4px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .matrix-viewport {
+      /* Scalable Matrix Viewport with 1:2 (96:192) Aspect Ratio */
+      width: clamp(120px, min(42vw, 40vh), 260px);
+      aspect-ratio: 96 / 192;
+      height: auto;
+      max-height: calc(100vh - 190px);
+      background: #020617;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.95);
+      /* Crisp pixel rendering */
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-crisp-edges;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* CRT scanlines overlay */
+    .matrix-viewport::after {
+      content: " ";
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    #game-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: transparent;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+
+    /* Right Controls & Upcoming Sidebar */
+    .right-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 170px;
+    }
+
+    /* Action Buttons (Compact / Icon-Friendly) */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .btn:hover {
+      background: #334155;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border-color: #60a5fa;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+
+    .btn-orange {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      border-color: #fb923c;
+      color: #fff;
+    }
+
+    .btn-orange:hover {
+      background: linear-gradient(135deg, #ea580c, #c2410c);
+    }
+
+    /* Compact Mobile / On-Screen Controls Bar: Small Icons & Letters */
+    .touch-controls {
+      width: 100%;
+      max-width: 480px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      margin-top: 10px;
+    }
+
+    .touch-btn {
+      padding: 6px 4px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background 0.1s, transform 0.05s;
+      min-height: 40px;
+    }
+
+    .touch-btn:active {
+      background: #3b82f6;
+      transform: scale(0.96);
+    }
+
+    .touch-btn .t-icon {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .touch-btn .t-key {
+      font-size: 9px;
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* Overlay Screen (Start / Game Over / Pause) */
+    .overlay-screen {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(2, 6, 23, 0.9);
+      backdrop-filter: blur(3px);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8px;
+      gap: 8px;
+    }
+
+    .overlay-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .overlay-score {
+      font-size: 20px;
+      font-weight: 900;
+      color: #f97316;
+    }
+
+    .speed-bar {
+      width: 100%;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .speed-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #f97316, #ef4444);
+      width: 10%;
+      transition: width 0.3s;
+    }
+
+    /* Legend / Shapes guide */
+    .shape-legend {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .shape-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    @media (max-width: 640px) {
+      .game-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .sidebar, .right-sidebar {
+        width: 100%;
+        max-width: 320px;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .sidebar .panel, .right-sidebar .panel {
+        flex: 1 1 140px;
+      }
+      .matrix-wrapper {
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Nav Bar -->
+  <div class="top-nav">
+    <div class="brand">
+      <span class="brand-tag">Firestorm Tournaments</span>
+      <span>Block Drop Matrix</span>
+    </div>
+    <div class="meta">
+      96x192 Scalable Grid &bull; 5-Block Pentominoes
+    </div>
+  </div>
+
+  <!-- Game Arena -->
+  <div class="game-container">
+    
+    <!-- Left Sidebar: Hold & Level Stats -->
+    <div class="sidebar">
+      
+      <!-- Hold Piece Panel -->
+      <div class="panel">
+        <div class="panel-title">
+          <span>Hold Slot</span>
+          <span style="font-size: 9px; color: #64748b;">[C]</span>
+        </div>
+        <div class="mini-canvas-container">
+          <canvas id="hold-canvas" width="64" height="64"></canvas>
+        </div>
+        <div class="stat-sub" style="text-align: center;">Press C to swap</div>
+      </div>
+
+      <!-- Score Panel -->
+      <div class="panel">
+        <div class="panel-title">Score</div>
+        <div id="score-display" class="stat-value">0</div>
+        <div class="stat-sub">High: <span id="high-score-display" style="color: #f97316; font-weight: bold;">0</span></div>
+      </div>
+
+      <!-- Level & Speed Panel -->
+      <div class="panel">
+        <div class="panel-title">
+          <span>Level</span>
+          <span id="level-num" style="color: #38bdf8; font-weight: bold;">1</span>
+        </div>
+        <div class="speed-bar">
+          <div id="speed-fill" class="speed-fill"></div>
+        </div>
+        <div class="stat-sub" id="speed-text">Drop: 280ms</div>
+      </div>
+
+      <!-- Lines Cleared Panel -->
+      <div class="panel">
+        <div class="panel-title">96px Lines</div>
+        <div id="lines-display" class="stat-value" style="color: #10b981;">0</div>
+        <div class="stat-sub">24 blocks / line</div>
+      </div>
+
+    </div>
+
+    <!-- Center Playfield: Scalable 96w x 192h Matrix -->
+    <div class="matrix-wrapper">
+      <div class="matrix-header-bar">
+        <span>MATRIX: 96w x 192h (5-BLOCK)</span>
+        <span id="combo-tag" style="color: #f97316; display: none;">COMBO x1</span>
+        <span id="status-tag">ACTIVE</span>
+      </div>
+
+      <div class="matrix-viewport" id="viewport">
+        <canvas id="game-canvas" width="96" height="192"></canvas>
+
+        <!-- Overlay Screen (Start / Game Over / Pause) -->
+        <div id="overlay" class="overlay-screen" style="display: flex;">
+          <div id="overlay-title" class="overlay-title">Block Drop Matrix</div>
+          <div id="overlay-msg" style="font-size: 10px; color: #cbd5e1; max-width: 90px; line-height: 1.3;">
+            Drop 5-block pentomino shapes into the scalable 96x192 matrix.
+          </div>
+          <div id="overlay-score-box" style="display: none;">
+            <div style="font-size: 9px; color: #94a3b8;">FINAL SCORE</div>
+            <div id="overlay-final-score" class="overlay-score">0</div>
+          </div>
+          <button id="start-btn" class="btn btn-orange" style="width: 80px; padding: 6px;">
+            Play
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Next Pieces & Control Options -->
+    <div class="right-sidebar">
+      
+      <!-- Next Piece Panel -->
+      <div class="panel">
+        <div class="panel-title">Next Piece</div>
+        <div class="mini-canvas-container">
+          <canvas id="next-canvas" width="64" height="64"></canvas>
+        </div>
+        <div class="stat-sub" style="text-align: center;" id="next-shape-name">Pentomino</div>
+      </div>
+
+      <!-- Shapes & Colors Key -->
+      <div class="panel">
+        <div class="panel-title">5-Block Shapes</div>
+        <div class="shape-legend">
+          <div class="shape-chip"><div class="color-dot" style="background:#00f0ff"></div> I-5 Line</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#eab308"></div> X-5 Cross</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#a855f7"></div> T-5 Tee</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#3b82f6"></div> U-5 Cup</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#ec4899"></div> V-5 Corner</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#10b981"></div> W-5 Steps</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#ef4444"></div> Z-5 Zig</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#14b8a6"></div> P-5 Flag</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#f97316"></div> F-5 Branch</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#f59e0b"></div> L-5 Long El</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#6366f1"></div> J-5 Long Jay</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#8b5cf6"></div> Y-5 Fork</div>
+          <div class="shape-chip"><div class="color-dot" style="background:#84cc16"></div> N-5 Bolt</div>
+        </div>
+      </div>
+
+      <!-- Compact Action Buttons with Icons & Letters -->
+      <div class="panel">
+        <div style="display: flex; gap: 4px; width: 100%;">
+          <button id="pause-btn" class="btn" style="flex: 1;">⏸ P</button>
+          <button id="sound-btn" class="btn" style="flex: 1;">🔊 Sfx</button>
+        </div>
+        <button id="restart-btn" class="btn btn-primary" style="margin-top: 4px; width: 100%;">🔄 R</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Compact Icon/Letter Controls Bar -->
+  <div class="touch-controls">
+    <button class="touch-btn" id="btn-left" title="Move Left (A / Left)">
+      <span class="t-icon">◀</span>
+      <span class="t-key">A</span>
+    </button>
+    <button class="touch-btn" id="btn-rotate" title="Rotate (W / Up)">
+      <span class="t-icon">⟳</span>
+      <span class="t-key">W</span>
+    </button>
+    <button class="touch-btn" id="btn-right" title="Move Right (D / Right)">
+      <span class="t-icon">▶</span>
+      <span class="t-key">D</span>
+    </button>
+    <button class="touch-btn" id="btn-soft-drop" title="Soft Drop (S / Down)">
+      <span class="t-icon">▼</span>
+      <span class="t-key">S</span>
+    </button>
+    <button class="touch-btn" id="btn-hard-drop" title="Hard Drop (Space)" style="background: #1e3a8a; border-color: #3b82f6;">
+      <span class="t-icon">⤓</span>
+      <span class="t-key">Space</span>
+    </button>
+    <button class="touch-btn" id="btn-hold" title="Hold Piece (C / Shift)">
+      <span class="t-icon">⇄</span>
+      <span class="t-key">C</span>
+    </button>
+  </div>
+
+  <script>
+    (function() {
+      // Configuration & Constants
+      // 96 width, 192 height, 4x4 block unit
+      const CANVAS_WIDTH = 96;
+      const CANVAS_HEIGHT = 192;
+      const BLOCK_SIZE = 4; // 4px x 4px per block unit
+      const COLS = CANVAS_WIDTH / BLOCK_SIZE; // 24 columns
+      const ROWS = CANVAS_HEIGHT / BLOCK_SIZE; // 48 rows
+
+      // Shape definitions: ALL shapes are combinations equal to EXACTLY 5 blocks (Pentominoes)
+      // Each block in local grid coords [ [x, y], ... ] (strictly 5 blocks per shape)
+      const SHAPES = [
+        {
+          name: 'I-5 Line',
+          color: '#00f0ff', // Cyan
+          accent: '#cffafe',
+          blocks: [[0, 2], [1, 2], [2, 2], [3, 2], [4, 2]],
+          size: 5
+        },
+        {
+          name: 'X-5 Cross',
+          color: '#eab308', // Gold
+          accent: '#fef08a',
+          blocks: [[1, 0], [0, 1], [1, 1], [2, 1], [1, 2]],
+          size: 3
+        },
+        {
+          name: 'T-5 Tee',
+          color: '#a855f7', // Purple
+          accent: '#f3e8ff',
+          blocks: [[0, 0], [1, 0], [2, 0], [1, 1], [1, 2]],
+          size: 3
+        },
+        {
+          name: 'U-5 Cup',
+          color: '#3b82f6', // Blue
+          accent: '#dbeafe',
+          blocks: [[0, 0], [2, 0], [0, 1], [1, 1], [2, 1]],
+          size: 3
+        },
+        {
+          name: 'V-5 Corner',
+          color: '#ec4899', // Pink
+          accent: '#fce7f3',
+          blocks: [[0, 0], [0, 1], [0, 2], [1, 2], [2, 2]],
+          size: 3
+        },
+        {
+          name: 'W-5 Steps',
+          color: '#10b981', // Emerald Green
+          accent: '#d1fae5',
+          blocks: [[0, 0], [0, 1], [1, 1], [1, 2], [2, 2]],
+          size: 3
+        },
+        {
+          name: 'Z-5 Zig',
+          color: '#ef4444', // Red
+          accent: '#fee2e2',
+          blocks: [[0, 0], [1, 0], [1, 1], [1, 2], [2, 2]],
+          size: 3
+        },
+        {
+          name: 'P-5 Flag',
+          color: '#14b8a6', // Teal
+          accent: '#ccfbf1',
+          blocks: [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2]],
+          size: 3
+        },
+        {
+          name: 'F-5 Branch',
+          color: '#f97316', // Orange
+          accent: '#ffedd5',
+          blocks: [[1, 0], [2, 0], [0, 1], [1, 1], [1, 2]],
+          size: 3
+        },
+        {
+          name: 'L-5 Long El',
+          color: '#f59e0b', // Amber
+          accent: '#fef3c7',
+          blocks: [[0, 0], [0, 1], [0, 2], [0, 3], [1, 3]],
+          size: 4
+        },
+        {
+          name: 'J-5 Long Jay',
+          color: '#6366f1', // Indigo
+          accent: '#e0e7ff',
+          blocks: [[1, 0], [1, 1], [1, 2], [1, 3], [0, 3]],
+          size: 4
+        },
+        {
+          name: 'Y-5 Fork',
+          color: '#8b5cf6', // Violet
+          accent: '#ede9fe',
+          blocks: [[1, 0], [0, 1], [1, 1], [1, 2], [1, 3]],
+          size: 4
+        },
+        {
+          name: 'N-5 Bolt',
+          color: '#84cc16', // Lime
+          accent: '#ecfccb',
+          blocks: [[0, 0], [0, 1], [0, 2], [1, 2], [1, 3]],
+          size: 4
+        }
+      ];
+
+      // Web Audio Synthesizer
+      let audioCtx = null;
+      let soundEnabled = true;
+
+      function initAudio() {
+        if (!audioCtx && typeof window !== 'undefined') {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            audioCtx = new AudioContext();
+          }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      }
+
+      function playTone(freq, type, duration, vol = 0.15) {
+        if (!soundEnabled || !audioCtx) return;
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type || 'sine';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
+      }
+
+      function soundMove() { playTone(280, 'triangle', 0.04, 0.05); }
+      function soundRotate() { playTone(440, 'sine', 0.06, 0.08); }
+      function soundDrop() { playTone(160, 'sawtooth', 0.08, 0.1); }
+      function soundHold() { playTone(520, 'sine', 0.08, 0.08); }
+      function soundLineClear(count) {
+        if (!soundEnabled || !audioCtx) return;
+        const freqs = [440, 554, 659, 880, 1108];
+        for (let i = 0; i <= count; i++) {
+          setTimeout(() => {
+            playTone(freqs[Math.min(i, freqs.length - 1)], 'sine', 0.18, 0.2);
+          }, i * 50);
+        }
+      }
+      function soundLevelUp() {
+        if (!soundEnabled || !audioCtx) return;
+        [523, 659, 784, 1046].forEach((f, idx) => {
+          setTimeout(() => playTone(f, 'triangle', 0.15, 0.2), idx * 80);
+        });
+      }
+      function soundGameOver() {
+        if (!soundEnabled || !audioCtx) return;
+        [300, 260, 220, 180, 120].forEach((f, idx) => {
+          setTimeout(() => playTone(f, 'sawtooth', 0.2, 0.2), idx * 90);
+        });
+      }
+
+      // DOM Elements
+      const canvas = document.getElementById('game-canvas');
+      const ctx = canvas.getContext('2d');
+      const holdCanvas = document.getElementById('hold-canvas');
+      const holdCtx = holdCanvas.getContext('2d');
+      const nextCanvas = document.getElementById('next-canvas');
+      const nextCtx = nextCanvas.getContext('2d');
+
+      const scoreDisplay = document.getElementById('score-display');
+      const highScoreDisplay = document.getElementById('high-score-display');
+      const linesDisplay = document.getElementById('lines-display');
+      const levelNum = document.getElementById('level-num');
+      const speedFill = document.getElementById('speed-fill');
+      const speedText = document.getElementById('speed-text');
+      const comboTag = document.getElementById('combo-tag');
+      const nextShapeName = document.getElementById('next-shape-name');
+      const statusTag = document.getElementById('status-tag');
+
+      const overlay = document.getElementById('overlay');
+      const overlayTitle = document.getElementById('overlay-title');
+      const overlayMsg = document.getElementById('overlay-msg');
+      const overlayScoreBox = document.getElementById('overlay-score-box');
+      const overlayFinalScore = document.getElementById('overlay-final-score');
+      const startBtn = document.getElementById('start-btn');
+      const pauseBtn = document.getElementById('pause-btn');
+      const soundBtn = document.getElementById('sound-btn');
+      const restartBtn = document.getElementById('restart-btn');
+
+      // Touch Buttons
+      const btnLeft = document.getElementById('btn-left');
+      const btnRight = document.getElementById('btn-right');
+      const btnRotate = document.getElementById('btn-rotate');
+      const btnHardDrop = document.getElementById('btn-hard-drop');
+      const btnSoftDrop = document.getElementById('btn-soft-drop');
+      const btnHold = document.getElementById('btn-hold');
+
+      // Game State
+      let grid = []; // 2D array [ROWS][COLS] containing null or color string
+      let currentPiece = null;
+      let nextPiece = null;
+      let holdPiece = null;
+      let canHold = true;
+      let score = 0;
+      let highScore = 0;
+      let lines = 0;
+      let level = 1;
+      let combo = 0;
+      let isPlaying = false;
+      let isPaused = false;
+      let lastDropTime = 0;
+      let dropInterval = 280; // ms (fast starting drop speed)
+      let animFrameId = null;
+
+      // Particle system for line clears
+      let particles = [];
+
+      // Flash lines animation
+      let clearingLines = [];
+      let clearAnimationProgress = 0;
+
+      // Load saved high score
+      try {
+        const saved = localStorage.getItem('firestorm_block_drop_highscore');
+        if (saved) {
+          highScore = parseInt(saved, 10) || 0;
+          highScoreDisplay.innerText = highScore.toLocaleString();
+        }
+      } catch (e) {}
+
+      // Initialize Empty Matrix
+      function createEmptyGrid() {
+        const g = [];
+        for (let r = 0; r < ROWS; r++) {
+          const row = [];
+          for (let c = 0; c < COLS; c++) {
+            row.push(null);
+          }
+          g.push(row);
+        }
+        return g;
+      }
+
+      // Generate random shape from definitions
+      function getRandomShape() {
+        const idx = Math.floor(Math.random() * SHAPES.length);
+        const template = SHAPES[idx];
+        return {
+          name: template.name,
+          color: template.color,
+          accent: template.accent,
+          size: template.size,
+          blocks: template.blocks.map(b => [...b]), // clone
+          x: Math.floor((COLS - template.size) / 2),
+          y: 0
+        };
+      }
+
+      // Calculate drop interval based on level with faster starting speed
+      function updateSpeed() {
+        // Starts at 280ms (increased starting speed), drops smoothly down to 45ms at level 15+
+        dropInterval = Math.max(45, Math.floor(280 - (level - 1) * 18));
+        speedText.innerText = `Drop: ${dropInterval}ms`;
+        const pct = Math.min(100, Math.floor((level / 15) * 100));
+        speedFill.style.width = `${pct}%`;
+      }
+
+      // Rotate Piece Clockwise
+      function rotatePiece(piece) {
+        const s = piece.size - 1;
+        const newBlocks = piece.blocks.map(([bx, by]) => {
+          // Standard rotation in local square of size piece.size:
+          // new_x = (size - 1) - old_y
+          // new_y = old_x
+          return [s - by, bx];
+        });
+
+        // Test normal position
+        if (isValidPosition(newBlocks, piece.x, piece.y)) {
+          piece.blocks = newBlocks;
+          soundRotate();
+          return true;
+        }
+
+        // Wall kick attempt (try shifting -1, 1, -2, 2, -3, 3)
+        const kicks = [-1, 1, -2, 2, -3, 3];
+        for (const k of kicks) {
+          if (isValidPosition(newBlocks, piece.x + k, piece.y)) {
+            piece.x += k;
+            piece.blocks = newBlocks;
+            soundRotate();
+            return true;
+          }
+        }
+
+        // Floor kick (shift up if hitting bottom or blocks below)
+        if (isValidPosition(newBlocks, piece.x, piece.y - 1)) {
+          piece.y -= 1;
+          piece.blocks = newBlocks;
+          soundRotate();
+          return true;
+        }
+        if (isValidPosition(newBlocks, piece.x, piece.y - 2)) {
+          piece.y -= 2;
+          piece.blocks = newBlocks;
+          soundRotate();
+          return true;
+        }
+
+        return false;
+      }
+
+      // Check if position is valid
+      function isValidPosition(blocks, offsetX, offsetY) {
+        for (const [bx, by] of blocks) {
+          const gx = offsetX + bx;
+          const gy = offsetY + by;
+
+          if (gx < 0 || gx >= COLS || gy >= ROWS) {
+            return false;
+          }
+          if (gy >= 0 && grid[gy] && grid[gy][gx] !== null) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      // Calculate Ghost Piece Y Position
+      function getGhostY() {
+        if (!currentPiece) return 0;
+        let ghostY = currentPiece.y;
+        while (isValidPosition(currentPiece.blocks, currentPiece.x, ghostY + 1)) {
+          ghostY++;
+        }
+        return ghostY;
+      }
+
+      // Lock Piece into Grid
+      function lockPiece() {
+        if (!currentPiece) return;
+
+        for (const [bx, by] of currentPiece.blocks) {
+          const gx = currentPiece.x + bx;
+          const gy = currentPiece.y + by;
+          if (gy >= 0 && gy < ROWS && gx >= 0 && gx < COLS) {
+            grid[gy][gx] = currentPiece.color;
+          }
+        }
+
+        soundDrop();
+        canHold = true;
+
+        // Check for line completions across the 96 width (24 columns)
+        checkLines();
+
+        // Spawn next piece
+        currentPiece = nextPiece;
+        currentPiece.x = Math.floor((COLS - currentPiece.size) / 2);
+        currentPiece.y = 0;
+        nextPiece = getRandomShape();
+        drawPreview(nextCanvas, nextCtx, nextPiece);
+        nextShapeName.innerText = nextPiece.name;
+
+        // Check Game Over
+        if (!isValidPosition(currentPiece.blocks, currentPiece.x, currentPiece.y)) {
+          gameOver();
+        }
+      }
+
+      // Check and clear completed lines
+      function checkLines() {
+        const fullRows = [];
+        for (let r = 0; r < ROWS; r++) {
+          let isFull = true;
+          for (let c = 0; c < COLS; c++) {
+            if (grid[r][c] === null) {
+              isFull = false;
+              break;
+            }
+          }
+          if (isFull) {
+            fullRows.push(r);
+          }
+        }
+
+        if (fullRows.length > 0) {
+          // Trigger particles & clear
+          for (const rowIdx of fullRows) {
+            for (let c = 0; c < COLS; c++) {
+              createParticles(c * BLOCK_SIZE + 2, rowIdx * BLOCK_SIZE + 2, grid[rowIdx][c] || '#ffffff');
+            }
+          }
+
+          // Remove full rows and insert empty rows at top
+          for (const rowIdx of fullRows) {
+            grid.splice(rowIdx, 1);
+            const newEmptyRow = new Array(COLS).fill(null);
+            grid.unshift(newEmptyRow);
+          }
+
+          // Calculate Line Score
+          lines += fullRows.length;
+          combo++;
+
+          const basePoints = [0, 100, 300, 700, 1500];
+          const pts = (basePoints[Math.min(fullRows.length, 4)] || (fullRows.length * 400)) * level;
+          const comboBonus = combo > 1 ? (combo * 50 * level) : 0;
+          score += pts + comboBonus;
+
+          // Sound effect
+          soundLineClear(fullRows.length);
+
+          // Level Up check (every 5 lines)
+          const newLevel = Math.floor(lines / 5) + 1;
+          if (newLevel > level) {
+            level = newLevel;
+            soundLevelUp();
+          }
+
+          // Update Displays
+          updateSpeed();
+          linesDisplay.innerText = lines.toString();
+          scoreDisplay.innerText = score.toLocaleString();
+          levelNum.innerText = level.toString();
+
+          if (combo > 1) {
+            comboTag.style.display = 'inline';
+            comboTag.innerText = `COMBO x${combo}`;
+          }
+
+          // Update High Score
+          if (score > highScore) {
+            highScore = score;
+            highScoreDisplay.innerText = highScore.toLocaleString();
+            try {
+              localStorage.setItem('firestorm_block_drop_highscore', highScore.toString());
+            } catch (e) {}
+          }
+        } else {
+          combo = 0;
+          comboTag.style.display = 'none';
+        }
+      }
+
+      // Particle Creation
+      function createParticles(x, y, color) {
+        for (let i = 0; i < 3; i++) {
+          particles.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 3,
+            vy: (Math.random() - 0.5) * 3 - 1,
+            color: color,
+            alpha: 1,
+            size: Math.random() * 2 + 1.5
+          });
+        }
+      }
+
+      function updateParticles() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.alpha -= 0.04;
+          if (p.alpha <= 0) {
+            particles.splice(i, 1);
+          }
+        }
+      }
+
+      function drawParticles() {
+        for (const p of particles) {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.alpha);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+          ctx.restore();
+        }
+      }
+
+      // Draw Mini Preview (Next / Hold)
+      function drawPreview(cCanvas, cCtx, piece) {
+        cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+        if (!piece) return;
+
+        let minX = 99, maxX = -99, minY = 99, maxY = -99;
+        for (const [bx, by] of piece.blocks) {
+          if (bx < minX) minX = bx;
+          if (bx > maxX) maxX = bx;
+          if (by < minY) minY = by;
+          if (by > maxY) maxY = by;
+        }
+        const spanX = (maxX - minX + 1);
+        const spanY = (maxY - minY + 1);
+        const maxSpan = Math.max(spanX, spanY, 3);
+        const pSize = Math.max(8, Math.floor(46 / maxSpan));
+
+        const totalW = spanX * pSize;
+        const totalH = spanY * pSize;
+        const startX = Math.floor((cCanvas.width - totalW) / 2) - minX * pSize;
+        const startY = Math.floor((cCanvas.height - totalH) / 2) - minY * pSize;
+
+        cCtx.fillStyle = piece.color;
+        for (const [bx, by] of piece.blocks) {
+          cCtx.fillRect(startX + bx * pSize, startY + by * pSize, pSize - 1, pSize - 1);
+          // Highlight edge
+          cCtx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+          cCtx.fillRect(startX + bx * pSize, startY + by * pSize, pSize - 1, Math.max(1, Math.floor(pSize / 4)));
+          cCtx.fillStyle = piece.color;
+        }
+      }
+
+      // Render Matrix Canvas (128x384)
+      function render() {
+        // Clear background
+        ctx.fillStyle = '#020617';
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        // Subtle column grid lines
+        ctx.strokeStyle = 'rgba(30, 41, 59, 0.35)';
+        ctx.lineWidth = 0.5;
+        for (let c = 0; c <= COLS; c += 4) {
+          ctx.beginPath();
+          ctx.moveTo(c * BLOCK_SIZE, 0);
+          ctx.lineTo(c * BLOCK_SIZE, CANVAS_HEIGHT);
+          ctx.stroke();
+        }
+
+        // Draw Locked Grid Blocks
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            const cellColor = grid[r][c];
+            if (cellColor) {
+              ctx.fillStyle = cellColor;
+              ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+              // Mini inner highlight
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+              ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, 1);
+            }
+          }
+        }
+
+        // Draw Ghost Piece
+        if (currentPiece && isPlaying && !isPaused) {
+          const ghostY = getGhostY();
+          ctx.strokeStyle = currentPiece.color;
+          ctx.lineWidth = 1;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+
+          for (const [bx, by] of currentPiece.blocks) {
+            const gx = (currentPiece.x + bx) * BLOCK_SIZE;
+            const gy = (ghostY + by) * BLOCK_SIZE;
+            ctx.strokeRect(gx + 0.5, gy + 0.5, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+            ctx.fillRect(gx + 0.5, gy + 0.5, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+          }
+        }
+
+        // Draw Active Falling Piece
+        if (currentPiece && isPlaying) {
+          for (const [bx, by] of currentPiece.blocks) {
+            const gx = (currentPiece.x + bx) * BLOCK_SIZE;
+            const gy = (currentPiece.y + by) * BLOCK_SIZE;
+
+            ctx.fillStyle = currentPiece.color;
+            ctx.fillRect(gx, gy, BLOCK_SIZE, BLOCK_SIZE);
+
+            // Highlight bar on block top
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+            ctx.fillRect(gx, gy, BLOCK_SIZE, 1);
+          }
+        }
+
+        // Draw Particles
+        drawParticles();
+      }
+
+      // Game Loop
+      function gameLoop(timestamp) {
+        if (!isPlaying || isPaused) {
+          animFrameId = requestAnimationFrame(gameLoop);
+          return;
+        }
+
+        if (timestamp - lastDropTime > dropInterval) {
+          // Drop step
+          if (currentPiece) {
+            if (isValidPosition(currentPiece.blocks, currentPiece.x, currentPiece.y + 1)) {
+              currentPiece.y++;
+            } else {
+              lockPiece();
+            }
+          }
+          lastDropTime = timestamp;
+        }
+
+        updateParticles();
+        render();
+
+        animFrameId = requestAnimationFrame(gameLoop);
+      }
+
+      // Actions
+      function moveLeft() {
+        if (!isPlaying || isPaused || !currentPiece) return;
+        if (isValidPosition(currentPiece.blocks, currentPiece.x - 1, currentPiece.y)) {
+          currentPiece.x--;
+          soundMove();
+        }
+      }
+
+      function moveRight() {
+        if (!isPlaying || isPaused || !currentPiece) return;
+        if (isValidPosition(currentPiece.blocks, currentPiece.x + 1, currentPiece.y)) {
+          currentPiece.x++;
+          soundMove();
+        }
+      }
+
+      function softDrop() {
+        if (!isPlaying || isPaused || !currentPiece) return;
+        if (isValidPosition(currentPiece.blocks, currentPiece.x, currentPiece.y + 1)) {
+          currentPiece.y++;
+          score += 1;
+          scoreDisplay.innerText = score.toLocaleString();
+        } else {
+          lockPiece();
+        }
+      }
+
+      function hardDrop() {
+        if (!isPlaying || isPaused || !currentPiece) return;
+        let dropCount = 0;
+        while (isValidPosition(currentPiece.blocks, currentPiece.x, currentPiece.y + 1)) {
+          currentPiece.y++;
+          dropCount++;
+        }
+        score += dropCount * 2;
+        scoreDisplay.innerText = score.toLocaleString();
+        lockPiece();
+      }
+
+      function holdCurrentPiece() {
+        if (!isPlaying || isPaused || !currentPiece || !canHold) return;
+
+        soundHold();
+        if (!holdPiece) {
+          holdPiece = {
+            name: currentPiece.name,
+            color: currentPiece.color,
+            accent: currentPiece.accent,
+            size: currentPiece.size,
+            blocks: currentPiece.blocks.map(b => [...b])
+          };
+          currentPiece = nextPiece;
+          currentPiece.x = Math.floor((COLS - currentPiece.size) / 2);
+          currentPiece.y = 0;
+          nextPiece = getRandomShape();
+          drawPreview(nextCanvas, nextCtx, nextPiece);
+          nextShapeName.innerText = nextPiece.name;
+        } else {
+          const temp = holdPiece;
+          holdPiece = {
+            name: currentPiece.name,
+            color: currentPiece.color,
+            accent: currentPiece.accent,
+            size: currentPiece.size,
+            blocks: currentPiece.blocks.map(b => [...b])
+          };
+          currentPiece = {
+            name: temp.name,
+            color: temp.color,
+            accent: temp.accent,
+            size: temp.size,
+            blocks: temp.blocks.map(b => [...b]),
+            x: Math.floor((COLS - temp.size) / 2),
+            y: 0
+          };
+        }
+
+        canHold = false;
+        drawPreview(holdCanvas, holdCtx, holdPiece);
+      }
+
+      function togglePause() {
+        if (!isPlaying) return;
+        isPaused = !isPaused;
+        statusTag.innerText = isPaused ? 'PAUSED' : 'ACTIVE';
+        statusTag.style.color = isPaused ? '#f59e0b' : '#38bdf8';
+        pauseBtn.innerText = isPaused ? 'Resume (P)' : 'Pause (P)';
+        if (isPaused) {
+          overlay.style.display = 'flex';
+          overlayTitle.innerText = 'Game Paused';
+          overlayMsg.innerText = 'Press P or click Resume to continue.';
+          overlayScoreBox.style.display = 'none';
+          startBtn.innerText = 'Resume';
+        } else {
+          overlay.style.display = 'none';
+        }
+      }
+
+      // Start / Reset Game
+      function startGame() {
+        initAudio();
+        grid = createEmptyGrid();
+        score = 0;
+        lines = 0;
+        level = 1;
+        combo = 0;
+        particles = [];
+        holdPiece = null;
+        canHold = true;
+
+        updateSpeed();
+        scoreDisplay.innerText = '0';
+        linesDisplay.innerText = '0';
+        levelNum.innerText = '1';
+        comboTag.style.display = 'none';
+        statusTag.innerText = 'ACTIVE';
+        statusTag.style.color = '#38bdf8';
+
+        currentPiece = getRandomShape();
+        nextPiece = getRandomShape();
+        drawPreview(nextCanvas, nextCtx, nextPiece);
+        drawPreview(holdCanvas, holdCtx, null);
+        nextShapeName.innerText = nextPiece.name;
+
+        isPlaying = true;
+        isPaused = false;
+        overlay.style.display = 'none';
+
+        if (!animFrameId) {
+          lastDropTime = performance.now();
+          animFrameId = requestAnimationFrame(gameLoop);
+        }
+      }
+
+      function gameOver() {
+        isPlaying = false;
+        soundGameOver();
+        statusTag.innerText = 'GAME OVER';
+        statusTag.style.color = '#ef4444';
+
+        // Notify parent Firestorm Tournament frame
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+              type: 'FIRESTORM_SAVE_SCORE',
+              gameId: 'block-drop',
+              gameName: 'Block Drop Matrix',
+              score: score,
+              details: `${lines} lines cleared • Level ${level}`
+            }, '*');
+          }
+        } catch (e) {}
+
+        // Show Game Over overlay
+        overlay.style.display = 'flex';
+        overlayTitle.innerText = 'Game Over';
+        overlayMsg.innerText = `You completed ${lines} lines and reached Level ${level}!`;
+        overlayScoreBox.style.display = 'block';
+        overlayFinalScore.innerText = score.toLocaleString();
+        startBtn.innerText = 'Play Again';
+      }
+
+      // Keyboard Listeners
+      window.addEventListener('keydown', (e) => {
+        if (!isPlaying && e.code === 'Space') {
+          startGame();
+          return;
+        }
+
+        switch (e.code) {
+          case 'ArrowLeft':
+          case 'KeyA':
+            e.preventDefault();
+            moveLeft();
+            break;
+          case 'ArrowRight':
+          case 'KeyD':
+            e.preventDefault();
+            moveRight();
+            break;
+          case 'ArrowUp':
+          case 'KeyW':
+          case 'KeyX':
+            e.preventDefault();
+            if (currentPiece) rotatePiece(currentPiece);
+            break;
+          case 'ArrowDown':
+          case 'KeyS':
+            e.preventDefault();
+            softDrop();
+            break;
+          case 'Space':
+            e.preventDefault();
+            hardDrop();
+            break;
+          case 'KeyC':
+          case 'ShiftLeft':
+          case 'ShiftRight':
+            e.preventDefault();
+            holdCurrentPiece();
+            break;
+          case 'KeyP':
+          case 'Escape':
+            e.preventDefault();
+            togglePause();
+            break;
+          case 'KeyR':
+            e.preventDefault();
+            startGame();
+            break;
+        }
+      });
+
+      // Button Click Listeners
+      startBtn.addEventListener('click', () => {
+        if (isPaused) {
+          togglePause();
+        } else {
+          startGame();
+        }
+      });
+
+      pauseBtn.addEventListener('click', togglePause);
+      restartBtn.addEventListener('click', startGame);
+
+      soundBtn.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        soundBtn.innerText = soundEnabled ? 'Sound: ON' : 'Sound: OFF';
+      });
+
+      // Touch Buttons Handlers
+      btnLeft.addEventListener('click', moveLeft);
+      btnRight.addEventListener('click', moveRight);
+      btnRotate.addEventListener('click', () => {
+        if (currentPiece) rotatePiece(currentPiece);
+      });
+      btnSoftDrop.addEventListener('click', softDrop);
+      btnHardDrop.addEventListener('click', hardDrop);
+      btnHold.addEventListener('click', holdCurrentPiece);
+
+      // Initial Canvas Render
+      render();
+
+    })();
+  </script>
+</body>
+</html>

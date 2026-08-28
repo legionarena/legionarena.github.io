@@ -2,8 +2,12 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'FIRESTORM — Tournaments',
-  description: 'Fortnite and Call of Duty inspired tactical tournament arena with interactive battle stations, leaderboards, and tactical intel threads.',
+  title: 'Firestorm Tournaments',
+  description: 'Clean, accessible gaming tournament platform created with Google Gemini AI Studio, featuring player registration, email verification, high score leaderboards, games including Block Drop Matrix (scalable 5-block pentominoes), music player, and community posts with image sharing.',
+  openGraph: {
+    title: 'Firestorm Tournaments',
+    description: 'Clean, accessible gaming tournament platform created with Google Gemini AI Studio, featuring player registration, email verification, high score leaderboards, games including Block Drop Matrix (scalable 5-block pentominoes), music player, and community posts with image sharing.',
+  }
 };
 
 export default function RootLayout({

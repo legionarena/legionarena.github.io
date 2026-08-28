@@ -14,6 +14,7 @@ export interface User {
   highScores?: {
     codePressed?: number;
     slotsUp?: number;
+    blockDrop?: number;
   };
   createdAt: string;
   lastLoginAt: string;
@@ -32,7 +33,7 @@ export interface DispatchedEmail {
 
 export interface GameHighScore {
   id: string;
-  gameId: 'code-pressed' | 'slots-up';
+  gameId: 'code-pressed' | 'slots-up' | 'block-drop';
   gameName: string;
   userId: string;
   userCallsign: string;
