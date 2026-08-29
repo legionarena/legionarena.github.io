@@ -15,6 +15,7 @@ export interface User {
     codePressed?: number;
     slotsUp?: number;
     blockDrop?: number;
+    rpgGame?: number;
   };
   createdAt: string;
   lastLoginAt: string;
@@ -33,7 +34,7 @@ export interface DispatchedEmail {
 
 export interface GameHighScore {
   id: string;
-  gameId: 'code-pressed' | 'slots-up' | 'block-drop';
+  gameId: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game';
   gameName: string;
   userId: string;
   userCallsign: string;
@@ -92,6 +93,74 @@ export interface IntelPost {
   updatedAt?: string;
 }
 
+export interface RpgGearItem {
+  id: string;
+  name: string;
+  slot: 'head' | 'shoulders' | 'chest' | 'belt' | 'pants' | 'boots' | 'leftHand' | 'rightHand';
+  level: number;
+  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  weaponSpeed?: number; // 2.0 to 6.0 seconds
+  damageMultiplier?: number; // 0.2 to 0.6
+  armor?: number;
+  magicResist?: number;
+  strength?: number;
+  intelligence?: number;
+  vitality?: number;
+  dexterity?: number;
+  elementalType?: 'melee' | 'fire' | 'frost' | 'lightning' | 'arcane' | 'holy' | 'shadow';
+  grantedAbility?: {
+    id: string;
+    name: string;
+    type: 'melee' | 'fire' | 'frost' | 'lightning' | 'arcane' | 'holy' | 'shadow';
+    damageBase: number;
+    cooldown: number; // 2.0 to 6.0 seconds
+    manaCost: number;
+    range: number;
+    description: string;
+  };
+}
+
+export interface RpgSaveData {
+  userId: string;
+  userCallsign: string;
+  classType: 'melee' | 'caster';
+  characterName: string;
+  level: number; // 1 to 50
+  experience: number;
+  experienceNext: number;
+  essence: number;
+  statPointsSpent: number;
+  statUpgrades: {
+    strength: number;
+    dexterity: number;
+    intelligence: number;
+    vitality: number;
+    armor: number;
+    magicResist: number;
+    critRate: number;
+  };
+  purchasedAbilityIds: string[];
+  equippedGear: {
+    head: RpgGearItem | null;
+    shoulders: RpgGearItem | null;
+    chest: RpgGearItem | null;
+    belt: RpgGearItem | null;
+    pants: RpgGearItem | null;
+    boots: RpgGearItem | null;
+    leftHand: RpgGearItem | null;
+    rightHand: RpgGearItem | null;
+  };
+  inventory: RpgGearItem[];
+  currentArea: number;
+  areaLevelMin: number;
+  areaLevelMax: number;
+  enemiesDefeatedInArea: number;
+  totalKills: number;
+  bossesDefeated: number;
+  highScore: number;
+  updatedAt: string;
+}
+
 export interface DbState {
   users: User[];
   currentUserId: string | null;
@@ -99,5 +168,6 @@ export interface DbState {
   highScores: GameHighScore[];
   playlists: UserPlaylist[];
   posts: IntelPost[];
+  rpgSaves?: Record<string, RpgSaveData>;
 }
 

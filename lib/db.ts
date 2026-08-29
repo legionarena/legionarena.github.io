@@ -1,4 +1,4 @@
-import { User, DispatchedEmail, DbState, GameHighScore, UserPlaylist, IntelThread, IntelPost } from './types';
+import { User, DispatchedEmail, DbState, GameHighScore, UserPlaylist, IntelThread, IntelPost, RpgSaveData } from './types';
 
 const DB_STORAGE_KEY = 'firestorm_tournaments_db_v2';
 
@@ -42,6 +42,17 @@ export const THEMED_THREADS: IntelThread[] = [
     badge: 'General Chat',
     themeColor: 'text-blue-500',
     accentBorder: 'border-blue-500/40'
+  },
+  {
+    id: 'rpg-realm-tactics',
+    title: 'Realm of Champions 3D',
+    callsignTag: '#RPG-04',
+    category: 'TACTICAL_RECON',
+    description: 'Melee vs Caster builds, 8-slot gear theorycrafting, essence stat upgrades, and 256-kill boss raids.',
+    briefing: 'Share ability rotations, resistance gearing, weapon speed damage multipliers, and level 50 progression guides.',
+    badge: '3D Action RPG',
+    themeColor: 'text-amber-500',
+    accentBorder: 'border-amber-500/40'
   },
   {
     id: 'block-drop-tactics',
@@ -175,6 +186,39 @@ const INITIAL_STATE: DbState = {
     }
   ],
   highScores: [
+    {
+      id: 'hs-rpg-01',
+      gameId: 'rpg-game',
+      gameName: 'Realm of Champions 3D',
+      userId: 'FS-3199-5520',
+      userCallsign: 'ShadowRecon',
+      userUid: 'FS-3199-5520',
+      score: 48500,
+      details: 'Level 28 Melee Paladin • 312 Enemies Slain • Boss Defeated',
+      createdAt: new Date(Date.now() - 28000000).toISOString()
+    },
+    {
+      id: 'hs-rpg-02',
+      gameId: 'rpg-game',
+      gameName: 'Realm of Champions 3D',
+      userId: 'FS-9842-1204',
+      userCallsign: 'GhostRider',
+      userUid: 'FS-9842-1204',
+      score: 36200,
+      details: 'Level 22 Caster Mage • 256 Area Clear • Meteor Spec',
+      createdAt: new Date(Date.now() - 65000000).toISOString()
+    },
+    {
+      id: 'hs-rpg-03',
+      gameId: 'rpg-game',
+      gameName: 'Realm of Champions 3D',
+      userId: 'FS-4412-8801',
+      userCallsign: 'ApexViper',
+      userUid: 'FS-4412-8801',
+      score: 24900,
+      details: 'Level 16 Caster Sorcerer • 184 Kills • Epic Gear',
+      createdAt: new Date(Date.now() - 98000000).toISOString()
+    },
     {
       id: 'hs-bd-01',
       gameId: 'block-drop',
@@ -485,11 +529,13 @@ export function saveGameHighScore(
       if (gameId === 'code-pressed') currentBest = user.highScores.codePressed || 0;
       else if (gameId === 'slots-up') currentBest = user.highScores.slotsUp || 0;
       else if (gameId === 'block-drop') currentBest = user.highScores.blockDrop || 0;
+      else if (gameId === 'rpg-game') currentBest = user.highScores.rpgGame || 0;
 
       if (score > currentBest) {
         if (gameId === 'code-pressed') user.highScores.codePressed = score;
         else if (gameId === 'slots-up') user.highScores.slotsUp = score;
         else if (gameId === 'block-drop') user.highScores.blockDrop = score;
+        else if (gameId === 'rpg-game') user.highScores.rpgGame = score;
 
         // Give rating boost for breaking personal records
         user.rating = (user.rating || 1000) + Math.min(150, Math.floor(score / 5));
@@ -508,7 +554,7 @@ export function saveGameHighScore(
   return { success: true, isNewPersonalBest, highScore: savedEntry };
 }
 
-export function getHighScores(gameId?: 'code-pressed' | 'slots-up' | 'block-drop'): GameHighScore[] {
+export function getHighScores(gameId?: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game'): GameHighScore[] {
   const state = loadDatabase();
   let scores = state.highScores || [];
   if (gameId) {
@@ -526,13 +572,14 @@ export function getHighScores(gameId?: 'code-pressed' | 'slots-up' | 'block-drop
   return Array.from(userBestMap.values()).sort((a, b) => b.score - a.score);
 }
 
-export function getUserPersonalBests(userId: string): { codePressed: number; slotsUp: number; blockDrop: number } {
+export function getUserPersonalBests(userId: string): { codePressed: number; slotsUp: number; blockDrop: number; rpgGame: number } {
   const state = loadDatabase();
   const user = state.users.find(u => u.id === userId);
   return {
     codePressed: user?.highScores?.codePressed || 0,
     slotsUp: user?.highScores?.slotsUp || 0,
-    blockDrop: user?.highScores?.blockDrop || 0
+    blockDrop: user?.highScores?.blockDrop || 0,
+    rpgGame: user?.highScores?.rpgGame || 0
   };
 }
 
@@ -1004,5 +1051,40 @@ export function logoutUser(): void {
 export function getEmailOutbox(): DispatchedEmail[] {
   const state = loadDatabase();
   return state.emailOutbox || [];
+}
+
+// ==========================================
+// 6. 3D RPG GAME DATA PERSISTENCE
+// ==========================================
+
+export function saveRpgGameData(saveData: RpgSaveData): boolean {
+  try {
+    const state = loadDatabase();
+    if (!state.rpgSaves) {
+      state.rpgSaves = {};
+    }
+    state.rpgSaves[saveData.userId] = {
+      ...saveData,
+      updatedAt: new Date().toISOString()
+    };
+    saveDatabase(state);
+    return true;
+  } catch (err) {
+    console.error('Failed to save RPG game data:', err);
+    return false;
+  }
+}
+
+export function getRpgGameData(userId: string): RpgSaveData | null {
+  try {
+    const state = loadDatabase();
+    if (!state.rpgSaves || !state.rpgSaves[userId]) {
+      return null;
+    }
+    return state.rpgSaves[userId];
+  } catch (err) {
+    console.error('Failed to load RPG game data:', err);
+    return null;
+  }
 }
 

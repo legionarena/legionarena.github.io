@@ -28,7 +28,8 @@ import {
   Zap,
   User as UserIcon,
   CheckCircle2,
-  Boxes
+  Boxes,
+  RotateCcw
 } from 'lucide-react';
 import { User, DispatchedEmail } from '@/lib/types';
 import {
@@ -36,7 +37,9 @@ import {
   logoutUser,
   saveGameHighScore,
   saveUserPlaylist,
-  getEmailOutbox
+  getEmailOutbox,
+  saveRpgGameData,
+  getRpgGameData
 } from '@/lib/db';
 import AuthLandingView from '@/components/AuthLandingView';
 import HighScoresView from '@/components/HighScoresView';
@@ -58,6 +61,20 @@ interface StationInfo {
 }
 
 const STATIONS: StationInfo[] = [
+  {
+    id: 'rpg-game',
+    name: 'Realm of Champions 3D',
+    url: '/rpg-game.html',
+    icon: Sparkles,
+    tag: '3D RPG',
+    category: 'Action RPG Arena (256x256)',
+    themeColor: 'text-amber-400',
+    accentBg: 'bg-amber-500/10',
+    borderAccent: 'border-amber-500/30',
+    badgeClass: 'bg-amber-900/60 text-amber-200 border-amber-500/40',
+    description: '3D third-person RPG. Choose Melee or Caster, equip 8-slot gear, spend essence on permanent stats, and slay 256 enemies to summon the Boss.',
+    status: 'ONLINE'
+  },
   {
     id: 'block-drop',
     name: 'Block Drop Matrix',
@@ -146,6 +163,7 @@ export default function Home() {
   const [sfxEnabled, setSfxEnabled] = useState<boolean>(true);
   const [ping, setPing] = useState<number>(24);
   const [isOutboxOpen, setIsOutboxOpen] = useState<boolean>(false);
+  const [gameVersionKey, setGameVersionKey] = useState<number>(() => Date.now());
   const [highScoreNotification, setHighScoreNotification] = useState<HighScoreNotification | null>(null);
   const [outboxEmails, setOutboxEmails] = useState<DispatchedEmail[]>(() => {
     if (typeof window !== 'undefined') {
@@ -246,12 +264,31 @@ export default function Home() {
           setHighScoreNotification({
             id: Date.now().toString(),
             gameId,
-            gameName: gameId === 'code-pressed' ? 'Reaction Challenge' : 'Supply Grid',
+            gameName: gameId === 'rpg-game' ? 'Realm of Champions 3D' : gameId === 'block-drop' ? 'Block Drop Matrix' : gameId === 'code-pressed' ? 'Reaction Challenge' : 'Supply Grid',
             score,
             details,
             isNewPersonalBest: res?.isNewPersonalBest
           });
         }
+      } else if (event.data.type === 'FIRESTORM_SAVE_RPG_DATA') {
+        const { saveData } = event.data;
+        if (saveData && saveData.userId) {
+          saveRpgGameData(saveData);
+        }
+      } else if (event.data.type === 'FIRESTORM_REQUEST_INIT') {
+        const activeUser = currentUser || getCurrentUser();
+        const existingData = activeUser ? getRpgGameData(activeUser.id) : null;
+        try {
+          (event.source as WindowProxy)?.postMessage({
+            type: 'FIRESTORM_INIT_RESPONSE',
+            user: activeUser ? {
+              id: activeUser.id,
+              callsign: activeUser.callsign,
+              rating: activeUser.rating
+            } : null,
+            rpgData: existingData
+          }, '*');
+        } catch {}
       } else if (event.data.type === 'FIRESTORM_SAVE_PLAYLIST') {
         const { name, tracks } = event.data;
         const activeUser = currentUser || getCurrentUser();
@@ -917,23 +954,45 @@ export default function Home() {
           <main className="flex-1 flex flex-col p-3 sm:p-6 max-w-7xl w-full mx-auto relative z-10">
             <div className="flex-1 flex flex-col rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-2xl relative min-h-[500px] h-[calc(100vh-210px)]">
               {/* Game Viewport Header Bar */}
-              <div className="flex flex-wrap items-center justify-between px-4 py-3 bg-slate-850 border-b border-slate-850 text-sm text-slate-300 shrink-0 gap-2">
-                <div className="flex items-center gap-2.5">
+              <div className="flex flex-wrap items-center justify-between px-4 py-3 bg-slate-850 border-b border-slate-800 text-sm text-slate-300 shrink-0 gap-2">
+                <div className="flex items-center gap-2.5 flex-wrap">
                   <span className="font-bold text-white text-base">{activeStation.name}</span>
                   <span className="text-slate-500">&bull;</span>
                   <span className="text-slate-400 text-xs hidden sm:inline">{activeStation.category}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 hidden md:inline">{activeStation.description}</span>
+                  <span className="text-xs text-slate-400 hidden lg:inline mr-2">{activeStation.description}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGameVersionKey(Date.now());
+                      playTacticalSound('click');
+                    }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                    title="Reload game frame to get newest version"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Reload Station</span>
+                  </button>
+                  <a
+                    href={activeStation.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-colors"
+                    title="Open game in full tab"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="hidden sm:inline">New Tab</span>
+                  </a>
                 </div>
               </div>
 
               {/* Interactive Game Frame Viewport */}
               <div className="flex-1 relative w-full h-full bg-slate-950">
                 <iframe
-                  key={activeStation.id}
-                  src={activeStation.url}
+                  key={`${activeStation.id}-${gameVersionKey}`}
+                  src={`${activeStation.url}?v=${gameVersionKey}`}
                   title={activeStation.name}
                   className="w-full h-full border-0 relative z-10"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; microphone; camera"

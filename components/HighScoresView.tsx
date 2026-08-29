@@ -16,7 +16,8 @@ import {
   Clock,
   User as UserIcon,
   Flame,
-  Boxes
+  Boxes,
+  Shield
 } from 'lucide-react';
 import { User, GameHighScore } from '@/lib/types';
 import { getHighScores, getUserPersonalBests } from '@/lib/db';
@@ -27,7 +28,7 @@ interface HighScoresViewProps {
   playTacticalSound: (type: 'click' | 'menu' | 'launch' | 'switch' | 'success' | 'alert') => void;
 }
 
-type GameFilter = 'all' | 'block-drop' | 'code-pressed' | 'slots-up';
+type GameFilter = 'all' | 'rpg-game' | 'block-drop' | 'code-pressed' | 'slots-up';
 
 export default function HighScoresView({
   currentUser,
@@ -42,11 +43,11 @@ export default function HighScoresView({
     }
     return [];
   });
-  const [personalBests, setPersonalBests] = useState<{ codePressed: number; slotsUp: number; blockDrop: number }>(() => {
+  const [personalBests, setPersonalBests] = useState<{ codePressed: number; slotsUp: number; blockDrop: number; rpgGame: number }>(() => {
     if (typeof window !== 'undefined' && currentUser) {
       return getUserPersonalBests(currentUser.id);
     }
-    return { codePressed: 0, slotsUp: 0, blockDrop: 0 };
+    return { codePressed: 0, slotsUp: 0, blockDrop: 0, rpgGame: 0 };
   });
 
   const loadData = React.useCallback(() => {
@@ -67,6 +68,7 @@ export default function HighScoresView({
   const filteredScores = useMemo(() => {
     const list = scores
       .filter((s) => {
+        if (selectedFilter === 'rpg-game' && s.gameId !== 'rpg-game') return false;
         if (selectedFilter === 'block-drop' && s.gameId !== 'block-drop') return false;
         if (selectedFilter === 'code-pressed' && s.gameId !== 'code-pressed') return false;
         if (selectedFilter === 'slots-up' && s.gameId !== 'slots-up') return false;
@@ -131,14 +133,14 @@ export default function HighScoresView({
               High Scores
             </h1>
             <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Official player rankings for Block Drop Matrix (5-Block Pentominoes), Reaction Challenge, and Supply Grid. Scores sync automatically when you finish a game.
+              Official player rankings for Realm of Champions 3D, Block Drop Matrix, Reaction Challenge, and Supply Grid. Scores sync automatically when you finish a game.
             </p>
           </div>
 
           {/* User Personal Stat Card */}
           <div
             id="personal-best-card"
-            className="flex items-center gap-4 bg-slate-900 border border-slate-750 p-4 rounded-xl shadow-md min-w-[300px]"
+            className="flex items-center gap-4 bg-slate-900 border border-slate-750 p-4 rounded-xl shadow-md min-w-[320px]"
           >
             <div className="w-12 h-12 rounded-xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400">
               <Crown className="w-6 h-6" />
@@ -146,6 +148,10 @@ export default function HighScoresView({
             <div>
               <div className="text-xs font-bold uppercase text-slate-400">Personal Bests</div>
               <div className="flex flex-wrap items-center gap-2.5 mt-1 text-xs font-semibold">
+                <span className="text-amber-400 flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5" /> {personalBests.rpgGame} pts
+                </span>
+                <span className="text-slate-600">&bull;</span>
                 <span className="text-cyan-400 flex items-center gap-1">
                   <Boxes className="w-3.5 h-3.5" /> {personalBests.blockDrop} pts
                 </span>
@@ -202,7 +208,7 @@ export default function HighScoresView({
                     <span className="text-xs font-bold uppercase tracking-wider">{medalText}</span>
                   </div>
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-900/80 border border-slate-700 text-slate-300">
-                    {item.gameId === 'block-drop' ? 'Block Drop' : item.gameId === 'code-pressed' ? 'Reaction' : 'Supply'}
+                    {item.gameId === 'rpg-game' ? '3D Action RPG' : item.gameId === 'block-drop' ? 'Block Drop' : item.gameId === 'code-pressed' ? 'Reaction' : 'Supply'}
                   </span>
                 </div>
 
@@ -262,6 +268,23 @@ export default function HighScoresView({
             }`}
           >
             All Games
+          </button>
+
+          <button
+            id="filter-rpg-btn"
+            type="button"
+            onClick={() => {
+              setSelectedFilter('rpg-game');
+              playTacticalSound('switch');
+            }}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              selectedFilter === 'rpg-game'
+                ? 'bg-amber-600 text-white shadow-md'
+                : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-750'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Realm of Champions 3D</span>
           </button>
 
           <button
@@ -405,7 +428,9 @@ export default function HighScoresView({
                       {/* Game Name */}
                       <td className="py-3.5 px-4">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 border border-slate-700 text-slate-200">
-                          {item.gameId === 'block-drop' ? (
+                          {item.gameId === 'rpg-game' ? (
+                            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                          ) : item.gameId === 'block-drop' ? (
                             <Boxes className="w-3.5 h-3.5 text-cyan-400" />
                           ) : item.gameId === 'code-pressed' ? (
                             <Swords className="w-3.5 h-3.5 text-orange-400" />

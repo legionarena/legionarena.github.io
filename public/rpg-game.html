@@ -1,0 +1,3110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Realm of Champions 3D • Firestorm Tournaments</title>
+  
+  <!-- Three.js 3D Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070b14;
+      --panel-bg: rgba(13, 20, 36, 0.92);
+      --panel-border: #1e293b;
+      --accent-gold: #f59e0b;
+      --accent-cyan: #06b6d4;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --accent-blue: #3b82f6;
+    }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    #webgl-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* HUD OVERLAY */
+    .hud-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px;
+      z-index: 10;
+    }
+    .hud-interactive {
+      pointer-events: auto;
+    }
+
+    /* TOP BAR STATS */
+    .top-stats-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .player-vitals-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      min-width: 260px;
+    }
+    .player-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .player-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: #fff;
+    }
+    .player-level-badge {
+      background: #3b82f6;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .bar-wrap {
+      margin-bottom: 5px;
+    }
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 2px;
+    }
+    .stat-bar-outer {
+      width: 100%;
+      height: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .stat-bar-fill {
+      height: 100%;
+      transition: width 0.15s ease-out;
+    }
+    .hp-fill { background: linear-gradient(90deg, #dc2626, #ef4444); }
+    .mana-fill { background: linear-gradient(90deg, #2563eb, #38bdf8); }
+    .xp-fill { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+
+    /* OBJECTIVE & ESSENCE CARD */
+    .zone-info-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      backdrop-filter: blur(8px);
+      text-align: right;
+      min-width: 220px;
+    }
+    .zone-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-gold);
+    }
+    .zone-kills {
+      font-size: 11px;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+    .essence-counter {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+    .essence-icon {
+      width: 14px;
+      height: 14px;
+      background: #0ea5e9;
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    }
+
+    /* TOP BUTTONS (INVENTORY, ESSENCE SHOP, AUDIO) */
+    .top-menu-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    .hud-btn {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .hud-btn:hover {
+      background: #334155;
+      border-color: #64748b;
+      color: #fff;
+    }
+    .hud-btn.active {
+      background: #2563eb;
+      border-color: #3b82f6;
+    }
+
+    /* TARGET CARD */
+    .target-card {
+      position: absolute;
+      top: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel-bg);
+      border: 1px solid #ef4444;
+      border-radius: 10px;
+      padding: 8px 14px;
+      min-width: 240px;
+      display: none;
+      backdrop-filter: blur(8px);
+      text-align: center;
+    }
+    .target-name {
+      font-size: 12px;
+      font-weight: 800;
+      color: #f87171;
+    }
+    .target-resist {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    /* BOTTOM ACTION BAR */
+    .bottom-action-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .ability-bar {
+      display: flex;
+      gap: 8px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      padding: 8px 12px;
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+    .ability-slot {
+      position: relative;
+      width: 56px;
+      height: 56px;
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.15s;
+    }
+    .ability-slot:hover {
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+    }
+    .ability-slot:active {
+      transform: scale(0.95);
+    }
+    .ability-slot.cooldown {
+      filter: grayscale(0.8);
+      cursor: not-allowed;
+    }
+    .ability-slot .cd-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0%;
+      background: rgba(0, 0, 0, 0.75);
+      transition: height 0.05s linear;
+    }
+    .ability-slot .cd-text {
+      position: absolute;
+      font-size: 14px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+      display: none;
+    }
+    .ability-icon {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+    .ability-hotkey {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 9px;
+      font-weight: 800;
+      color: #94a3b8;
+    }
+    .ability-name-label {
+      font-size: 8px;
+      font-weight: 700;
+      color: #cbd5e1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 50px;
+      text-align: center;
+    }
+
+    /* CONTROLS HINT */
+    .controls-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(51, 65, 85, 0.5);
+    }
+
+    /* FLOATING COMBAT TEXT */
+    .damage-text {
+      position: absolute;
+      font-weight: 900;
+      font-size: 16px;
+      pointer-events: none;
+      animation: floatUp 1.1s ease-out forwards;
+      text-shadow: 0 2px 4px #000, 0 0 8px rgba(0,0,0,0.8);
+      z-index: 20;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); }
+      20% { transform: translate(-50%, -15px) scale(1.2); }
+      100% { opacity: 0; transform: translate(-50%, -50px) scale(0.9); }
+    }
+
+    /* MODAL WINDOWS (CHARACTER / INVENTORY / ESSENCE SHOP / VICTORY / GAMEOVER) */
+    .modal-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(3, 7, 18, 0.82);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-box {
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 10px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-close-btn {
+      background: #1e293b;
+      border: none;
+      color: #94a3b8;
+      font-size: 18px;
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-close-btn:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    /* GEAR SLOTS GRID */
+    .gear-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .gear-paperdoll {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      padding: 12px;
+      border-radius: 12px;
+    }
+    .gear-slot-card {
+      background: #131d31;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: all 0.15s;
+      min-height: 60px;
+    }
+    .gear-slot-card:hover {
+      border-color: #60a5fa;
+      background: #1e293b;
+    }
+    .gear-slot-tag {
+      font-size: 9px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+    .gear-slot-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-top: 2px;
+    }
+    .gear-slot-stats {
+      font-size: 9px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    /* INVENTORY BAG */
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+      gap: 6px;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      padding: 10px;
+      border-radius: 12px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .inv-item {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #131d31;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 4px;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .inv-item:hover {
+      border-color: #38bdf8;
+      transform: scale(1.05);
+    }
+    .inv-item-name {
+      font-size: 8px;
+      font-weight: 700;
+      color: #f1f5f9;
+      line-height: 1.1;
+      margin-top: 2px;
+    }
+
+    /* RARITY COLORS */
+    .rarity-common { border-color: #64748b !important; color: #cbd5e1; }
+    .rarity-uncommon { border-color: #22c55e !important; color: #4ade80; }
+    .rarity-rare { border-color: #3b82f6 !important; color: #60a5fa; }
+    .rarity-epic { border-color: #a855f7 !important; color: #c084fc; }
+    .rarity-legendary { border-color: #f59e0b !important; color: #fbbf24; }
+
+    /* STATS & ESSENCE SHOP UPGRADES */
+    .stat-upgrade-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #131d31;
+      border: 1px solid #1e293b;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+    .stat-upgrade-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-upgrade-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .stat-upgrade-val {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .stat-buy-btn {
+      background: #0284c7;
+      border: none;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .stat-buy-btn:hover:not(:disabled) {
+      background: #0ea5e9;
+    }
+    .stat-buy-btn:disabled {
+      background: #1e293b;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+
+    /* CLASS SELECTION SCREEN */
+    .class-select-card {
+      background: #131d31;
+      border: 2px solid #334155;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .class-select-card:hover {
+      border-color: var(--accent-gold);
+      background: #1e293b;
+      transform: translateY(-3px);
+    }
+    .class-icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+    .class-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .class-desc {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- HUD OVERLAY -->
+  <div class="hud-overlay">
+    <!-- TOP BAR -->
+    <div class="top-stats-bar">
+      <!-- Player Vitals -->
+      <div class="player-vitals-card hud-interactive">
+        <div class="player-header">
+          <span class="player-name" id="hud-player-name">Hero</span>
+          <span class="player-level-badge" id="hud-player-lvl">LVL 1</span>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-label">
+            <span>HEALTH</span>
+            <span id="hud-hp-val">100 / 100</span>
+          </div>
+          <div class="stat-bar-outer">
+            <div class="stat-bar-fill hp-fill" id="hud-hp-bar" style="width: 100%"></div>
+          </div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-label">
+            <span>MANA</span>
+            <span id="hud-mana-val">50 / 50</span>
+          </div>
+          <div class="stat-bar-outer">
+            <div class="stat-bar-fill mana-fill" id="hud-mana-bar" style="width: 100%"></div>
+          </div>
+        </div>
+        <div class="bar-wrap" style="margin-bottom: 0;">
+          <div class="bar-label">
+            <span>EXPERIENCE (LVL 1 - 50)</span>
+            <span id="hud-xp-val">0 / 100</span>
+          </div>
+          <div class="stat-bar-outer">
+            <div class="stat-bar-fill xp-fill" id="hud-xp-bar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Target Frame -->
+      <div class="target-card" id="target-frame">
+        <div class="target-name" id="target-name">Enemy</div>
+        <div class="stat-bar-outer" style="margin: 4px 0;">
+          <div class="stat-bar-fill hp-fill" id="target-hp-bar" style="width: 100%"></div>
+        </div>
+        <div class="target-resist" id="target-resist">Resist: None</div>
+      </div>
+
+      <!-- Right Zone & Menu Buttons -->
+      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+        <div class="zone-info-card hud-interactive">
+          <div class="zone-title" id="hud-zone-title">Zone 1: Forbidden Ruins</div>
+          <div class="zone-kills" id="hud-zone-kills">Area Kills: 0 / 256 (Boss Unlocks)</div>
+          <div class="essence-counter">
+            <div class="essence-icon"></div>
+            <span id="hud-essence-val">0 Essence</span>
+          </div>
+        </div>
+
+        <div class="top-menu-buttons hud-interactive">
+          <button class="hud-btn" id="btn-open-gear">🛡️ Gear & Bag [I]</button>
+          <button class="hud-btn" id="btn-open-essence">💎 Essence Shop [K]</button>
+          <button class="hud-btn" id="btn-sound-toggle">🔊 Sound</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ACTION BAR -->
+    <div class="bottom-action-bar hud-interactive">
+      <div class="ability-bar">
+        <!-- Attack Button (Weapon Speed Cooldown 2-6s, Time=Multiplier 0.2-0.6) -->
+        <div class="ability-slot" id="slot-attack" title="Basic Attack (Weapon Speed Multiplier)">
+          <span class="ability-hotkey">SPACE</span>
+          <div class="ability-icon">⚔️</div>
+          <div class="ability-name-label" id="label-attack-name">Strike</div>
+          <div class="cd-overlay" id="cd-overlay-attack"></div>
+          <div class="cd-text" id="cd-text-attack">0.0</div>
+        </div>
+
+        <!-- Ability 1 (Right Hand) -->
+        <div class="ability-slot" id="slot-ab1" title="Right Hand Weapon Ability">
+          <span class="ability-hotkey">1</span>
+          <div class="ability-icon" id="ab1-icon">🔥</div>
+          <div class="ability-name-label" id="ab1-label">Slash</div>
+          <div class="cd-overlay" id="cd-overlay-1"></div>
+          <div class="cd-text" id="cd-text-1">0.0</div>
+        </div>
+
+        <!-- Ability 2 (Left Hand / Offhand) -->
+        <div class="ability-slot" id="slot-ab2" title="Left Hand / Offhand Ability">
+          <span class="ability-hotkey">2</span>
+          <div class="ability-icon" id="ab2-icon">🛡️</div>
+          <div class="ability-name-label" id="ab2-label">Block</div>
+          <div class="cd-overlay" id="cd-overlay-2"></div>
+          <div class="cd-text" id="cd-text-2">0.0</div>
+        </div>
+
+        <!-- Ability 3 (Head Armor) -->
+        <div class="ability-slot" id="slot-ab3" title="Head Armor Ability">
+          <span class="ability-hotkey">3</span>
+          <div class="ability-icon" id="ab3-icon">⚡</div>
+          <div class="ability-name-label" id="ab3-label">Thunder</div>
+          <div class="cd-overlay" id="cd-overlay-3"></div>
+          <div class="cd-text" id="cd-text-3">0.0</div>
+        </div>
+
+        <!-- Ability 4 (Shoulders Armor) -->
+        <div class="ability-slot" id="slot-ab4" title="Shoulders Armor Ability">
+          <span class="ability-hotkey">4</span>
+          <div class="ability-icon" id="ab4-icon">❄️</div>
+          <div class="ability-name-label" id="ab4-label">Blizzard</div>
+          <div class="cd-overlay" id="cd-overlay-4"></div>
+          <div class="cd-text" id="cd-text-4">0.0</div>
+        </div>
+      </div>
+
+      <div class="controls-hint">
+        WASD to Move (W: Forward, S: Back, A/D: Strafe) • ARROWS to Rotate Camera & Aim • SPACE to Attack • 1-4 for Abilities
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CHARACTER CREATION -->
+<div class="modal-backdrop" id="modal-class-select" style="display: flex;">
+  <div class="modal-box" style="max-width: 540px;">
+    <div class="modal-header">
+      <div class="modal-title">⚔️ Choose Your Hero Archetype</div>
+    </div>
+    <p style="font-size: 13px; color: #94a3b8; line-height: 1.5;">
+      Select your starting class to enter the 256x256 3D RPG arena. Your Left Hand, Right Hand, Head, and Shoulders gear grant unique abilities and scale damage output!
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px;">
+      <div class="class-select-card" id="select-melee-btn">
+        <div class="class-icon">⚔️</div>
+        <div class="class-title">Melee Warrior</div>
+        <div class="class-desc">
+          Master of close-quarters physical combat and heavy armor. High Strength, Armor, and brutal cleave abilities.
+        </div>
+        <div style="margin-top: 12px; font-size: 11px; font-weight: 800; color: #f59e0b;">
+          STARTING GEAR: Iron Blade & Steel Buckler
+        </div>
+      </div>
+
+      <div class="class-select-card" id="select-caster-btn">
+        <div class="class-icon">🔮</div>
+        <div class="class-title">Caster Mage</div>
+        <div class="class-desc">
+          Wielder of elemental fire, frost, and arcane magic. High Intelligence, spell range, and devastating burst abilities.
+        </div>
+        <div style="margin-top: 12px; font-size: 11px; font-weight: 800; color: #38bdf8;">
+          STARTING GEAR: Apprentice Wand & Arcane Focus
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GEAR & INVENTORY -->
+<div class="modal-backdrop" id="modal-gear" style="display: none;">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🛡️ Equipment & Inventory</div>
+      <button class="modal-close-btn" id="btn-close-gear">✕</button>
+    </div>
+
+    <div class="gear-container">
+      <!-- 8-Slot Paperdoll -->
+      <div>
+        <div style="font-size: 12px; font-weight: 800; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase;">
+          Equipped Gear (8 Slots)
+        </div>
+        <div class="gear-paperdoll">
+          <div class="gear-slot-card" id="slot-ui-head" data-slot="head">
+            <span class="gear-slot-tag">Head (Grants Ab #3)</span>
+            <span class="gear-slot-name" id="ui-name-head">Empty</span>
+            <span class="gear-slot-stats" id="ui-stat-head">-</span>
+          </div>
+          <div class="gear-slot-card" id="slot-ui-shoulders" data-slot="shoulders">
+            <span class="gear-slot-tag">Shoulders (Grants Ab #4)</span>
+            <span class="gear-slot-name" id="ui-name-shoulders">Empty</span>
+            <span class="gear-slot-stats" id="ui-stat-shoulders">-</span>
+          </div>
+          <div class="gear-slot-card" id="slot-ui-chest" data-slot="chest">
+            <span class="gear-slot-tag">Chest</span>
+            <span class="gear-slot-name" id="ui-name-chest">Empty</span>
+            <span class="gear-slot-stats" id="ui-stat-chest">-</span>
+          </div>
+          <div class="gear-slot-card" id="slot-ui-belt" data-slot="belt">
+            <span class="gear-slot-tag">Belt</span>
+            <span class="gear-slot-name" id="ui-name-belt">Empty</span>
+            <span class="gear-slot-stats" id="ui-stat-belt">-</span>
+          </div>
+          <div class="gear-slot-card" id="slot-ui-pants" data-slot="pants">
+            <span class="gear-slot-tag">Pants</span>
+            <span class="gear-slot-name" id="ui-name-pants">Empty</span>
+            <span class="gear-slot-stats" id="ui-stat-pants">-</span>
+          </div>
+          <div class="gear-slot-card" id="slot-ui-boots" data-slot="boots">
+            <span class="gear-slot-tag">Boots</span>
+            <span class="gear-slot-name" id="ui-name-boots">Empty</span>
+            <span class="gear-slot-stats" id="ui-stat-boots">-</span>
+          </div>
+          <div class="gear-slot-card" id="slot-ui-leftHand" data-slot="leftHand">
+            <span class="gear-slot-tag">Left Hand (Grants Ab #2)</span>
+            <span class="gear-slot-name" id="ui-name-leftHand">Empty</span>
+            <span class="gear-slot-stats" id="ui-stat-leftHand">-</span>
+          </div>
+          <div class="gear-slot-card" id="slot-ui-rightHand" data-slot="rightHand">
+            <span class="gear-slot-tag">Right Hand (Grants Ab #1)</span>
+            <span class="gear-slot-name" id="ui-name-rightHand">Empty</span>
+            <span class="gear-slot-stats" id="ui-stat-rightHand">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backpack Inventory -->
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Backpack Loot</span>
+          <span style="font-size: 11px; color: #64748b;" id="inv-count">0 items</span>
+        </div>
+        <div class="inventory-grid" id="inventory-list">
+          <!-- Populated dynamically -->
+        </div>
+        <div style="font-size: 10px; color: #64748b; margin-top: 8px;">
+          * Click any item in your backpack to equip it.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ESSENCE SHOP -->
+<div class="modal-backdrop" id="modal-essence" style="display: none;">
+  <div class="modal-box" style="max-width: 520px;">
+    <div class="modal-header">
+      <div class="modal-title">💎 Essence Talent & Stat Forge</div>
+      <button class="modal-close-btn" id="btn-close-essence">✕</button>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; background: #090d16; padding: 10px 14px; border-radius: 8px;">
+      <span style="font-size: 12px; font-weight: 700; color: #94a3b8;">Available Essence:</span>
+      <span style="font-size: 16px; font-weight: 900; color: #38bdf8;" id="modal-essence-count">0</span>
+    </div>
+
+    <div style="margin-top: 10px;">
+      <div class="stat-upgrade-row">
+        <div class="stat-upgrade-info">
+          <span class="stat-upgrade-title">Strength (+Melee Damage)</span>
+          <span class="stat-upgrade-val" id="shop-str-val">Current: +0</span>
+        </div>
+        <button class="stat-buy-btn" id="buy-str-btn">Upgrade (5 Essence)</button>
+      </div>
+
+      <div class="stat-upgrade-row">
+        <div class="stat-upgrade-info">
+          <span class="stat-upgrade-title">Intelligence (+Spell Power & Mana)</span>
+          <span class="stat-upgrade-val" id="shop-int-val">Current: +0</span>
+        </div>
+        <button class="stat-buy-btn" id="buy-int-btn">Upgrade (5 Essence)</button>
+      </div>
+
+      <div class="stat-upgrade-row">
+        <div class="stat-upgrade-info">
+          <span class="stat-upgrade-title">Vitality (+Max Health)</span>
+          <span class="stat-upgrade-val" id="shop-vit-val">Current: +0</span>
+        </div>
+        <button class="stat-buy-btn" id="buy-vit-btn">Upgrade (5 Essence)</button>
+      </div>
+
+      <div class="stat-upgrade-row">
+        <div class="stat-upgrade-info">
+          <span class="stat-upgrade-title">Armor (+Physical Resistance)</span>
+          <span class="stat-upgrade-val" id="shop-arm-val">Current: +0</span>
+        </div>
+        <button class="stat-buy-btn" id="buy-arm-btn">Upgrade (5 Essence)</button>
+      </div>
+
+      <div class="stat-upgrade-row">
+        <div class="stat-upgrade-info">
+          <span class="stat-upgrade-title">Magic Resist (+Elemental Resistance)</span>
+          <span class="stat-upgrade-val" id="shop-res-val">Current: +0</span>
+        </div>
+        <button class="stat-buy-btn" id="buy-res-btn">Upgrade (5 Essence)</button>
+      </div>
+
+      <div class="stat-upgrade-row">
+        <div class="stat-upgrade-info">
+          <span class="stat-upgrade-title">Critical Strike Chance</span>
+          <span class="stat-upgrade-val" id="shop-crit-val">Current: +0%</span>
+        </div>
+        <button class="stat-buy-btn" id="buy-crit-btn">Upgrade (8 Essence)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: BOSS PORTAL / VICTORY -->
+<div class="modal-backdrop" id="modal-portal" style="display: none;">
+  <div class="modal-box" style="max-width: 460px; text-align: center;">
+    <div class="modal-title" style="justify-content: center; color: #fbbf24; font-size: 22px;">
+      🏆 Boss Defeated! Dimensional Rift Opened
+    </div>
+    <p style="font-size: 13px; color: #cbd5e1; margin-top: 10px; line-height: 1.5;">
+      You have conquered Area <span id="portal-area-num">1</span> and slain the Dread Titan! The next realm awaits with higher level enemies, greater gear drops, and richer essence pools.
+    </p>
+    <button class="stat-buy-btn" id="btn-enter-portal" style="margin-top: 16px; padding: 12px 24px; font-size: 14px; background: #2563eb;">
+      🌌 Enter Next Realm
+    </button>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   3D RPG GAME CORE ENGINE (THREE.JS + ACTION COMBAT + 256x256 ARENA)
+   ========================================================================= */
+
+(function() {
+  // Audio synthesizer via Web Audio API
+  let audioCtx = null;
+  let sfxEnabled = true;
+
+  function initAudio() {
+    if (!audioCtx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) audioCtx = new AudioContext();
+    }
+  }
+
+  function playSound(type) {
+    if (!sfxEnabled) return;
+    initAudio();
+    if (!audioCtx) return;
+    try {
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'hit') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'spell') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.22);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      } else if (type === 'levelup') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(554.37, now + 0.1);
+        osc.frequency.setValueAtTime(659.25, now + 0.2);
+        osc.frequency.setValueAtTime(880, now + 0.3);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      } else if (type === 'loot') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
+    } catch (e) {}
+  }
+
+  // --- GAME STATE ---
+  const ARENA_SIZE = 256;
+  const HALF_ARENA = ARENA_SIZE / 2;
+
+  let gameState = {
+    classType: 'melee',
+    characterName: 'Hero',
+    level: 1,
+    experience: 0,
+    experienceNext: 100,
+    essence: 0,
+    hp: 120,
+    maxHp: 120,
+    mana: 60,
+    maxMana: 60,
+    statUpgrades: {
+      strength: 0,
+      intelligence: 0,
+      vitality: 0,
+      armor: 0,
+      magicResist: 0,
+      critRate: 0
+    },
+    equipped: {
+      head: null,
+      shoulders: null,
+      chest: null,
+      belt: null,
+      pants: null,
+      boots: null,
+      leftHand: null,
+      rightHand: null
+    },
+    inventory: [],
+    currentArea: 1,
+    areaLevelMin: 1,
+    areaLevelMax: 7 + Math.floor(Math.random() * 4) + 1, // 1 through (7 + rand(1..4))
+    areaKills: 0,
+    totalKills: 0,
+    bossSpawned: false,
+    bossDefeated: false,
+    highScore: 0
+  };
+
+  // Cooldown Trackers (in milliseconds)
+  const cooldowns = {
+    attack: { current: 0, max: 2000 },
+    ab1: { current: 0, max: 2500 },
+    ab2: { current: 0, max: 3500 },
+    ab3: { current: 0, max: 4500 },
+    ab4: { current: 0, max: 5500 }
+  };
+
+  // Three.js Scene Setup
+  let scene, camera, renderer;
+  let playerMesh, playerLight;
+  let enemies = [];
+  let floatingTexts = [];
+  let keys = {};
+  let targetEnemy = null;
+  let isOrbiting = false;
+  let previousMousePosition = { x: 0, y: 0 };
+  let cameraDistance = 14;
+  let cameraTheta = Math.PI; // angle around character
+  let cameraPhi = 0.45; // pitch angle
+
+  // Generate Equipment based on slot and level
+  function generateGearItem(slot, level, rarity = 'common') {
+    const isMeleeClass = gameState.classType === 'melee';
+    const id = 'gear_' + Math.random().toString(36).substr(2, 9);
+    
+    // Weapon Speed in 2 - 6 seconds, damageMultiplier in 0.2 - 0.6 range
+    const weaponSpeed = 2.0 + Math.random() * 4.0; // 2.0s to 6.0s
+    const damageMultiplier = parseFloat((weaponSpeed * 0.1).toFixed(2)); // 0.20 to 0.60
+
+    let name = '';
+    let elementalType = 'melee';
+    let grantedAbility = null;
+    let armor = 0;
+    let magicResist = 0;
+    let strength = 0;
+    let intelligence = 0;
+    let vitality = 0;
+
+    const rarityMultipliers = { common: 1, uncommon: 1.3, rare: 1.7, epic: 2.2, legendary: 3.0 };
+    const mult = rarityMultipliers[rarity] || 1;
+
+    switch(slot) {
+      case 'rightHand':
+        if (isMeleeClass) {
+          name = `${rarity.toUpperCase()} Iron Broadsword L${level}`;
+          elementalType = 'melee';
+          strength = Math.round((4 + level * 2) * mult);
+          grantedAbility = {
+            id: 'ab_cleave',
+            name: 'Whirlwind Strike',
+            type: 'melee',
+            damageBase: Math.round((20 + level * 7) * mult),
+            cooldown: 2.5,
+            manaCost: 10,
+            range: 6,
+            description: 'Deals heavy physical melee cleave damage in front of you.'
+          };
+        } else {
+          name = `${rarity.toUpperCase()} Pyromancer Staff L${level}`;
+          elementalType = 'fire';
+          intelligence = Math.round((5 + level * 2.2) * mult);
+          grantedAbility = {
+            id: 'ab_fireball',
+            name: 'Pyroblast',
+            type: 'fire',
+            damageBase: Math.round((28 + level * 8) * mult),
+            cooldown: 2.5,
+            manaCost: 15,
+            range: 22,
+            description: 'Launches a searing fireball dealing massive Fire damage.'
+          };
+        }
+        break;
+
+      case 'leftHand':
+        if (isMeleeClass) {
+          name = `${rarity.toUpperCase()} Tower Shield L${level}`;
+          elementalType = 'melee';
+          armor = Math.round((10 + level * 3) * mult);
+          vitality = Math.round((4 + level * 1.5) * mult);
+          grantedAbility = {
+            id: 'ab_shield_bash',
+            name: 'Shield Slam',
+            type: 'melee',
+            damageBase: Math.round((16 + level * 5) * mult),
+            cooldown: 3.5,
+            manaCost: 12,
+            range: 5,
+            description: 'Bashes target with shield, dealing blunt physical damage and briefly stunning.'
+          };
+        } else {
+          name = `${rarity.toUpperCase()} Frost Tome L${level}`;
+          elementalType = 'frost';
+          magicResist = Math.round((8 + level * 2.5) * mult);
+          intelligence = Math.round((4 + level * 1.8) * mult);
+          grantedAbility = {
+            id: 'ab_frost_nova',
+            name: 'Frost Spike',
+            type: 'frost',
+            damageBase: Math.round((24 + level * 7) * mult),
+            cooldown: 3.5,
+            manaCost: 18,
+            range: 18,
+            description: 'Impales target with glacial Frost shard.'
+          };
+        }
+        break;
+
+      case 'head':
+        name = `${rarity.toUpperCase()} Helm of Thunder L${level}`;
+        elementalType = 'lightning';
+        armor = Math.round((5 + level * 1.5) * mult);
+        magicResist = Math.round((4 + level * 1.5) * mult);
+        grantedAbility = {
+          id: 'ab_lightning_strike',
+          name: 'Thunderbolt',
+          type: 'lightning',
+          damageBase: Math.round((32 + level * 9) * mult),
+          cooldown: 4.5,
+          manaCost: 20,
+          range: 24,
+          description: 'Calls down a bolt of Lightning from the sky.'
+        };
+        break;
+
+      case 'shoulders':
+        name = `${rarity.toUpperCase()} Pauldrons of Ruin L${level}`;
+        elementalType = 'arcane';
+        armor = Math.round((6 + level * 1.8) * mult);
+        vitality = Math.round((5 + level * 1.5) * mult);
+        grantedAbility = {
+          id: 'ab_arcane_burst',
+          name: 'Arcane Nova',
+          type: 'arcane',
+          damageBase: Math.round((38 + level * 10) * mult),
+          cooldown: 5.5,
+          manaCost: 25,
+          range: 14,
+          description: 'Emits a shockwave of raw Arcane energy to surrounding enemies.'
+        };
+        break;
+
+      case 'chest':
+        name = `${rarity.toUpperCase()} Chestguard L${level}`;
+        armor = Math.round((14 + level * 4) * mult);
+        vitality = Math.round((8 + level * 2.5) * mult);
+        break;
+      case 'belt':
+        name = `${rarity.toUpperCase()} Girdle L${level}`;
+        armor = Math.round((6 + level * 1.5) * mult);
+        vitality = Math.round((4 + level * 1.2) * mult);
+        break;
+      case 'pants':
+        name = `${rarity.toUpperCase()} Greaves L${level}`;
+        armor = Math.round((10 + level * 2.5) * mult);
+        vitality = Math.round((6 + level * 2) * mult);
+        break;
+      case 'boots':
+        name = `${rarity.toUpperCase()} Treads L${level}`;
+        armor = Math.round((5 + level * 1.5) * mult);
+        vitality = Math.round((3 + level * 1.2) * mult);
+        break;
+    }
+
+    return {
+      id,
+      name,
+      slot,
+      level,
+      rarity,
+      weaponSpeed: parseFloat(weaponSpeed.toFixed(1)),
+      damageMultiplier,
+      armor,
+      magicResist,
+      strength,
+      intelligence,
+      vitality,
+      elementalType,
+      grantedAbility
+    };
+  }
+
+  // Recalculate Player Total Stats from Gear and Essence Upgrades
+  function recalculateStats() {
+    let baseHp = 100 + (gameState.level - 1) * 18;
+    let baseMana = 50 + (gameState.level - 1) * 12;
+
+    let totalArmor = gameState.statUpgrades.armor * 4;
+    let totalResist = gameState.statUpgrades.magicResist * 4;
+    let totalStr = gameState.statUpgrades.strength * 3;
+    let totalInt = gameState.statUpgrades.intelligence * 3;
+    let totalVit = gameState.statUpgrades.vitality * 3;
+
+    // Sum equipped items
+    for (const slot in gameState.equipped) {
+      const item = gameState.equipped[slot];
+      if (item) {
+        totalArmor += item.armor || 0;
+        totalResist += item.magicResist || 0;
+        totalStr += item.strength || 0;
+        totalInt += item.intelligence || 0;
+        totalVit += item.vitality || 0;
+      }
+    }
+
+    gameState.maxHp = baseHp + totalVit * 12;
+    gameState.maxMana = baseMana + totalInt * 8;
+    gameState.hp = Math.min(gameState.hp, gameState.maxHp);
+    gameState.mana = Math.min(gameState.mana, gameState.maxMana);
+
+    // Update Action Bar Icons & Names from Equipped Weapons / Armor
+    const ab1 = gameState.equipped.rightHand?.grantedAbility;
+    const ab2 = gameState.equipped.leftHand?.grantedAbility;
+    const ab3 = gameState.equipped.head?.grantedAbility;
+    const ab4 = gameState.equipped.shoulders?.grantedAbility;
+
+    document.getElementById('ab1-label').innerText = ab1 ? ab1.name : 'Empty';
+    document.getElementById('ab2-label').innerText = ab2 ? ab2.name : 'Empty';
+    document.getElementById('ab3-label').innerText = ab3 ? ab3.name : 'Empty';
+    document.getElementById('ab4-label').innerText = ab4 ? ab4.name : 'Empty';
+
+    // Update Weapon Attack Cooldown
+    const weaponSpeed = gameState.equipped.rightHand?.weaponSpeed || 2.0;
+    cooldowns.attack.max = Math.round(weaponSpeed * 1000);
+    const speedMult = (weaponSpeed * 0.1).toFixed(2);
+    document.getElementById('label-attack-name').innerText = `Strike (${speedMult}x)`;
+
+    updateHud();
+  }
+
+  function updateHud() {
+    document.getElementById('hud-player-name').innerText = gameState.characterName;
+    document.getElementById('hud-player-lvl').innerText = `LVL ${gameState.level}`;
+    document.getElementById('hud-hp-val').innerText = `${Math.ceil(gameState.hp)} / ${Math.ceil(gameState.maxHp)}`;
+    document.getElementById('hud-hp-bar').style.width = `${Math.max(0, (gameState.hp / gameState.maxHp) * 100)}%`;
+    
+    document.getElementById('hud-mana-val').innerText = `${Math.ceil(gameState.mana)} / ${Math.ceil(gameState.maxMana)}`;
+    document.getElementById('hud-mana-bar').style.width = `${Math.max(0, (gameState.mana / gameState.maxMana) * 100)}%`;
+
+    document.getElementById('hud-xp-val').innerText = `${Math.floor(gameState.experience)} / ${gameState.experienceNext}`;
+    document.getElementById('hud-xp-bar').style.width = `${Math.min(100, (gameState.experience / gameState.experienceNext) * 100)}%`;
+
+    document.getElementById('hud-zone-title').innerText = `Zone ${gameState.currentArea}: Level ${gameState.areaLevelMin}-${gameState.areaLevelMax}`;
+    document.getElementById('hud-zone-kills').innerText = `Area Kills: ${gameState.areaKills} / 256 ${gameState.areaKills >= 256 ? '• BOSS SPAWNED!' : ''}`;
+    document.getElementById('hud-essence-val').innerText = `${gameState.essence} Essence`;
+    document.getElementById('modal-essence-count').innerText = gameState.essence;
+  }
+
+  // --- THREE.JS INITIALIZATION & STYLIZED WORLD GENERATION ---
+  const SANCTUARY_RADIUS = 18; // Compact sacred elevated round temple
+  let sanctuaryBeacon;
+  let templeTorches = [];
+
+  // Animation State Machine for Player Character
+  const playerAnimState = {
+    walkCycle: 0,
+    isWalking: false,
+    swingTime: 0,
+    swingDuration: 0.32,
+    castTime: 0,
+    castDuration: 0.45,
+    castType: 'melee'
+  };
+
+  // --- PROCEDURAL TEXTURES ---
+  function createPlainsTerrainTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    // Base forest & plains meadow green gradient
+    const grad = ctx.createRadialGradient(512, 512, 50, 512, 512, 600);
+    grad.addColorStop(0, '#2e5b22');
+    grad.addColorStop(0.5, '#3b6e2d');
+    grad.addColorStop(1, '#254b1c');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1024, 1024);
+
+    // Varied grassy tone patches
+    const grassColors = ['#386d2a', '#447f33', '#2a531e', '#4f8f3b', '#203e17'];
+    for (let i = 0; i < 400; i++) {
+      const px = Math.random() * 1024;
+      const py = Math.random() * 1024;
+      const rad = 20 + Math.random() * 60;
+      ctx.fillStyle = grassColors[Math.floor(Math.random() * grassColors.length)];
+      ctx.globalAlpha = 0.35;
+      ctx.beginPath();
+      ctx.arc(px, py, rad, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Dirt trails & earthy soil patches
+    const soilColors = ['#5a4228', '#6a4e30', '#4a351e', '#7b5b38'];
+    for (let i = 0; i < 70; i++) {
+      const sx = Math.random() * 1024;
+      const sy = Math.random() * 1024;
+      const w = 15 + Math.random() * 45;
+      const h = 10 + Math.random() * 30;
+      ctx.fillStyle = soilColors[Math.floor(Math.random() * soilColors.length)];
+      ctx.globalAlpha = 0.28;
+      ctx.beginPath();
+      ctx.ellipse(sx, sy, w, h, Math.random() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Wildflower specks (Dandelions, Lavender, White Daisies)
+    const flowerColors = ['#fde047', '#e879f9', '#ffffff', '#60a5fa', '#f97316'];
+    ctx.globalAlpha = 0.85;
+    for (let i = 0; i < 350; i++) {
+      const fx = Math.random() * 1024;
+      const fy = Math.random() * 1024;
+      ctx.fillStyle = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+      ctx.beginPath();
+      ctx.arc(fx, fy, 1.5 + Math.random() * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1.0;
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(16, 16);
+    return texture;
+  }
+
+  function createBrickTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    // Mortar background
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, 512, 512);
+
+    const rows = 16;
+    const rowHeight = 512 / rows;
+    for (let r = 0; r < rows; r++) {
+      const cols = 8;
+      const colWidth = 512 / cols;
+      const offset = (r % 2 === 0) ? 0 : colWidth / 2;
+      for (let c = -1; c <= cols; c++) {
+        const x = c * colWidth + offset;
+        const y = r * rowHeight;
+        
+        // Brick stone color variations
+        const shade = 38 + Math.floor(Math.sin(r * 3 + c * 5) * 8) + Math.floor(Math.random() * 8);
+        const rVal = shade + 4;
+        const gVal = shade + 2;
+        const bVal = shade + 12;
+        ctx.fillStyle = `rgb(${rVal},${gVal},${bVal})`;
+        ctx.fillRect(x + 2, y + 2, colWidth - 4, rowHeight - 4);
+        
+        // Bevel highlight & shadow
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.fillRect(x + 2, y + 2, colWidth - 4, 3);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+        ctx.fillRect(x + 2, y + rowHeight - 5, colWidth - 4, 3);
+      }
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }
+
+  function createTree(x, z, scale = 1, treeType = 'pine') {
+    const treeGroup = new THREE.Group();
+    treeGroup.position.set(x, 0, z);
+
+    // Tree Trunk
+    const trunkGeo = new THREE.CylinderGeometry(0.35 * scale, 0.65 * scale, 4.2 * scale, 7);
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x452a16, roughness: 0.95 });
+    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    trunk.position.y = 2.1 * scale;
+    trunk.castShadow = true;
+    trunk.receiveShadow = true;
+    treeGroup.add(trunk);
+
+    if (treeType === 'pine') {
+      // 3-Tiered Evergreen Pine Cones
+      const pineColors = [0x143d2b, 0x1e563d, 0x2d7a56, 0x3d9e70];
+      for (let t = 0; t < 3; t++) {
+        const coneGeo = new THREE.ConeGeometry((2.7 - t * 0.65) * scale, (3.2 - t * 0.4) * scale, 7);
+        const coneMat = new THREE.MeshStandardMaterial({
+          color: pineColors[t % pineColors.length],
+          roughness: 0.82
+        });
+        const cone = new THREE.Mesh(coneGeo, coneMat);
+        cone.position.y = (3.4 + t * 1.9) * scale;
+        cone.castShadow = true;
+        cone.receiveShadow = true;
+        treeGroup.add(cone);
+      }
+    } else {
+      // Broadleaf Forest Foliage
+      const leafMat1 = new THREE.MeshStandardMaterial({ color: 0x1e563d, roughness: 0.85 });
+      const leafMat2 = new THREE.MeshStandardMaterial({ color: 0x2d7a56, roughness: 0.85 });
+      
+      const b1 = new THREE.Mesh(new THREE.DodecahedronGeometry(2.3 * scale, 1), leafMat1);
+      b1.position.y = 4.8 * scale;
+      b1.castShadow = true;
+      b1.receiveShadow = true;
+      treeGroup.add(b1);
+
+      const b2 = new THREE.Mesh(new THREE.DodecahedronGeometry(1.6 * scale, 1), leafMat2);
+      b2.position.set(0.4 * scale, 6.2 * scale, -0.3 * scale);
+      b2.castShadow = true;
+      treeGroup.add(b2);
+    }
+
+    treeGroup.rotation.y = Math.random() * Math.PI * 2;
+    return treeGroup;
+  }
+
+  // --- STYLIZED CHARACTER GENERATION WITH LIMB RIGGING ---
+  function createStylizedPlayerMesh(classType) {
+    const root = new THREE.Group();
+    const isMelee = classType === 'melee';
+
+    // Materials
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfbd38d, roughness: 0.6 });
+    const armorMat = new THREE.MeshStandardMaterial({
+      color: isMelee ? 0x2563eb : 0x7c3aed,
+      roughness: 0.45,
+      metalness: isMelee ? 0.65 : 0.25
+    });
+    const goldTrimMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.8 });
+    const darkLeatherMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.2, metalness: 0.9 });
+    const glowCyanMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+
+    // 1. Torso & Chestplate
+    const torsoGroup = new THREE.Group();
+    torsoGroup.position.set(0, 1.2, 0);
+
+    const chestGeo = new THREE.BoxGeometry(0.9, 1.0, 0.6);
+    const chestMesh = new THREE.Mesh(chestGeo, armorMat);
+    chestMesh.castShadow = true;
+    torsoGroup.add(chestMesh);
+
+    // Belt
+    const beltGeo = new THREE.BoxGeometry(0.95, 0.2, 0.65);
+    const beltMesh = new THREE.Mesh(beltGeo, darkLeatherMat);
+    beltMesh.position.y = -0.4;
+    torsoGroup.add(beltMesh);
+
+    const buckleGeo = new THREE.BoxGeometry(0.3, 0.22, 0.7);
+    const buckleMesh = new THREE.Mesh(buckleGeo, goldTrimMat);
+    buckleMesh.position.y = -0.4;
+    torsoGroup.add(buckleMesh);
+
+    // Pauldrons (Shoulder Armor Plates)
+    const pauldronGeo = new THREE.BoxGeometry(0.45, 0.35, 0.65);
+    const pauldronL = new THREE.Mesh(pauldronGeo, goldTrimMat);
+    pauldronL.position.set(-0.6, 0.4, 0);
+    torsoGroup.add(pauldronL);
+
+    const pauldronR = new THREE.Mesh(pauldronGeo, goldTrimMat);
+    pauldronR.position.set(0.6, 0.4, 0);
+    torsoGroup.add(pauldronR);
+
+    // 2. Head & Helmet / Hood
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 0.8, 0);
+
+    if (isMelee) {
+      // Knight Greathelm
+      const helmGeo = new THREE.BoxGeometry(0.65, 0.65, 0.65);
+      const helmMesh = new THREE.Mesh(helmGeo, armorMat);
+      helmMesh.castShadow = true;
+      headGroup.add(helmMesh);
+
+      // Visor Glow Slit
+      const visorGeo = new THREE.BoxGeometry(0.5, 0.1, 0.68);
+      const visorMesh = new THREE.Mesh(visorGeo, glowCyanMat);
+      visorMesh.position.set(0, 0.05, 0.02);
+      headGroup.add(visorMesh);
+
+      // Crest Plume
+      const plumeGeo = new THREE.BoxGeometry(0.12, 0.35, 0.6);
+      const plumeMesh = new THREE.Mesh(plumeGeo, goldTrimMat);
+      plumeMesh.position.set(0, 0.45, -0.05);
+      headGroup.add(plumeMesh);
+    } else {
+      // Wizard Hood & Arcane Cowl
+      const hoodGeo = new THREE.ConeGeometry(0.55, 0.85, 8);
+      const hoodMesh = new THREE.Mesh(hoodGeo, armorMat);
+      hoodMesh.position.y = 0.2;
+      hoodMesh.rotation.x = -0.2;
+      headGroup.add(hoodMesh);
+
+      const faceGeo = new THREE.SphereGeometry(0.28, 8, 8);
+      const faceMesh = new THREE.Mesh(faceGeo, darkLeatherMat);
+      faceMesh.position.set(0, 0, 0.15);
+      headGroup.add(faceMesh);
+
+      // Glowing Arcane Eyes
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), glowCyanMat);
+      eyeL.position.set(-0.1, 0.04, 0.38);
+      headGroup.add(eyeL);
+
+      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), glowCyanMat);
+      eyeR.position.set(0.1, 0.04, 0.38);
+      headGroup.add(eyeR);
+    }
+    torsoGroup.add(headGroup);
+    root.add(torsoGroup);
+
+    // 3. Left Arm Pivot (Holding Shield or Grimoire)
+    const leftArmPivot = new THREE.Group();
+    leftArmPivot.position.set(-0.62, 1.55, 0);
+
+    const armLGeo = new THREE.CylinderGeometry(0.16, 0.14, 0.7, 8);
+    const armLMesh = new THREE.Mesh(armLGeo, armorMat);
+    armLMesh.position.y = -0.35;
+    armLMesh.castShadow = true;
+    leftArmPivot.add(armLMesh);
+
+    const handLMesh = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), skinMat);
+    handLMesh.position.y = -0.7;
+    leftArmPivot.add(handLMesh);
+
+    let offhandMesh;
+    if (isMelee) {
+      // Tower Shield
+      const shieldGeo = new THREE.BoxGeometry(0.65, 1.1, 0.12);
+      offhandMesh = new THREE.Mesh(shieldGeo, goldTrimMat);
+      offhandMesh.position.set(-0.15, -0.65, 0.3);
+      offhandMesh.rotation.y = 0.4;
+      offhandMesh.castShadow = true;
+      leftArmPivot.add(offhandMesh);
+    } else {
+      // Arcane Grimoire Spell Tome
+      const bookGeo = new THREE.BoxGeometry(0.4, 0.55, 0.12);
+      offhandMesh = new THREE.Mesh(bookGeo, goldTrimMat);
+      offhandMesh.position.set(-0.15, -0.65, 0.25);
+      offhandMesh.rotation.x = Math.PI / 4;
+      leftArmPivot.add(offhandMesh);
+    }
+    root.add(leftArmPivot);
+
+    // 4. Right Arm Pivot (Holding Weapon)
+    const rightArmPivot = new THREE.Group();
+    rightArmPivot.position.set(0.62, 1.55, 0);
+
+    const armRGeo = new THREE.CylinderGeometry(0.16, 0.14, 0.7, 8);
+    const armRMesh = new THREE.Mesh(armRGeo, armorMat);
+    armRMesh.position.y = -0.35;
+    armRMesh.castShadow = true;
+    rightArmPivot.add(armRMesh);
+
+    const handRMesh = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), skinMat);
+    handRMesh.position.y = -0.7;
+    rightArmPivot.add(handRMesh);
+
+    let weaponMesh;
+    if (isMelee) {
+      // Steel Broadsword
+      const swordGroup = new THREE.Group();
+      swordGroup.position.set(0, -0.7, 0.25);
+      swordGroup.rotation.x = Math.PI / 3;
+
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.6, 0.06), steelMat);
+      blade.position.y = 0.8;
+      blade.castShadow = true;
+      swordGroup.add(blade);
+
+      const hilt = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.12), goldTrimMat);
+      hilt.position.y = 0.05;
+      swordGroup.add(hilt);
+
+      const pommel = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), goldTrimMat);
+      pommel.position.y = -0.2;
+      swordGroup.add(pommel);
+
+      weaponMesh = swordGroup;
+      rightArmPivot.add(swordGroup);
+    } else {
+      // Sorcerer Staff
+      const staffGroup = new THREE.Group();
+      staffGroup.position.set(0, -0.7, 0.2);
+      staffGroup.rotation.x = Math.PI / 4;
+
+      const staffRod = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 2.2, 8), darkLeatherMat);
+      staffRod.position.y = 0.6;
+      staffGroup.add(staffRod);
+
+      const staffOrb = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), glowCyanMat);
+      staffOrb.position.y = 1.75;
+      staffGroup.add(staffOrb);
+
+      weaponMesh = staffGroup;
+      rightArmPivot.add(staffGroup);
+    }
+    root.add(rightArmPivot);
+
+    // 5. Left Leg Pivot
+    const leftLegPivot = new THREE.Group();
+    leftLegPivot.position.set(-0.28, 0.8, 0);
+
+    const legLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.14, 0.75, 8), darkLeatherMat);
+    legLMesh.position.y = -0.38;
+    legLMesh.castShadow = true;
+    leftLegPivot.add(legLMesh);
+
+    const bootL = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.2, 0.42), armorMat);
+    bootL.position.set(0, -0.75, 0.08);
+    leftLegPivot.add(bootL);
+    root.add(leftLegPivot);
+
+    // 6. Right Leg Pivot
+    const rightLegPivot = new THREE.Group();
+    rightLegPivot.position.set(0.28, 0.8, 0);
+
+    const legRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.14, 0.75, 8), darkLeatherMat);
+    legRMesh.position.y = -0.38;
+    legRMesh.castShadow = true;
+    rightLegPivot.add(legRMesh);
+
+    const bootR = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.2, 0.42), armorMat);
+    bootR.position.set(0, -0.75, 0.08);
+    rightLegPivot.add(bootR);
+    root.add(rightLegPivot);
+
+    // 7. Dynamic Slash Trail Effect Mesh (for swings)
+    const slashGeo = new THREE.RingGeometry(1.2, 2.0, 16, 1, 0, Math.PI * 0.9);
+    const slashMat = new THREE.MeshBasicMaterial({
+      color: isMelee ? 0x93c5fd : 0xf472b6,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.85
+    });
+    const slashEffect = new THREE.Mesh(slashGeo, slashMat);
+    slashEffect.position.set(0, 1.4, 0.8);
+    slashEffect.rotation.x = Math.PI / 2.5;
+    slashEffect.visible = false;
+    root.add(slashEffect);
+
+    // 8. Spell Cast Aura Particle Glow
+    const castGeo = new THREE.IcosahedronGeometry(1.2, 1);
+    const castMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.65
+    });
+    const castAura = new THREE.Mesh(castGeo, castMat);
+    castAura.position.set(0, 1.5, 0.5);
+    castAura.visible = false;
+    root.add(castAura);
+
+    root.userData = {
+      torso: torsoGroup,
+      head: headGroup,
+      leftArmPivot,
+      rightArmPivot,
+      leftLegPivot,
+      rightLegPivot,
+      weaponMesh,
+      offhandMesh,
+      slashEffect,
+      castAura
+    };
+
+    return root;
+  }
+
+  function createStylizedEnemyMesh(isBoss, isCaster, enemyLvl) {
+    const root = new THREE.Group();
+    const scale = isBoss ? 2.5 : 1.0;
+
+    // Materials
+    const baseColor = isBoss ? 0x7f1d1d : (isCaster ? 0x4c1d95 : 0x3f3f46);
+    const accentColor = isBoss ? 0xf59e0b : (isCaster ? 0xa855f7 : 0xef4444);
+
+    const bodyMat = new THREE.MeshStandardMaterial({ color: baseColor, roughness: 0.7, metalness: isBoss ? 0.8 : 0.3 });
+    const trimMat = new THREE.MeshStandardMaterial({ color: accentColor, roughness: 0.4 });
+    const eyeMat = new THREE.MeshBasicMaterial({ color: isBoss ? 0xf97316 : (isCaster ? 0x06b6d4 : 0xef4444) });
+    const boneMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.9 });
+
+    // Torso
+    const torsoGroup = new THREE.Group();
+    torsoGroup.position.set(0, 1.2 * scale, 0);
+
+    const chestGeo = new THREE.BoxGeometry(0.9 * scale, 1.0 * scale, 0.6 * scale);
+    const chest = new THREE.Mesh(chestGeo, bodyMat);
+    chest.castShadow = true;
+    torsoGroup.add(chest);
+
+    // Spiked Pauldrons
+    const spL = new THREE.Mesh(new THREE.ConeGeometry(0.25 * scale, 0.5 * scale, 4), trimMat);
+    spL.position.set(-0.6 * scale, 0.5 * scale, 0);
+    spL.rotation.z = Math.PI / 4;
+    torsoGroup.add(spL);
+
+    const spR = new THREE.Mesh(new THREE.ConeGeometry(0.25 * scale, 0.5 * scale, 4), trimMat);
+    spR.position.set(0.6 * scale, 0.5 * scale, 0);
+    spR.rotation.z = -Math.PI / 4;
+    torsoGroup.add(spR);
+
+    // Head
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 0.75 * scale, 0);
+
+    const skull = new THREE.Mesh(new THREE.BoxGeometry(0.6 * scale, 0.6 * scale, 0.6 * scale), isCaster ? bodyMat : boneMat);
+    skull.castShadow = true;
+    headGroup.add(skull);
+
+    // Glowing Menacing Eyes
+    const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.08 * scale, 6, 6), eyeMat);
+    eyeL.position.set(-0.16 * scale, 0.05 * scale, 0.32 * scale);
+    headGroup.add(eyeL);
+
+    const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.08 * scale, 6, 6), eyeMat);
+    eyeR.position.set(0.16 * scale, 0.05 * scale, 0.32 * scale);
+    headGroup.add(eyeR);
+
+    if (isBoss) {
+      // Blazing Crown Horns for Dread Titan
+      const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.2 * scale, 0.9 * scale, 5), trimMat);
+      hornL.position.set(-0.35 * scale, 0.5 * scale, 0);
+      hornL.rotation.z = Math.PI / 6;
+      headGroup.add(hornL);
+
+      const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.2 * scale, 0.9 * scale, 5), trimMat);
+      hornR.position.set(0.35 * scale, 0.5 * scale, 0);
+      hornR.rotation.z = -Math.PI / 6;
+      headGroup.add(hornR);
+    }
+    torsoGroup.add(headGroup);
+    root.add(torsoGroup);
+
+    // Left Arm Pivot
+    const leftArmPivot = new THREE.Group();
+    leftArmPivot.position.set(-0.6 * scale, 1.5 * scale, 0);
+
+    const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.14 * scale, 0.12 * scale, 0.7 * scale, 6), bodyMat);
+    armL.position.y = -0.35 * scale;
+    leftArmPivot.add(armL);
+
+    if (!isCaster) {
+      // Offhand Bone Cleaver
+      const cleaver = new THREE.Mesh(new THREE.BoxGeometry(0.12 * scale, 0.8 * scale, 0.3 * scale), boneMat);
+      cleaver.position.set(0, -0.6 * scale, 0.2 * scale);
+      leftArmPivot.add(cleaver);
+    }
+    root.add(leftArmPivot);
+
+    // Right Arm Pivot (Holding Main Weapon)
+    const rightArmPivot = new THREE.Group();
+    rightArmPivot.position.set(0.6 * scale, 1.5 * scale, 0);
+
+    const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.14 * scale, 0.12 * scale, 0.7 * scale, 6), bodyMat);
+    armR.position.y = -0.35 * scale;
+    rightArmPivot.add(armR);
+
+    if (isCaster) {
+      // Cultist Staff with Floating Orb
+      const st = new THREE.Mesh(new THREE.CylinderGeometry(0.05 * scale, 0.05 * scale, 2.0 * scale, 6), trimMat);
+      st.position.set(0, 0.2 * scale, 0.3 * scale);
+      rightArmPivot.add(st);
+
+      const orb = new THREE.Mesh(new THREE.OctahedronGeometry(0.2 * scale, 0), eyeMat);
+      orb.position.set(0, 1.3 * scale, 0.3 * scale);
+      rightArmPivot.add(orb);
+    } else {
+      // Spiked Executioner Axe / Colossal Blade
+      const wGeo = new THREE.BoxGeometry(0.15 * scale, 1.6 * scale, 0.45 * scale);
+      const wMesh = new THREE.Mesh(wGeo, isBoss ? trimMat : boneMat);
+      wMesh.position.set(0, 0.1 * scale, 0.4 * scale);
+      wMesh.rotation.x = Math.PI / 4;
+      wMesh.castShadow = true;
+      rightArmPivot.add(wMesh);
+    }
+    root.add(rightArmPivot);
+
+    // Left & Right Leg Pivots
+    const leftLegPivot = new THREE.Group();
+    leftLegPivot.position.set(-0.25 * scale, 0.8 * scale, 0);
+    const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.14 * scale, 0.12 * scale, 0.75 * scale, 6), bodyMat);
+    legL.position.y = -0.38 * scale;
+    leftLegPivot.add(legL);
+    root.add(leftLegPivot);
+
+    const rightLegPivot = new THREE.Group();
+    rightLegPivot.position.set(0.25 * scale, 0.8 * scale, 0);
+    const legR = new THREE.Mesh(new THREE.CylinderGeometry(0.14 * scale, 0.12 * scale, 0.75 * scale, 6), bodyMat);
+    legR.position.y = -0.38 * scale;
+    rightLegPivot.add(legR);
+    root.add(rightLegPivot);
+
+    root.userData = {
+      torso: torsoGroup,
+      head: headGroup,
+      leftArmPivot,
+      rightArmPivot,
+      leftLegPivot,
+      rightLegPivot
+    };
+
+    return root;
+  }
+
+  function init3DWorld() {
+    const container = document.getElementById('game-container');
+    const canvas = document.getElementById('webgl-canvas');
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x070d1a);
+    scene.fog = new THREE.FogExp2(0x070d1a, 0.012);
+
+    camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
+    
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+
+    // Ambient and Directional Moonlight/Sunlight
+    const ambientLight = new THREE.AmbientLight(0x4a6582, 1.3);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfff5dd, 1.4);
+    dirLight.position.set(50, 90, 60);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
+    scene.add(dirLight);
+
+    // =========================================================================
+    // 256x256 STYLIZED FOREST & PLAINS GROUND TERRAIN
+    // =========================================================================
+    const groundTex = createPlainsTerrainTexture();
+    const groundGeo = new THREE.PlaneGeometry(ARENA_SIZE, ARENA_SIZE, 32, 32);
+    const groundMat = new THREE.MeshStandardMaterial({
+      map: groundTex,
+      roughness: 0.88,
+      metalness: 0.05
+    });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Subtle natural boundary grid helper
+    const gridHelper = new THREE.GridHelper(ARENA_SIZE, 32, 0x166534, 0x14532d);
+    gridHelper.position.y = 0.02;
+    scene.add(gridHelper);
+
+    // =========================================================================
+    // DEDICATED START ZONE: ELEVATED ROUND TEMPLE (SAFE ZONE NO ENEMIES)
+    // =========================================================================
+    const templeGroup = new THREE.Group();
+    templeGroup.position.set(0, 0, 0);
+
+    const marbleMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      roughness: 0.45,
+      metalness: 0.15
+    });
+    const darkStoneMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      roughness: 0.75
+    });
+    const goldMat = new THREE.MeshStandardMaterial({
+      color: 0xf59e0b,
+      roughness: 0.25,
+      metalness: 0.85
+    });
+
+    // 1. Tiered Stepped Round Foundation
+    // Step 1: Base Tier (Radius 18, Height 0.45)
+    const baseStep = new THREE.Mesh(new THREE.CylinderGeometry(SANCTUARY_RADIUS, SANCTUARY_RADIUS + 0.6, 0.45, 48), darkStoneMat);
+    baseStep.position.y = 0.225;
+    baseStep.receiveShadow = true;
+    templeGroup.add(baseStep);
+
+    // Step 2: Middle Tier (Radius 16, Height 0.45)
+    const midStep = new THREE.Mesh(new THREE.CylinderGeometry(SANCTUARY_RADIUS - 2, SANCTUARY_RADIUS - 1.6, 0.45, 48), darkStoneMat);
+    midStep.position.y = 0.675;
+    midStep.receiveShadow = true;
+    templeGroup.add(midStep);
+
+    // Step 3: Top Marble Temple Floor (Radius 14, Height 0.45 -> Floor level = 1.35)
+    const topFloor = new THREE.Mesh(new THREE.CylinderGeometry(SANCTUARY_RADIUS - 4, SANCTUARY_RADIUS - 3.6, 0.45, 48), marbleMat);
+    topFloor.position.y = 1.125;
+    topFloor.receiveShadow = true;
+    templeGroup.add(topFloor);
+
+    // Glowing Inlaid Temple Floor Mandala Rings
+    const goldRing = new THREE.Mesh(
+      new THREE.RingGeometry(SANCTUARY_RADIUS - 5, SANCTUARY_RADIUS - 4.4, 48),
+      new THREE.MeshBasicMaterial({ color: 0xf59e0b, side: THREE.DoubleSide })
+    );
+    goldRing.rotation.x = -Math.PI / 2;
+    goldRing.position.y = 1.36;
+    templeGroup.add(goldRing);
+
+    const cyanRing = new THREE.Mesh(
+      new THREE.RingGeometry(6, 6.8, 36),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide })
+    );
+    cyanRing.rotation.x = -Math.PI / 2;
+    cyanRing.position.y = 1.36;
+    templeGroup.add(cyanRing);
+
+    // 2. Classical Temple Circular Colonnade (10 Fluted Marble Pillars + Entablature Architrave Ring)
+    const pillarCount = 10;
+    const colonnadeRadius = 12.8;
+    const pillarHeight = 7.0;
+
+    for (let i = 0; i < pillarCount; i++) {
+      const ang = (i / pillarCount) * Math.PI * 2;
+      const px = Math.cos(ang) * colonnadeRadius;
+      const pz = Math.sin(ang) * colonnadeRadius;
+
+      const pGroup = new THREE.Group();
+      pGroup.position.set(px, 1.35, pz);
+
+      // Pillar Base Plinth
+      const plinth = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.5, 1.2), darkStoneMat);
+      plinth.position.y = 0.25;
+      plinth.castShadow = true;
+      pGroup.add(plinth);
+
+      // Fluted Shaft
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.52, pillarHeight, 16), marbleMat);
+      shaft.position.y = 0.5 + pillarHeight / 2;
+      shaft.castShadow = true;
+      pGroup.add(shaft);
+
+      // Ornate Capital Trim
+      const capital = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.6, 1.3), goldMat);
+      capital.position.y = 0.5 + pillarHeight + 0.3;
+      capital.castShadow = true;
+      pGroup.add(capital);
+
+      templeGroup.add(pGroup);
+    }
+
+    // Circular Temple Roof Entablature Ring atop the columns
+    const entablature = new THREE.Mesh(
+      new THREE.TorusGeometry(colonnadeRadius, 0.65, 12, 48),
+      darkStoneMat
+    );
+    entablature.rotation.x = Math.PI / 2;
+    entablature.position.y = 1.35 + 0.5 + pillarHeight + 0.6;
+    entablature.castShadow = true;
+    templeGroup.add(entablature);
+
+    // 3. Central Temple Altar & Floating Sacred Beacon
+    const altarBase = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.8, 0.6, 8), darkStoneMat);
+    altarBase.position.y = 1.65;
+    templeGroup.add(altarBase);
+
+    const altarTop = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, 0.3, 8), goldMat);
+    altarTop.position.y = 2.0;
+    templeGroup.add(altarTop);
+
+    // Sacred Floating Celestial Beacon Crystal
+    const crystalGeo = new THREE.OctahedronGeometry(1.5, 0);
+    const crystalMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.8,
+      roughness: 0.1,
+      metalness: 0.9
+    });
+    sanctuaryBeacon = new THREE.Mesh(crystalGeo, crystalMat);
+    sanctuaryBeacon.position.y = 4.2;
+    templeGroup.add(sanctuaryBeacon);
+
+    // 4 Sacred Temple Torch Braziers
+    const torchAngles = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
+    torchAngles.forEach(ang => {
+      const tx = Math.cos(ang) * 9.5;
+      const tz = Math.sin(ang) * 9.5;
+
+      const urn = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.3, 1.8, 8), darkStoneMat);
+      urn.position.set(tx, 1.35 + 0.9, tz);
+      urn.castShadow = true;
+      templeGroup.add(urn);
+
+      const flame = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+      flame.position.set(tx, 1.35 + 2.0, tz);
+      templeGroup.add(flame);
+
+      const tLight = new THREE.PointLight(0x38bdf8, 1.2, 18);
+      tLight.position.set(tx, 1.35 + 2.3, tz);
+      templeGroup.add(tLight);
+    });
+
+    // 4 Step Ramps leading down to the plains (North, South, East, West)
+    const rampAngles = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
+    rampAngles.forEach(ang => {
+      const rampGeo = new THREE.BoxGeometry(4.2, 0.45, 3.8);
+      const rampMesh = new THREE.Mesh(rampGeo, darkStoneMat);
+      rampMesh.position.set(
+        Math.cos(ang) * (SANCTUARY_RADIUS + 0.8),
+        0.45,
+        Math.sin(ang) * (SANCTUARY_RADIUS + 0.8)
+      );
+      rampMesh.rotation.y = ang;
+      rampMesh.rotation.x = 0.25;
+      templeGroup.add(rampMesh);
+    });
+
+    scene.add(templeGroup);
+
+    // =========================================================================
+    // 256x256 PERIMETER BRICK FORTRESS WALLS & CORNER TOWERS
+    // =========================================================================
+    const brickTex = createBrickTexture();
+    brickTex.repeat.set(24, 2);
+
+    const wallMaterial = new THREE.MeshStandardMaterial({
+      map: brickTex,
+      roughness: 0.85,
+      metalness: 0.15
+    });
+
+    const wallHeight = 12;
+    const wallThickness = 4;
+    const halfSpan = HALF_ARENA; // 128
+
+    // North Wall (Z = -128)
+    const northWall = new THREE.Mesh(new THREE.BoxGeometry(ARENA_SIZE, wallHeight, wallThickness), wallMaterial);
+    northWall.position.set(0, wallHeight / 2, -halfSpan);
+    northWall.castShadow = true;
+    northWall.receiveShadow = true;
+    scene.add(northWall);
+
+    // South Wall (Z = 128)
+    const southWall = new THREE.Mesh(new THREE.BoxGeometry(ARENA_SIZE, wallHeight, wallThickness), wallMaterial);
+    southWall.position.set(0, wallHeight / 2, halfSpan);
+    southWall.castShadow = true;
+    southWall.receiveShadow = true;
+    scene.add(southWall);
+
+    // East Wall (X = 128)
+    const eastWall = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, wallHeight, ARENA_SIZE), wallMaterial);
+    eastWall.position.set(halfSpan, wallHeight / 2, 0);
+    eastWall.castShadow = true;
+    eastWall.receiveShadow = true;
+    scene.add(eastWall);
+
+    // West Wall (X = -128)
+    const westWall = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, wallHeight, ARENA_SIZE), wallMaterial);
+    westWall.position.set(-halfSpan, wallHeight / 2, 0);
+    westWall.castShadow = true;
+    westWall.receiveShadow = true;
+    scene.add(westWall);
+
+    // Castle Battlement Crenellations
+    const crenMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    for (let pos = -halfSpan + 4; pos <= halfSpan - 4; pos += 8) {
+      const cN = new THREE.Mesh(new THREE.BoxGeometry(4, 2, wallThickness + 0.4), crenMat);
+      cN.position.set(pos, wallHeight + 1, -halfSpan);
+      scene.add(cN);
+
+      const cS = new THREE.Mesh(new THREE.BoxGeometry(4, 2, wallThickness + 0.4), crenMat);
+      cS.position.set(pos, wallHeight + 1, halfSpan);
+      scene.add(cS);
+
+      const cE = new THREE.Mesh(new THREE.BoxGeometry(wallThickness + 0.4, 2, 4), crenMat);
+      cE.position.set(halfSpan, wallHeight + 1, pos);
+      scene.add(cE);
+
+      const cW = new THREE.Mesh(new THREE.BoxGeometry(wallThickness + 0.4, 2, 4), crenMat);
+      cW.position.set(-halfSpan, wallHeight + 1, pos);
+      scene.add(cW);
+    }
+
+    // 4 Corner Fortress Watchtowers
+    const cornerPositions = [
+      [-halfSpan, -halfSpan],
+      [halfSpan, -halfSpan],
+      [halfSpan, halfSpan],
+      [-halfSpan, halfSpan]
+    ];
+    cornerPositions.forEach(([cx, cz]) => {
+      const towerGroup = new THREE.Group();
+      towerGroup.position.set(cx, 0, cz);
+
+      const tBase = new THREE.Mesh(new THREE.CylinderGeometry(6, 6.5, 16, 16), wallMaterial);
+      tBase.position.y = 8;
+      tBase.castShadow = true;
+      towerGroup.add(tBase);
+
+      const tRoof = new THREE.Mesh(new THREE.ConeGeometry(7.5, 6, 16), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 }));
+      tRoof.position.y = 19;
+      tRoof.castShadow = true;
+      towerGroup.add(tRoof);
+
+      scene.add(towerGroup);
+    });
+
+    // =========================================================================
+    // 3D TREES SCATTERED ACROSS 256x256 FOREST PLAINS
+    // =========================================================================
+    const treeCount = 75;
+    for (let i = 0; i < treeCount; i++) {
+      let tx, tz, dist;
+      let attempts = 0;
+      do {
+        tx = (Math.random() - 0.5) * (ARENA_SIZE - 28);
+        tz = (Math.random() - 0.5) * (ARENA_SIZE - 28);
+        dist = Math.hypot(tx, tz);
+        attempts++;
+      } while (dist < (SANCTUARY_RADIUS + 6) && attempts < 25);
+
+      const scale = 0.85 + Math.random() * 0.6;
+      const type = Math.random() > 0.45 ? 'pine' : 'oak';
+      const tree = createTree(tx, tz, scale, type);
+      scene.add(tree);
+    }
+
+    // =========================================================================
+    // STYLIZED PLAYER CHARACTER MESH
+    // =========================================================================
+    playerMesh = createStylizedPlayerMesh(gameState.classType);
+    // Spawn player in center of elevated temple
+    playerMesh.position.set(0, 1.35, 0);
+    scene.add(playerMesh);
+
+    // Player Follow Spotlight
+    playerLight = new THREE.PointLight(0x38bdf8, 1.5, 20);
+    playerLight.position.set(0, 4, 0);
+    scene.add(playerLight);
+
+    // Spawn Initial Enemies Outside Safe Temple Sanctuary
+    spawnInitialEnemies();
+
+    // Event Listeners
+    window.addEventListener('resize', onWindowResize);
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    
+    canvas.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    canvas.addEventListener('wheel', onMouseWheel, { passive: true });
+    canvas.addEventListener('click', onCanvasClick);
+  }
+
+  function onWindowResize() {
+    if (!renderer || !camera) return;
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  // --- ENEMY SYSTEM ---
+  function spawnInitialEnemies() {
+    const count = 18;
+    for (let i = 0; i < count; i++) {
+      spawnRandomEnemy();
+    }
+  }
+
+  function spawnRandomEnemy(isBoss = false) {
+    const minLvl = gameState.areaLevelMin;
+    const maxLvl = gameState.areaLevelMax;
+    const enemyLvl = isBoss ? (maxLvl + 3) : Math.floor(minLvl + Math.random() * (maxLvl - minLvl + 1));
+    
+    const isCaster = Math.random() > 0.5;
+    const enemyType = isBoss ? 'DREAD TITAN (BOSS)' : (isCaster ? 'Cultist Sorcerer' : 'Undead Berserker');
+    
+    const resists = ['fire', 'frost', 'lightning', 'melee', 'none'];
+    const resist = resists[Math.floor(Math.random() * resists.length)];
+
+    const meshGroup = createStylizedEnemyMesh(isBoss, isCaster, enemyLvl);
+
+    // Spawn OUTSIDE Sanctuary (Radius > 26) and within fortress walls (< 118)
+    const rad = (SANCTUARY_RADIUS + 10) + Math.random() * (HALF_ARENA - (SANCTUARY_RADIUS + 25));
+    const angle = Math.random() * Math.PI * 2;
+    meshGroup.position.set(Math.cos(angle) * rad, 0, Math.sin(angle) * rad);
+    scene.add(meshGroup);
+
+    const maxHp = (50 + enemyLvl * 24) * (isBoss ? 5.5 : 1.0);
+
+    // Random wander vector
+    const wanderAngle = Math.random() * Math.PI * 2;
+    const wanderDir = new THREE.Vector3(Math.cos(wanderAngle), 0, Math.sin(wanderAngle)).normalize();
+
+    const enemyObj = {
+      mesh: meshGroup,
+      name: `${enemyType} [L${enemyLvl}]`,
+      level: enemyLvl,
+      isBoss,
+      isCaster,
+      hp: maxHp,
+      maxHp: maxHp,
+      mana: 100,
+      maxMana: 100,
+      resist,
+      speed: isBoss ? 2.5 : (3.5 + Math.random() * 1.5),
+      attackCooldown: 0,
+      weaponSpeed: 2.5 + Math.random() * 2.0,
+      // Random wandering AI state
+      state: 'wander',
+      wanderTimer: 2.0 + Math.random() * 3.0,
+      wanderDir: wanderDir,
+      wanderSpeed: 1.2 + Math.random() * 1.2,
+      isMoving: true,
+      walkCycle: Math.random() * 10,
+      attackAnimTimer: 0
+    };
+
+    enemies.push(enemyObj);
+  }
+
+  // --- DAMAGE & COMBAT CALCULATION ---
+  function showDamageNumber(x, y, z, damage, color = '#fff') {
+    const div = document.createElement('div');
+    div.className = 'damage-text';
+    div.innerText = Math.round(damage);
+    div.style.color = color;
+
+    document.getElementById('game-container').appendChild(div);
+
+    floatingTexts.push({
+      element: div,
+      pos: new THREE.Vector3(x, y + 2, z),
+      time: 1.1
+    });
+  }
+
+  function executeAttack(abilityType = 'attack') {
+    if (!targetEnemy && enemies.length > 0) {
+      // Auto-target closest enemy
+      let closest = null;
+      let minDist = 999;
+      for (const e of enemies) {
+        const d = playerMesh.position.distanceTo(e.mesh.position);
+        if (d < minDist) {
+          minDist = d;
+          closest = e;
+        }
+      }
+      if (closest && minDist < 28) {
+        targetEnemy = closest;
+        updateTargetCard();
+      }
+    }
+
+    if (!targetEnemy) return;
+
+    const dist = playerMesh.position.distanceTo(targetEnemy.mesh.position);
+    let requiredRange = 6;
+    let baseDmg = 15 + gameState.level * 4;
+    let elemType = 'melee';
+    let manaReq = 0;
+
+    if (abilityType === 'attack') {
+      if (cooldowns.attack.current > 0) return;
+      const weaponSpeed = gameState.equipped.rightHand?.weaponSpeed || 2.0;
+      const damageMult = gameState.equipped.rightHand?.damageMultiplier || 0.25;
+      baseDmg = (baseDmg + (gameState.classType === 'melee' ? gameState.statUpgrades.strength * 5 : gameState.statUpgrades.intelligence * 5)) * damageMult;
+      cooldowns.attack.current = cooldowns.attack.max;
+      playSound('hit');
+
+      // Trigger Melee Weapon Swing Animation
+      if (gameState.classType === 'melee') {
+        playerAnimState.swingTime = 0.001;
+        playerAnimState.castTime = 0;
+      } else {
+        playerAnimState.castTime = 0.001;
+        playerAnimState.castType = 'caster';
+        playerAnimState.swingTime = 0;
+      }
+    } else if (abilityType === 'ab1') {
+      const ab = gameState.equipped.rightHand?.grantedAbility;
+      if (!ab || cooldowns.ab1.current > 0 || gameState.mana < ab.manaCost) return;
+      requiredRange = ab.range;
+      baseDmg = ab.damageBase + (gameState.statUpgrades.strength + gameState.statUpgrades.intelligence) * 4;
+      elemType = ab.type;
+      manaReq = ab.manaCost;
+      cooldowns.ab1.current = ab.cooldown * 1000;
+      gameState.mana -= manaReq;
+      playSound('spell');
+
+      // Trigger Cast or Swing Animation
+      if (elemType === 'melee') {
+        playerAnimState.swingTime = 0.001;
+        playerAnimState.castTime = 0;
+      } else {
+        playerAnimState.castTime = 0.001;
+        playerAnimState.castType = elemType;
+        playerAnimState.swingTime = 0;
+      }
+    } else if (abilityType === 'ab2') {
+      const ab = gameState.equipped.leftHand?.grantedAbility;
+      if (!ab || cooldowns.ab2.current > 0 || gameState.mana < ab.manaCost) return;
+      requiredRange = ab.range;
+      baseDmg = ab.damageBase + gameState.statUpgrades.vitality * 4;
+      elemType = ab.type;
+      manaReq = ab.manaCost;
+      cooldowns.ab2.current = ab.cooldown * 1000;
+      gameState.mana -= manaReq;
+      playSound('spell');
+
+      playerAnimState.castTime = 0.001;
+      playerAnimState.castType = elemType;
+      playerAnimState.swingTime = 0;
+    } else if (abilityType === 'ab3') {
+      const ab = gameState.equipped.head?.grantedAbility;
+      if (!ab || cooldowns.ab3.current > 0 || gameState.mana < ab.manaCost) return;
+      requiredRange = ab.range;
+      baseDmg = ab.damageBase + gameState.statUpgrades.intelligence * 5;
+      elemType = ab.type;
+      manaReq = ab.manaCost;
+      cooldowns.ab3.current = ab.cooldown * 1000;
+      gameState.mana -= manaReq;
+      playSound('spell');
+
+      playerAnimState.castTime = 0.001;
+      playerAnimState.castType = elemType;
+      playerAnimState.swingTime = 0;
+    } else if (abilityType === 'ab4') {
+      const ab = gameState.equipped.shoulders?.grantedAbility;
+      if (!ab || cooldowns.ab4.current > 0 || gameState.mana < ab.manaCost) return;
+      requiredRange = ab.range;
+      baseDmg = ab.damageBase + gameState.statUpgrades.vitality * 5;
+      elemType = ab.type;
+      manaReq = ab.manaCost;
+      cooldowns.ab4.current = ab.cooldown * 1000;
+      gameState.mana -= manaReq;
+      playSound('spell');
+
+      playerAnimState.castTime = 0.001;
+      playerAnimState.castType = elemType;
+      playerAnimState.swingTime = 0;
+    }
+
+    if (dist > requiredRange) {
+      showDamageNumber(playerMesh.position.x, playerMesh.position.y + 1, playerMesh.position.z, 'Too Far', '#94a3b8');
+      return;
+    }
+
+    // Apply Enemy Elemental Resistances
+    let finalDmg = baseDmg;
+    if (targetEnemy.resist === elemType) {
+      finalDmg *= 0.5; // 50% resistance
+    }
+
+    // Critical Strike Check
+    const isCrit = Math.random() < (0.05 + gameState.statUpgrades.critRate * 0.02);
+    if (isCrit) finalDmg *= 2.0;
+
+    targetEnemy.hp -= finalDmg;
+    const dmgColor = isCrit ? '#f59e0b' : (elemType === 'fire' ? '#ef4444' : elemType === 'frost' ? '#38bdf8' : elemType === 'lightning' ? '#eab308' : '#fff');
+    showDamageNumber(targetEnemy.mesh.position.x, targetEnemy.mesh.position.y + 1, targetEnemy.mesh.position.z, finalDmg, dmgColor);
+
+    updateTargetCard();
+
+    // Check Enemy Defeat
+    if (targetEnemy.hp <= 0) {
+      onEnemyDefeated(targetEnemy);
+    }
+  }
+
+  function onEnemyDefeated(enemy) {
+    scene.remove(enemy.mesh);
+    enemies = enemies.filter(e => e !== enemy);
+    targetEnemy = null;
+    document.getElementById('target-frame').style.display = 'none';
+
+    gameState.areaKills++;
+    gameState.totalKills++;
+    gameState.highScore += (enemy.level * 120) * (enemy.isBoss ? 8 : 1);
+
+    // Diminished rewards if over 256 kills in area
+    const isOver256 = gameState.areaKills > 256;
+    const rewardFactor = isOver256 ? 0.35 : 1.0;
+
+    // Reduced Essence Drop (Limited amounts for purchasing abilities/stats)
+    const essenceGained = enemy.isBoss ? (8 + Math.floor(Math.random() * 5)) : (Math.random() < 0.35 ? 1 : 0);
+    if (essenceGained > 0) {
+      gameState.essence += essenceGained;
+      showDamageNumber(enemy.mesh.position.x, enemy.mesh.position.y + 1.5, enemy.mesh.position.z, `+${essenceGained} Essence`, '#a855f7');
+    }
+
+    // Reduced Experience Drop (Rebalanced progression)
+    const xpGained = Math.round((7 + enemy.level * 2.8) * rewardFactor * (enemy.isBoss ? 3.5 : 1));
+    gainExperience(xpGained);
+
+    // Reduced Gear Drop Chance (Lower drop rate for balanced loot economy)
+    const dropChance = enemy.isBoss ? 0.9 : (0.12 * rewardFactor);
+    if (Math.random() < dropChance) {
+      const slots = ['head', 'shoulders', 'chest', 'belt', 'pants', 'boots', 'leftHand', 'rightHand'];
+      const slot = slots[Math.floor(Math.random() * slots.length)];
+      const rarities = enemy.isBoss ? ['rare', 'epic', 'legendary'] : ['common', 'uncommon', 'rare'];
+      const rarity = rarities[Math.floor(Math.random() * rarities.length)];
+      const item = generateGearItem(slot, enemy.level, rarity);
+      gameState.inventory.push(item);
+      playSound('loot');
+      showDamageNumber(enemy.mesh.position.x, enemy.mesh.position.y + 2.0, enemy.mesh.position.z, `Found ${item.name}!`, '#fbbf24');
+      renderInventory();
+    }
+
+    // Check Boss Spawn at 256 Kills
+    if (gameState.areaKills === 256 && !gameState.bossSpawned) {
+      gameState.bossSpawned = true;
+      spawnRandomEnemy(true);
+      showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2, playerMesh.position.z, 'DREAD TITAN SPAWNED!', '#f59e0b');
+    }
+
+    if (enemy.isBoss) {
+      gameState.bossDefeated = true;
+      document.getElementById('modal-portal').style.display = 'flex';
+      document.getElementById('portal-area-num').innerText = gameState.currentArea;
+      playSound('levelup');
+      saveProgressToParent();
+    }
+
+    // Respawn regular enemy to keep arena populated
+    if (!enemy.isBoss && enemies.length < 18) {
+      spawnRandomEnemy();
+    }
+
+    updateHud();
+  }
+
+  function gainExperience(amount) {
+    gameState.experience += amount;
+    while (gameState.experience >= gameState.experienceNext && gameState.level < 50) {
+      gameState.experience -= gameState.experienceNext;
+      gameState.level++;
+      gameState.experienceNext = Math.round(100 * Math.pow(1.18, gameState.level - 1));
+      gameState.hp = gameState.maxHp;
+      gameState.mana = gameState.maxMana;
+      playSound('levelup');
+      showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2.5, playerMesh.position.z, `LEVEL UP! LVL ${gameState.level}`, '#fbbf24');
+    }
+    recalculateStats();
+    saveProgressToParent();
+  }
+
+  function updateTargetCard() {
+    const card = document.getElementById('target-frame');
+    if (!targetEnemy || targetEnemy.hp <= 0) {
+      card.style.display = 'none';
+      return;
+    }
+    card.style.display = 'block';
+    document.getElementById('target-name').innerText = targetEnemy.name;
+    document.getElementById('target-hp-bar').style.width = `${Math.max(0, (targetEnemy.hp / targetEnemy.maxHp) * 100)}%`;
+    document.getElementById('target-resist').innerText = `Resist: ${targetEnemy.resist.toUpperCase()}`;
+  }
+
+  // --- CONTROLS & INPUT ---
+  function onKeyDown(e) {
+    keys[e.code] = true;
+
+    if (e.code === 'Space') {
+      e.preventDefault();
+      executeAttack('attack');
+    } else if (e.code === 'Digit1') {
+      executeAttack('ab1');
+    } else if (e.code === 'Digit2') {
+      executeAttack('ab2');
+    } else if (e.code === 'Digit3') {
+      executeAttack('ab3');
+    } else if (e.code === 'Digit4') {
+      executeAttack('ab4');
+    } else if (e.code === 'KeyI') {
+      toggleModal('modal-gear');
+    } else if (e.code === 'KeyK') {
+      toggleModal('modal-essence');
+    }
+  }
+
+  function onKeyUp(e) {
+    keys[e.code] = false;
+  }
+
+  function onMouseDown(e) {
+    if (e.button === 0 || e.button === 2) {
+      isOrbiting = true;
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    }
+  }
+
+  function onMouseMove(e) {
+    if (isOrbiting) {
+      const deltaX = e.clientX - previousMousePosition.x;
+      const deltaY = e.clientY - previousMousePosition.y;
+
+      cameraTheta -= deltaX * 0.008;
+      cameraPhi = Math.max(0.1, Math.min(Math.PI / 2.2, cameraPhi + deltaY * 0.008));
+
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    }
+  }
+
+  function onMouseUp() {
+    isOrbiting = false;
+  }
+
+  function onMouseWheel(e) {
+    cameraDistance = Math.max(6, Math.min(26, cameraDistance + e.deltaY * 0.02));
+  }
+
+  function onCanvasClick(e) {
+    // Raycasting for target selection
+    const mouse = new THREE.Vector2(
+      (e.clientX / window.innerWidth) * 2 - 1,
+      -(e.clientY / window.innerHeight) * 2 + 1
+    );
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+
+    const enemyMeshes = enemies.map(e => e.mesh.children[0]).filter(Boolean);
+    const intersects = raycaster.intersectObjects(enemyMeshes);
+
+    if (intersects.length > 0) {
+      const clickedMesh = intersects[0].object;
+      const found = enemies.find(e => e.mesh.children.includes(clickedMesh));
+      if (found) {
+        targetEnemy = found;
+        updateTargetCard();
+      }
+    }
+  }
+
+  // --- GAME LOOP ---
+  let lastTime = performance.now();
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    const now = performance.now();
+    const delta = Math.min((now - lastTime) / 1000, 0.1);
+    lastTime = now;
+
+    // Rotate Sanctuary Beacon Crystal
+    if (sanctuaryBeacon) {
+      sanctuaryBeacon.rotation.y += 0.02;
+      sanctuaryBeacon.rotation.x += 0.01;
+    }
+
+    // =========================================================================
+    // ARROW KEYS: ROTATE CAMERA & PLAYER DIRECTION
+    // =========================================================================
+    const turnSpeed = 2.4; // Radians per second
+    const pitchSpeed = 1.6;
+
+    if (keys['ArrowLeft']) {
+      cameraTheta += turnSpeed * delta;
+    }
+    if (keys['ArrowRight']) {
+      cameraTheta -= turnSpeed * delta;
+    }
+    if (keys['ArrowUp']) {
+      cameraPhi = Math.min(Math.PI / 2.2, cameraPhi + pitchSpeed * delta);
+    }
+    if (keys['ArrowDown']) {
+      cameraPhi = Math.max(0.12, cameraPhi - pitchSpeed * delta);
+    }
+
+    // =========================================================================
+    // WASD KEYS: W (FORWARD), S (BACKWARD), A (STRAFE LEFT), D (STRAFE RIGHT)
+    // =========================================================================
+    const moveSpeed = 11.0 * delta;
+    let moveFwd = 0;
+    let moveRight = 0;
+
+    if (keys['KeyW']) moveFwd += 1;
+    if (keys['KeyS']) moveFwd -= 1;
+    if (keys['KeyD']) moveRight += 1;
+    if (keys['KeyA']) moveRight -= 1;
+
+    const isMoving = (moveFwd !== 0 || moveRight !== 0);
+
+    // Compute Forward & Right Strafe Vectors from Camera Orientation
+    const forward = new THREE.Vector3(-Math.sin(cameraTheta), 0, -Math.cos(cameraTheta)).normalize();
+    const right = new THREE.Vector3(Math.cos(cameraTheta), 0, -Math.sin(cameraTheta)).normalize();
+
+    if (isMoving) {
+      const len = Math.hypot(moveFwd, moveRight);
+      const normFwd = moveFwd / len;
+      const normRight = moveRight / len;
+
+      const finalMove = new THREE.Vector3()
+        .addScaledVector(forward, normFwd * moveSpeed)
+        .addScaledVector(right, normRight * moveSpeed);
+
+      playerMesh.position.add(finalMove);
+
+      // Orient player smoothly to movement direction
+      playerMesh.rotation.y = Math.atan2(finalMove.x, finalMove.z);
+    } else {
+      // Idle: Orient player facing forward with camera
+      playerMesh.rotation.y = cameraTheta + Math.PI;
+    }
+
+    // Adjust Player Elevation on Temple Steps vs Plains Ground
+    const playerDistFromCenter = Math.hypot(playerMesh.position.x, playerMesh.position.z);
+    if (playerDistFromCenter < (SANCTUARY_RADIUS - 4)) {
+      playerMesh.position.y = 1.35; // Top elevated temple platform
+    } else if (playerDistFromCenter < SANCTUARY_RADIUS) {
+      playerMesh.position.y = 0.7; // Middle temple steps
+    } else {
+      playerMesh.position.y = 0; // Plains ground
+    }
+
+    // Clamp player within 256x256 Brick Fortress Walls
+    const wallInnerLimit = HALF_ARENA - 6; // 122
+    playerMesh.position.x = Math.max(-wallInnerLimit, Math.min(wallInnerLimit, playerMesh.position.x));
+    playerMesh.position.z = Math.max(-wallInnerLimit, Math.min(wallInnerLimit, playerMesh.position.z));
+
+    // =========================================================================
+    // PLAYER ANIMATIONS: WALKING, SWING, AND CASTING
+    // =========================================================================
+    if (playerMesh && playerMesh.userData) {
+      const ud = playerMesh.userData;
+
+      // 1. Walking Animation (Legs & Torso Bob)
+      if (isMoving) {
+        playerAnimState.walkCycle += delta * 11;
+        ud.leftLegPivot.rotation.x = Math.sin(playerAnimState.walkCycle) * 0.65;
+        ud.rightLegPivot.rotation.x = -Math.sin(playerAnimState.walkCycle) * 0.65;
+        ud.torso.position.y = 1.2 + Math.abs(Math.sin(playerAnimState.walkCycle)) * 0.07;
+      } else {
+        ud.leftLegPivot.rotation.x = THREE.MathUtils.lerp(ud.leftLegPivot.rotation.x, 0, delta * 10);
+        ud.rightLegPivot.rotation.x = THREE.MathUtils.lerp(ud.rightLegPivot.rotation.x, 0, delta * 10);
+        ud.torso.position.y = THREE.MathUtils.lerp(ud.torso.position.y, 1.2, delta * 10);
+      }
+
+      // 2. Weapon Swing Animation (Fluid Slash Arc & Slash Mesh Effect)
+      if (playerAnimState.swingTime > 0) {
+        playerAnimState.swingTime += delta;
+        const progress = playerAnimState.swingTime / playerAnimState.swingDuration;
+
+        if (progress < 1.0) {
+          if (progress < 0.25) {
+            // Windup back
+            const p1 = progress / 0.25;
+            ud.rightArmPivot.rotation.x = -1.2 * p1;
+            ud.rightArmPivot.rotation.y = 0.5 * p1;
+            ud.torso.rotation.y = -0.35 * p1;
+            ud.slashEffect.visible = false;
+          } else if (progress < 0.75) {
+            // Power Slash Forward Arc
+            const p2 = (progress - 0.25) / 0.5;
+            ud.rightArmPivot.rotation.x = -1.2 + 2.8 * p2;
+            ud.rightArmPivot.rotation.y = 0.5 - 1.2 * p2;
+            ud.torso.rotation.y = -0.35 + 0.7 * p2;
+            ud.slashEffect.visible = true;
+            ud.slashEffect.rotation.z = p2 * Math.PI;
+          } else {
+            // Recovery
+            const p3 = (progress - 0.75) / 0.25;
+            ud.slashEffect.visible = false;
+            ud.rightArmPivot.rotation.x = 1.6 * (1 - p3);
+            ud.rightArmPivot.rotation.y = -0.7 * (1 - p3);
+            ud.torso.rotation.y = 0.35 * (1 - p3);
+          }
+        } else {
+          playerAnimState.swingTime = 0;
+          ud.slashEffect.visible = false;
+          ud.rightArmPivot.rotation.set(0, 0, 0);
+          ud.torso.rotation.y = 0;
+        }
+      } else if (playerAnimState.castTime > 0) {
+        // 3. Spell Casting Animation (Both arms raise high with glowing pulsing aura)
+        playerAnimState.castTime += delta;
+        const progress = playerAnimState.castTime / playerAnimState.castDuration;
+
+        if (progress < 1.0) {
+          const castArc = Math.sin(progress * Math.PI);
+          ud.leftArmPivot.rotation.x = -1.6 * castArc;
+          ud.rightArmPivot.rotation.x = -1.6 * castArc;
+          ud.leftArmPivot.rotation.z = -0.45 * castArc;
+          ud.rightArmPivot.rotation.z = 0.45 * castArc;
+
+          ud.castAura.visible = true;
+          ud.castAura.rotation.y += delta * 6;
+          ud.castAura.scale.setScalar(1.0 + castArc * 1.4);
+        } else {
+          playerAnimState.castTime = 0;
+          ud.castAura.visible = false;
+          ud.leftArmPivot.rotation.set(0, 0, 0);
+          ud.rightArmPivot.rotation.set(0, 0, 0);
+        }
+      } else if (isMoving) {
+        // Natural arm counter-swing during walking
+        ud.leftArmPivot.rotation.x = -Math.sin(playerAnimState.walkCycle) * 0.45;
+        ud.rightArmPivot.rotation.x = Math.sin(playerAnimState.walkCycle) * 0.45;
+        ud.leftArmPivot.rotation.z = 0;
+        ud.rightArmPivot.rotation.z = 0;
+      } else {
+        // Rest arms smoothly
+        ud.leftArmPivot.rotation.x = THREE.MathUtils.lerp(ud.leftArmPivot.rotation.x, 0, delta * 8);
+        ud.rightArmPivot.rotation.x = THREE.MathUtils.lerp(ud.rightArmPivot.rotation.x, 0, delta * 8);
+        ud.leftArmPivot.rotation.z = 0;
+        ud.rightArmPivot.rotation.z = 0;
+      }
+    }
+
+    // =========================================================================
+    // 3RD PERSON CHASE CAMERA TRACKING
+    // =========================================================================
+    if (playerMesh) {
+      playerLight.position.copy(playerMesh.position).add(new THREE.Vector3(0, 3.5, 0));
+
+      const cx = playerMesh.position.x + cameraDistance * Math.sin(cameraTheta) * Math.cos(cameraPhi);
+      const cy = playerMesh.position.y + cameraDistance * Math.sin(cameraPhi) + 2.4;
+      const cz = playerMesh.position.z + cameraDistance * Math.cos(cameraTheta) * Math.cos(cameraPhi);
+
+      camera.position.set(cx, cy, cz);
+      camera.lookAt(playerMesh.position.x, playerMesh.position.y + 1.8, playerMesh.position.z);
+    }
+
+    // =========================================================================
+    // ENEMY AI: RANDOM WANDERING, CHASE & ATTACK ANIMATIONS
+    // =========================================================================
+    const playerDistToSanctuary = Math.hypot(playerMesh.position.x, playerMesh.position.z);
+    const isPlayerInSanctuary = playerDistToSanctuary < (SANCTUARY_RADIUS + 1.5);
+
+    for (const enemy of enemies) {
+      const dist = enemy.mesh.position.distanceTo(playerMesh.position);
+      const enemyDistToCenter = Math.hypot(enemy.mesh.position.x, enemy.mesh.position.z);
+
+      // Repel enemies trying to enter elevated temple sanctuary
+      if (enemyDistToCenter < SANCTUARY_RADIUS + 2.5) {
+        const pushDir = new THREE.Vector3(enemy.mesh.position.x, 0, enemy.mesh.position.z).normalize();
+        if (pushDir.lengthSq() === 0) pushDir.set(1, 0, 0);
+        enemy.mesh.position.addScaledVector(pushDir, 7.0 * delta);
+        continue;
+      }
+
+      // Chase Player ONLY if Player is OUTSIDE the dedicated safe Sanctuary
+      if (!isPlayerInSanctuary && dist < 34 && dist > 3.0) {
+        const dir = new THREE.Vector3().subVectors(playerMesh.position, enemy.mesh.position).normalize();
+        enemy.mesh.position.addScaledVector(dir, enemy.speed * delta);
+        enemy.mesh.rotation.y = Math.atan2(dir.x, dir.z);
+        enemy.isMoving = true;
+      } else if (!isPlayerInSanctuary && dist <= 3.0) {
+        // In melee attack range
+        enemy.isMoving = false;
+        enemy.attackCooldown -= delta;
+        if (enemy.attackCooldown <= 0) {
+          enemy.attackCooldown = enemy.weaponSpeed;
+          enemy.attackAnimTimer = 0.35; // Trigger enemy strike animation
+          const enemyDmg = Math.max(2, (8 + enemy.level * 3) - gameState.statUpgrades.armor * 2);
+          gameState.hp -= enemyDmg;
+          showDamageNumber(playerMesh.position.x, playerMesh.position.y + 1, playerMesh.position.z, enemyDmg, '#ef4444');
+          updateHud();
+
+          // ===================================================================
+          // PLAYER DEATH: RESPAWN IN TEMPLE & RESET UNDEFEATED ENEMIES TO FULL HEALTH & MANA
+          // ===================================================================
+          if (gameState.hp <= 0) {
+            gameState.hp = gameState.maxHp;
+            gameState.mana = gameState.maxMana;
+            playerMesh.position.set(0, 1.35, 0);
+            
+            // RESET ALL UNDEFEATED ENEMIES TO FULL HEALTH AND MANA
+            for (const e of enemies) {
+              e.hp = e.maxHp;
+              e.mana = e.maxMana;
+              e.attackCooldown = 0;
+            }
+
+            targetEnemy = null;
+            document.getElementById('target-frame').style.display = 'none';
+            playSound('hit');
+            showDamageNumber(0, 4, 0, 'DEFEATED! Enemies restored to full health. Returned to Temple.', '#f87171');
+            updateHud();
+          }
+        }
+      } else {
+        // =====================================================================
+        // RANDOM ENEMY PATROL & WANDERING BEHAVIOR
+        // =====================================================================
+        enemy.wanderTimer -= delta;
+        if (enemy.wanderTimer <= 0) {
+          // 70% chance to pick a new wander direction, 30% chance to pause/idle
+          if (Math.random() < 0.7) {
+            const ang = Math.random() * Math.PI * 2;
+            enemy.wanderDir.set(Math.cos(ang), 0, Math.sin(ang)).normalize();
+            enemy.isMoving = true;
+          } else {
+            enemy.isMoving = false;
+          }
+          enemy.wanderTimer = 2.5 + Math.random() * 3.5;
+        }
+
+        if (enemy.isMoving) {
+          enemy.mesh.position.addScaledVector(enemy.wanderDir, enemy.wanderSpeed * delta);
+          enemy.mesh.rotation.y = Math.atan2(enemy.wanderDir.x, enemy.wanderDir.z);
+
+          // Avoid arena fortress walls
+          const wallBoundary = HALF_ARENA - 12;
+          if (Math.abs(enemy.mesh.position.x) > wallBoundary || Math.abs(enemy.mesh.position.z) > wallBoundary) {
+            enemy.wanderDir.set(-enemy.mesh.position.x, 0, -enemy.mesh.position.z).normalize();
+          }
+        }
+      }
+
+      // Enemy Limb Movement & Attack Animations
+      if (enemy.mesh.userData) {
+        const eud = enemy.mesh.userData;
+        if (enemy.isMoving) {
+          enemy.walkCycle += delta * 8;
+          eud.leftLegPivot.rotation.x = Math.sin(enemy.walkCycle) * 0.55;
+          eud.rightLegPivot.rotation.x = -Math.sin(enemy.walkCycle) * 0.55;
+        } else {
+          eud.leftLegPivot.rotation.x = THREE.MathUtils.lerp(eud.leftLegPivot.rotation.x, 0, delta * 8);
+          eud.rightLegPivot.rotation.x = THREE.MathUtils.lerp(eud.rightLegPivot.rotation.x, 0, delta * 8);
+        }
+
+        if (enemy.attackAnimTimer > 0) {
+          enemy.attackAnimTimer -= delta;
+          const strikeProgress = Math.sin((0.35 - enemy.attackAnimTimer) / 0.35 * Math.PI);
+          eud.rightArmPivot.rotation.x = -0.5 + strikeProgress * 2.2;
+        } else {
+          eud.rightArmPivot.rotation.x = THREE.MathUtils.lerp(eud.rightArmPivot.rotation.x, 0, delta * 8);
+        }
+      }
+    }
+
+    // Cooldown ticks & Action Bar UI
+    for (const key in cooldowns) {
+      if (cooldowns[key].current > 0) {
+        cooldowns[key].current = Math.max(0, cooldowns[key].current - delta * 1000);
+        const pct = (cooldowns[key].current / cooldowns[key].max) * 100;
+        const overlayId = key === 'attack' ? 'cd-overlay-attack' : (key === 'ab1' ? 'cd-overlay-1' : key === 'ab2' ? 'cd-overlay-2' : key === 'ab3' ? 'cd-overlay-3' : 'cd-overlay-4');
+        const textId = key === 'attack' ? 'cd-text-attack' : (key === 'ab1' ? 'cd-text-1' : key === 'ab2' ? 'cd-text-2' : key === 'ab3' ? 'cd-text-3' : 'cd-text-4');
+        
+        document.getElementById(overlayId).style.height = `${pct}%`;
+        const txtEl = document.getElementById(textId);
+        if (pct > 0) {
+          txtEl.style.display = 'block';
+          txtEl.innerText = (cooldowns[key].current / 1000).toFixed(1);
+        } else {
+          txtEl.style.display = 'none';
+        }
+      }
+    }
+
+    // Floating text updates
+    for (let i = floatingTexts.length - 1; i >= 0; i--) {
+      const ft = floatingTexts[i];
+      ft.time -= delta;
+      ft.pos.y += delta * 1.5;
+
+      const screenPos = ft.pos.clone().project(camera);
+      const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+      const y = (-(screenPos.y * 0.5) + 0.5) * window.innerHeight;
+
+      ft.element.style.left = `${x}px`;
+      ft.element.style.top = `${y}px`;
+
+      if (ft.time <= 0) {
+        ft.element.remove();
+        floatingTexts.splice(i, 1);
+      }
+    }
+
+    // Mana natural regeneration
+    if (gameState.mana < gameState.maxMana) {
+      gameState.mana = Math.min(gameState.maxMana, gameState.mana + 4 * delta);
+      document.getElementById('hud-mana-val').innerText = `${Math.ceil(gameState.mana)} / ${Math.ceil(gameState.maxMana)}`;
+      document.getElementById('hud-mana-bar').style.width = `${Math.max(0, (gameState.mana / gameState.maxMana) * 100)}%`;
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  // --- INVENTORY & UI MODALS ---
+  function toggleModal(id) {
+    const el = document.getElementById(id);
+    if (el.style.display === 'flex') {
+      el.style.display = 'none';
+    } else {
+      el.style.display = 'flex';
+      if (id === 'modal-gear') renderGearUI();
+      if (id === 'modal-essence') renderEssenceShop();
+    }
+  }
+
+  function renderGearUI() {
+    for (const slot in gameState.equipped) {
+      const item = gameState.equipped[slot];
+      const nameEl = document.getElementById(`ui-name-${slot}`);
+      const statEl = document.getElementById(`ui-stat-${slot}`);
+      if (item) {
+        nameEl.innerText = item.name;
+        nameEl.className = `gear-slot-name rarity-${item.rarity}`;
+        statEl.innerText = item.grantedAbility ? `Ability: ${item.grantedAbility.name}` : `Armor +${item.armor || 0}`;
+      } else {
+        nameEl.innerText = 'Empty';
+        nameEl.className = 'gear-slot-name';
+        statEl.innerText = '-';
+      }
+    }
+    renderInventory();
+  }
+
+  function renderInventory() {
+    const container = document.getElementById('inventory-list');
+    container.innerHTML = '';
+    document.getElementById('inv-count').innerText = `${gameState.inventory.length} items`;
+
+    gameState.inventory.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = `inv-item rarity-${item.rarity}`;
+      div.innerHTML = `
+        <span style="font-size: 16px;">${item.slot.includes('Hand') ? '⚔️' : '🛡️'}</span>
+        <span class="inv-item-name">${item.name}</span>
+      `;
+      div.onclick = () => {
+        equipItem(index);
+      };
+      container.appendChild(div);
+    });
+  }
+
+  function equipItem(invIndex) {
+    const item = gameState.inventory[invIndex];
+    if (!item) return;
+
+    const oldItem = gameState.equipped[item.slot];
+    gameState.equipped[item.slot] = item;
+    gameState.inventory.splice(invIndex, 1);
+
+    if (oldItem) {
+      gameState.inventory.push(oldItem);
+    }
+
+    playSound('loot');
+    recalculateStats();
+    renderGearUI();
+    saveProgressToParent();
+  }
+
+  function renderEssenceShop() {
+    document.getElementById('modal-essence-count').innerText = gameState.essence;
+    document.getElementById('shop-str-val').innerText = `Current: +${gameState.statUpgrades.strength}`;
+    document.getElementById('shop-int-val').innerText = `Current: +${gameState.statUpgrades.intelligence}`;
+    document.getElementById('shop-vit-val').innerText = `Current: +${gameState.statUpgrades.vitality}`;
+    document.getElementById('shop-arm-val').innerText = `Current: +${gameState.statUpgrades.armor}`;
+    document.getElementById('shop-res-val').innerText = `Current: +${gameState.statUpgrades.magicResist}`;
+    document.getElementById('shop-crit-val').innerText = `Current: +${gameState.statUpgrades.critRate * 2}%`;
+  }
+
+  function buyStatUpgrade(stat, cost) {
+    if (gameState.essence < cost) return;
+    gameState.essence -= cost;
+    gameState.statUpgrades[stat]++;
+    playSound('loot');
+    recalculateStats();
+    renderEssenceShop();
+    saveProgressToParent();
+  }
+
+  // --- SAVE & PERSISTENCE VIA POSTMESSAGE ---
+  function saveProgressToParent() {
+    try {
+      if (window.parent && window.parent !== window) {
+        // Report High Score
+        window.parent.postMessage({
+          type: 'FIRESTORM_SAVE_SCORE',
+          gameId: 'rpg-game',
+          gameName: 'Realm of Champions 3D',
+          score: gameState.highScore,
+          details: `LVL ${gameState.level} ${gameState.classType.toUpperCase()} • Area ${gameState.currentArea} • ${gameState.totalKills} Kills`
+        }, '*');
+
+        // Report Full Character Save Data
+        window.parent.postMessage({
+          type: 'FIRESTORM_SAVE_RPG_DATA',
+          saveData: {
+            classType: gameState.classType,
+            characterName: gameState.characterName,
+            level: gameState.level,
+            experience: gameState.experience,
+            experienceNext: gameState.experienceNext,
+            essence: gameState.essence,
+            statUpgrades: gameState.statUpgrades,
+            equippedGear: gameState.equipped,
+            inventory: gameState.inventory,
+            currentArea: gameState.currentArea,
+            areaLevelMin: gameState.areaLevelMin,
+            areaLevelMax: gameState.areaLevelMax,
+            enemiesDefeatedInArea: gameState.areaKills,
+            totalKills: gameState.totalKills,
+            highScore: gameState.highScore
+          }
+        }, '*');
+      }
+    } catch (e) {}
+  }
+
+  // Next Realm Area Transition
+  function enterNextRealm() {
+    gameState.currentArea++;
+    gameState.areaKills = 0;
+    gameState.bossSpawned = false;
+    gameState.bossDefeated = false;
+    
+    // Each level ranges from 1 thru (7 + rand(1..4)) and next starting level is last level + 1
+    const span = 7 + Math.floor(Math.random() * 4) + 1;
+    gameState.areaLevelMin = gameState.areaLevelMax + 1;
+    gameState.areaLevelMax = gameState.areaLevelMin + span;
+
+    document.getElementById('modal-portal').style.display = 'none';
+
+    // Clear old enemies and spawn higher level realm enemies
+    for (const e of enemies) scene.remove(e.mesh);
+    enemies = [];
+    spawnInitialEnemies();
+
+    playerMesh.position.set(0, 1.35, 0);
+    showDamageNumber(0, 3, 0, `ENTERED REALM ${gameState.currentArea}!`, '#38bdf8');
+    recalculateStats();
+    saveProgressToParent();
+  }
+
+  // --- INITIALIZATION HANDLERS ---
+  function startGame(classType) {
+    gameState.classType = classType;
+    document.getElementById('modal-class-select').style.display = 'none';
+
+    // Start with basic Level 1 gear for some slots
+    gameState.equipped.rightHand = generateGearItem('rightHand', 1, 'common');
+    gameState.equipped.leftHand = generateGearItem('leftHand', 1, 'common');
+    gameState.equipped.head = generateGearItem('head', 1, 'common');
+    gameState.equipped.shoulders = generateGearItem('shoulders', 1, 'common');
+    gameState.equipped.chest = generateGearItem('chest', 1, 'common');
+    gameState.equipped.boots = generateGearItem('boots', 1, 'common');
+
+    // Add extra items to inventory
+    gameState.inventory.push(generateGearItem('belt', 1, 'common'));
+    gameState.inventory.push(generateGearItem('pants', 1, 'common'));
+
+    init3DWorld();
+    recalculateStats();
+    animate();
+
+    // Request persistent data from Firestorm Parent frame
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'FIRESTORM_REQUEST_INIT' }, '*');
+      }
+    } catch(e) {}
+  }
+
+  // Listen for parent load response
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'FIRESTORM_INIT_RESPONSE') {
+      if (event.data.user && event.data.user.callsign) {
+        gameState.characterName = event.data.user.callsign;
+      }
+      if (event.data.rpgData) {
+        const d = event.data.rpgData;
+        gameState.level = d.level || gameState.level;
+        gameState.experience = d.experience || 0;
+        gameState.experienceNext = d.experienceNext || 100;
+        gameState.essence = d.essence || 0;
+        gameState.statUpgrades = d.statUpgrades || gameState.statUpgrades;
+        gameState.equipped = d.equippedGear || gameState.equipped;
+        gameState.inventory = d.inventory || [];
+        gameState.currentArea = d.currentArea || 1;
+        gameState.totalKills = d.totalKills || 0;
+        recalculateStats();
+      }
+    }
+  });
+
+  // Attach UI Buttons
+  document.getElementById('select-melee-btn').onclick = () => startGame('melee');
+  document.getElementById('select-caster-btn').onclick = () => startGame('caster');
+
+  document.getElementById('btn-open-gear').onclick = () => toggleModal('modal-gear');
+  document.getElementById('btn-close-gear').onclick = () => toggleModal('modal-gear');
+
+  document.getElementById('btn-open-essence').onclick = () => toggleModal('modal-essence');
+  document.getElementById('btn-close-essence').onclick = () => toggleModal('modal-essence');
+
+  document.getElementById('btn-enter-portal').onclick = enterNextRealm;
+
+  document.getElementById('slot-attack').onclick = () => executeAttack('attack');
+  document.getElementById('slot-ab1').onclick = () => executeAttack('ab1');
+  document.getElementById('slot-ab2').onclick = () => executeAttack('ab2');
+  document.getElementById('slot-ab3').onclick = () => executeAttack('ab3');
+  document.getElementById('slot-ab4').onclick = () => executeAttack('ab4');
+
+  document.getElementById('buy-str-btn').onclick = () => buyStatUpgrade('strength', 5);
+  document.getElementById('buy-int-btn').onclick = () => buyStatUpgrade('intelligence', 5);
+  document.getElementById('buy-vit-btn').onclick = () => buyStatUpgrade('vitality', 5);
+  document.getElementById('buy-arm-btn').onclick = () => buyStatUpgrade('armor', 5);
+  document.getElementById('buy-res-btn').onclick = () => buyStatUpgrade('magicResist', 5);
+  document.getElementById('buy-crit-btn').onclick = () => buyStatUpgrade('critRate', 8);
+
+  document.getElementById('btn-sound-toggle').onclick = () => {
+    sfxEnabled = !sfxEnabled;
+    document.getElementById('btn-sound-toggle').innerText = sfxEnabled ? '🔊 Sound' : '🔇 Muted';
+  };
+
+})();
+</script>
+</body>
+</html>
