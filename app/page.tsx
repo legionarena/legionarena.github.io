@@ -261,14 +261,17 @@ export default function Home() {
         if (typeof score === 'number') {
           const res = saveGameHighScore(gameId, score, details || '', activeUser);
           playTacticalSound('success');
-          setHighScoreNotification({
-            id: Date.now().toString(),
-            gameId,
-            gameName: gameId === 'rpg-game' ? 'Realm of Champions 3D' : gameId === 'block-drop' ? 'Block Drop Matrix' : gameId === 'code-pressed' ? 'Reaction Challenge' : 'Supply Grid',
-            score,
-            details,
-            isNewPersonalBest: res?.isNewPersonalBest
-          });
+          // High score notifications disabled for rpg-game and slots-up as requested
+          if (gameId !== 'rpg-game' && gameId !== 'slots-up') {
+            setHighScoreNotification({
+              id: Date.now().toString(),
+              gameId,
+              gameName: gameId === 'block-drop' ? 'Block Drop Matrix' : gameId === 'code-pressed' ? 'Reaction Challenge' : 'Supply Grid',
+              score,
+              details,
+              isNewPersonalBest: res?.isNewPersonalBest
+            });
+          }
         }
       } else if (event.data.type === 'FIRESTORM_SAVE_RPG_DATA') {
         const { saveData } = event.data;

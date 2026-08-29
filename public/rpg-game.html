@@ -172,6 +172,8 @@
     .top-menu-buttons {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
     .hud-btn {
       background: rgba(30, 41, 59, 0.85);
@@ -193,6 +195,16 @@
       color: #fff;
     }
     .hud-btn.active {
+      background: #16a34a;
+      border-color: #22c55e;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
+    }
+    .hud-btn-warp {
+      background: rgba(37, 99, 235, 0.25);
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+    .hud-btn-warp:hover {
       background: #2563eb;
       border-color: #3b82f6;
     }
@@ -633,7 +645,10 @@
         </div>
 
         <div class="top-menu-buttons hud-interactive">
-          <button class="hud-btn" id="btn-open-gear">🛡️ Gear & Bag [I]</button>
+          <button class="hud-btn" id="btn-autowalk" title="Toggle Auto-Walk [X]">🏃 Auto-Walk: OFF [X]</button>
+          <button class="hud-btn" id="btn-reset-controls" title="Reset Stuck Controls [R]">🔄 Reset Controls [R]</button>
+          <button class="hud-btn hud-btn-warp" id="btn-warp-sanctuary" title="Warp Back to Temple Sanctuary [T]">🏛️ Warp to Start [T]</button>
+          <button class="hud-btn" id="btn-open-gear">🛡️ Gear &amp; Bag [I]</button>
           <button class="hud-btn" id="btn-open-essence">💎 Essence Shop [K]</button>
           <button class="hud-btn" id="btn-sound-toggle">🔊 Sound</button>
         </div>
@@ -690,7 +705,7 @@
       </div>
 
       <div class="controls-hint">
-        WASD to Move (W: Forward, S: Back, A/D: Strafe) • ARROWS to Rotate Camera & Aim • SPACE to Attack • 1-4 for Abilities
+        WASD to Move • ARROWS / MOUSE DRAG to Rotate Camera • SPACE to Attack • 1-4 for Abilities • X: Auto-Walk • R: Reset Controls • T: Warp to Start
       </div>
     </div>
   </div>
@@ -954,8 +969,18 @@
   }
 
   // --- GAME STATE ---
-  const ARENA_SIZE = 256;
-  const HALF_ARENA = ARENA_SIZE / 2;
+  const ARENA_SIZE = 512;
+  const HALF_ARENA = ARENA_SIZE / 2; // 256
+  const SANCTUARY_RADIUS = 18; // Compact sacred elevated round temple
+  
+  // Northeast Fort & River Constants
+  const FORT_X = 175;
+  const FORT_Z = -175;
+  const FORT_SIZE = 64;
+  const FORT_ELEVATION = 9.0;
+  const RIVER_WIDTH = 32;
+  const RIVER_HALF_WIDTH = 16;
+  const RIVER_NORTH_LIMIT = -105; // River stops near the foothills, does not cross into fort
 
   let gameState = {
     classType: 'melee',
@@ -964,10 +989,10 @@
     experience: 0,
     experienceNext: 100,
     essence: 0,
-    hp: 120,
-    maxHp: 120,
-    mana: 60,
-    maxMana: 60,
+    hp: 10,
+    maxHp: 10,
+    mana: 20,
+    maxMana: 20,
     statUpgrades: {
       strength: 0,
       intelligence: 0,
@@ -992,6 +1017,9 @@
     areaLevelMax: 7 + Math.floor(Math.random() * 4) + 1, // 1 through (7 + rand(1..4))
     areaKills: 0,
     totalKills: 0,
+    fortUnlocked: false,
+    midBossSpawned: false,
+    midBossDefeated: false,
     bossSpawned: false,
     bossDefeated: false,
     highScore: 0
@@ -1009,6 +1037,8 @@
   // Three.js Scene Setup
   let scene, camera, renderer;
   let playerMesh, playerLight;
+  let fortGateMesh, fortBarrierMesh, fortGroup;
+  let riverWaterMesh;
   let enemies = [];
   let floatingTexts = [];
   let keys = {};
@@ -1019,7 +1049,71 @@
   let cameraTheta = Math.PI; // angle around character
   let cameraPhi = 0.45; // pitch angle
 
-  // Generate Equipment based on slot and level
+  // Reusable vectors for 60 FPS performance without GC allocations
+  const _vForward = new THREE.Vector3();
+  const _vRight = new THREE.Vector3();
+  const _vMove = new THREE.Vector3();
+  const _vDir = new THREE.Vector3();
+  const _vScreen = new THREE.Vector3();
+
+  // River Centerline Path along Middle East side
+  function getRiverCenterX(z) {
+    return 110 + 18 * Math.sin(z * 0.016);
+  }
+
+  // Smooth Continuous Procedural Terrain Height Map
+  function getTerrainHeight(x, z) {
+    const distFromCenter = Math.hypot(x, z);
+    if (distFromCenter < 22) return 0; // Flat sanctuary base
+
+    const dxFort = x - FORT_X;
+    const dzFort = z - FORT_Z;
+    const distToFortCenter = Math.hypot(dxFort, dzFort);
+
+    // Flattened area around the Northeast mid-boss fort (plateau & surroundings)
+    if (Math.abs(dxFort) <= 52 && Math.abs(dzFort) <= 52) {
+      return FORT_ELEVATION;
+    }
+
+    let baseH = 0;
+
+    // Scenic smooth apron transitioning down from the flattened fort plateau
+    if (distToFortCenter < 80) {
+      const t = Math.max(0, (distToFortCenter - 52) / 28);
+      const hillT = 1 - t;
+      baseH = FORT_ELEVATION * (hillT * hillT) + 3.0 * (1 - hillT);
+    } else {
+      // Rolling terrain that gradually rises to hills towards the East and Northeast
+      const eastBias = Math.max(0, (x + 120) / 376);
+      const northBias = Math.max(0, (-z + 120) / 376);
+      const lowWave = Math.sin(x * 0.014) * Math.cos(z * 0.018) * 4.2;
+      const medWave = Math.sin(x * 0.036 + z * 0.03) * 2.0;
+      baseH = Math.max(0, (eastBias * 5.8 + northBias * 4.6) + lowWave + medWave);
+    }
+
+    // Smooth blend to flat sanctuary
+    if (distFromCenter < 36) {
+      const blend = (distFromCenter - 22) / 14;
+      baseH *= Math.max(0, Math.min(1, blend));
+    }
+
+    // Single 32-wide river running along Middle East side towards the fort but NOT crossing into the fort
+    // River runs from south boundary (z = 252) up to z = -105 (stops well before the fort at z = -143..-207)
+    if (z > RIVER_NORTH_LIMIT && z < (HALF_ARENA - 4)) {
+      const rCenterX = getRiverCenterX(z);
+      const rDist = Math.abs(x - rCenterX);
+      if (rDist < RIVER_HALF_WIDTH) {
+        // 32-wide parabolic riverbed
+        const t = rDist / RIVER_HALF_WIDTH;
+        const depth = 4.2 * Math.cos(t * (Math.PI / 2));
+        baseH -= depth;
+      }
+    }
+
+    return baseH;
+  }
+
+  // Generate Equipment based on slot and level - EXACT SINGLE STAT EQUAL TO OR LESS THAN ENEMY LEVEL
   function generateGearItem(slot, level, rarity = 'common') {
     const isMeleeClass = gameState.classType === 'melee';
     const id = 'gear_' + Math.random().toString(36).substr(2, 9);
@@ -1037,70 +1131,68 @@
     let intelligence = 0;
     let vitality = 0;
 
-    const rarityMultipliers = { common: 1, uncommon: 1.3, rare: 1.7, epic: 2.2, legendary: 3.0 };
-    const mult = rarityMultipliers[rarity] || 1;
+    // Stat crunch rule: each item has ONLY ONE stat, equal to or less than level
+    const statVal = Math.max(1, level);
 
     switch(slot) {
       case 'rightHand':
         if (isMeleeClass) {
-          name = `${rarity.toUpperCase()} Iron Broadsword L${level}`;
+          name = `${rarity.toUpperCase()} Mountain Blade L${level}`;
           elementalType = 'melee';
-          strength = Math.round((4 + level * 2) * mult);
+          strength = statVal; // ONLY ONE STAT: Strength <= level
           grantedAbility = {
             id: 'ab_cleave',
             name: 'Whirlwind Strike',
             type: 'melee',
-            damageBase: Math.round((20 + level * 7) * mult),
+            damageBase: 3 + Math.max(1, Math.floor(level * 0.8)),
             cooldown: 2.5,
-            manaCost: 10,
+            manaCost: 4,
             range: 6,
-            description: 'Deals heavy physical melee cleave damage in front of you.'
+            description: 'Deals physical melee cleave damage in front of you.'
           };
         } else {
           name = `${rarity.toUpperCase()} Pyromancer Staff L${level}`;
           elementalType = 'fire';
-          intelligence = Math.round((5 + level * 2.2) * mult);
+          intelligence = statVal; // ONLY ONE STAT: Intelligence <= level
           grantedAbility = {
             id: 'ab_fireball',
             name: 'Pyroblast',
             type: 'fire',
-            damageBase: Math.round((28 + level * 8) * mult),
+            damageBase: 4 + Math.max(1, Math.floor(level * 0.9)),
             cooldown: 2.5,
-            manaCost: 15,
+            manaCost: 5,
             range: 22,
-            description: 'Launches a searing fireball dealing massive Fire damage.'
+            description: 'Launches a searing fireball dealing Fire damage.'
           };
         }
         break;
 
       case 'leftHand':
         if (isMeleeClass) {
-          name = `${rarity.toUpperCase()} Tower Shield L${level}`;
+          name = `${rarity.toUpperCase()} Stone Shield L${level}`;
           elementalType = 'melee';
-          armor = Math.round((10 + level * 3) * mult);
-          vitality = Math.round((4 + level * 1.5) * mult);
+          armor = statVal; // ONLY ONE STAT: Armor <= level
           grantedAbility = {
             id: 'ab_shield_bash',
             name: 'Shield Slam',
             type: 'melee',
-            damageBase: Math.round((16 + level * 5) * mult),
+            damageBase: 2 + Math.max(1, Math.floor(level * 0.6)),
             cooldown: 3.5,
-            manaCost: 12,
+            manaCost: 4,
             range: 5,
-            description: 'Bashes target with shield, dealing blunt physical damage and briefly stunning.'
+            description: 'Bashes target with shield, dealing physical damage.'
           };
         } else {
           name = `${rarity.toUpperCase()} Frost Tome L${level}`;
           elementalType = 'frost';
-          magicResist = Math.round((8 + level * 2.5) * mult);
-          intelligence = Math.round((4 + level * 1.8) * mult);
+          magicResist = statVal; // ONLY ONE STAT: Magic Resist <= level
           grantedAbility = {
             id: 'ab_frost_nova',
             name: 'Frost Spike',
             type: 'frost',
-            damageBase: Math.round((24 + level * 7) * mult),
+            damageBase: 3 + Math.max(1, Math.floor(level * 0.7)),
             cooldown: 3.5,
-            manaCost: 18,
+            manaCost: 5,
             range: 18,
             description: 'Impales target with glacial Frost shard.'
           };
@@ -1110,15 +1202,14 @@
       case 'head':
         name = `${rarity.toUpperCase()} Helm of Thunder L${level}`;
         elementalType = 'lightning';
-        armor = Math.round((5 + level * 1.5) * mult);
-        magicResist = Math.round((4 + level * 1.5) * mult);
+        magicResist = statVal; // ONLY ONE STAT: Magic Resist <= level
         grantedAbility = {
           id: 'ab_lightning_strike',
           name: 'Thunderbolt',
           type: 'lightning',
-          damageBase: Math.round((32 + level * 9) * mult),
+          damageBase: 4 + Math.max(1, Math.floor(level * 0.9)),
           cooldown: 4.5,
-          manaCost: 20,
+          manaCost: 6,
           range: 24,
           description: 'Calls down a bolt of Lightning from the sky.'
         };
@@ -1127,15 +1218,15 @@
       case 'shoulders':
         name = `${rarity.toUpperCase()} Pauldrons of Ruin L${level}`;
         elementalType = 'arcane';
-        armor = Math.round((6 + level * 1.8) * mult);
-        vitality = Math.round((5 + level * 1.5) * mult);
+        strength = isMeleeClass ? statVal : 0; // ONLY ONE STAT
+        intelligence = isMeleeClass ? 0 : statVal;
         grantedAbility = {
           id: 'ab_arcane_burst',
           name: 'Arcane Nova',
           type: 'arcane',
-          damageBase: Math.round((38 + level * 10) * mult),
+          damageBase: 5 + Math.max(1, Math.floor(level * 1.0)),
           cooldown: 5.5,
-          manaCost: 25,
+          manaCost: 8,
           range: 14,
           description: 'Emits a shockwave of raw Arcane energy to surrounding enemies.'
         };
@@ -1143,23 +1234,19 @@
 
       case 'chest':
         name = `${rarity.toUpperCase()} Chestguard L${level}`;
-        armor = Math.round((14 + level * 4) * mult);
-        vitality = Math.round((8 + level * 2.5) * mult);
+        vitality = statVal; // ONLY ONE STAT: Vitality <= level
         break;
       case 'belt':
         name = `${rarity.toUpperCase()} Girdle L${level}`;
-        armor = Math.round((6 + level * 1.5) * mult);
-        vitality = Math.round((4 + level * 1.2) * mult);
+        armor = statVal; // ONLY ONE STAT: Armor <= level
         break;
       case 'pants':
         name = `${rarity.toUpperCase()} Greaves L${level}`;
-        armor = Math.round((10 + level * 2.5) * mult);
-        vitality = Math.round((6 + level * 2) * mult);
+        vitality = statVal; // ONLY ONE STAT: Vitality <= level
         break;
       case 'boots':
         name = `${rarity.toUpperCase()} Treads L${level}`;
-        armor = Math.round((5 + level * 1.5) * mult);
-        vitality = Math.round((3 + level * 1.2) * mult);
+        armor = statVal; // ONLY ONE STAT: Armor <= level
         break;
     }
 
@@ -1181,18 +1268,18 @@
     };
   }
 
-  // Recalculate Player Total Stats from Gear and Essence Upgrades
+  // Recalculate Player Total Stats from Gear and Essence Upgrades (Stat-crunched to 10 start HP)
   function recalculateStats() {
-    let baseHp = 100 + (gameState.level - 1) * 18;
-    let baseMana = 50 + (gameState.level - 1) * 12;
+    let baseHp = 10 + (gameState.level - 1) * 2;
+    let baseMana = 20 + (gameState.level - 1) * 3;
 
-    let totalArmor = gameState.statUpgrades.armor * 4;
-    let totalResist = gameState.statUpgrades.magicResist * 4;
-    let totalStr = gameState.statUpgrades.strength * 3;
-    let totalInt = gameState.statUpgrades.intelligence * 3;
-    let totalVit = gameState.statUpgrades.vitality * 3;
+    let totalArmor = gameState.statUpgrades.armor;
+    let totalResist = gameState.statUpgrades.magicResist;
+    let totalStr = gameState.statUpgrades.strength;
+    let totalInt = gameState.statUpgrades.intelligence;
+    let totalVit = gameState.statUpgrades.vitality;
 
-    // Sum equipped items
+    // Sum equipped items (each item gives exactly 1 stat <= level)
     for (const slot in gameState.equipped) {
       const item = gameState.equipped[slot];
       if (item) {
@@ -1204,8 +1291,8 @@
       }
     }
 
-    gameState.maxHp = baseHp + totalVit * 12;
-    gameState.maxMana = baseMana + totalInt * 8;
+    gameState.maxHp = baseHp + totalVit * 2;
+    gameState.maxMana = baseMana + totalInt * 2;
     gameState.hp = Math.min(gameState.hp, gameState.maxHp);
     gameState.mana = Math.min(gameState.mana, gameState.maxMana);
 
@@ -1241,14 +1328,24 @@
     document.getElementById('hud-xp-val').innerText = `${Math.floor(gameState.experience)} / ${gameState.experienceNext}`;
     document.getElementById('hud-xp-bar').style.width = `${Math.min(100, (gameState.experience / gameState.experienceNext) * 100)}%`;
 
-    document.getElementById('hud-zone-title').innerText = `Zone ${gameState.currentArea}: Level ${gameState.areaLevelMin}-${gameState.areaLevelMax}`;
-    document.getElementById('hud-zone-kills').innerText = `Area Kills: ${gameState.areaKills} / 256 ${gameState.areaKills >= 256 ? '• BOSS SPAWNED!' : ''}`;
+    let bossStatusText = '';
+    if (gameState.areaKills < 96) {
+      bossStatusText = `Kills: ${gameState.areaKills} / 96 (Fort Boss Unlocks)`;
+    } else if (!gameState.midBossDefeated) {
+      bossStatusText = `🏰 FORT UNLOCKED [NE] • Mid-Boss Awakened! (${gameState.areaKills}/256)`;
+    } else if (gameState.areaKills < 256) {
+      bossStatusText = `Mid-Boss Slain! Kills: ${gameState.areaKills} / 256 (Dread Titan)`;
+    } else {
+      bossStatusText = `⚔️ DREAD TITAN AWAKENED!`;
+    }
+
+    document.getElementById('hud-zone-title').innerText = `Realm ${gameState.currentArea}: Level ${gameState.areaLevelMin}-${gameState.areaLevelMax}`;
+    document.getElementById('hud-zone-kills').innerText = bossStatusText;
     document.getElementById('hud-essence-val').innerText = `${gameState.essence} Essence`;
     document.getElementById('modal-essence-count').innerText = gameState.essence;
   }
 
   // --- THREE.JS INITIALIZATION & STYLIZED WORLD GENERATION ---
-  const SANCTUARY_RADIUS = 18; // Compact sacred elevated round temple
   let sanctuaryBeacon;
   let templeTorches = [];
 
@@ -1363,6 +1460,81 @@
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }
+
+  function createGateTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Heavy weathered iron & dark oak wood base
+    ctx.fillStyle = '#1c1917';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Vertical heavy wooden timber planks
+    const plankWidth = 512 / 8;
+    for (let i = 0; i < 8; i++) {
+      const px = i * plankWidth;
+      const woodShade = 36 + (i % 3) * 6;
+      ctx.fillStyle = `rgb(${woodShade + 16}, ${woodShade + 8}, ${woodShade})`;
+      ctx.fillRect(px + 2, 0, plankWidth - 4, 512);
+
+      // Plank grain lines
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      for (let g = 0; g < 4; g++) {
+        ctx.fillRect(px + 8 + g * 12, 0, 1.5, 512);
+      }
+    }
+
+    // Heavy Forged Iron Banding (Horizontal Bars)
+    const bandY = [50, 180, 310, 440];
+    for (const by of bandY) {
+      ctx.fillStyle = '#292524';
+      ctx.fillRect(0, by, 512, 38);
+
+      ctx.fillStyle = '#57534e';
+      ctx.fillRect(0, by + 2, 512, 4); // Highlight
+
+      ctx.fillStyle = '#0c0a09';
+      ctx.fillRect(0, by + 34, 512, 4); // Shadow
+
+      // Iron Rivet Studs
+      for (let rx = 24; rx < 512; rx += 48) {
+        ctx.fillStyle = '#a8a29e';
+        ctx.beginPath();
+        ctx.arc(rx, by + 19, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#292524';
+        ctx.beginPath();
+        ctx.arc(rx + 1, by + 20, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Central Iron Dragon & Sword Crest
+    ctx.strokeStyle = '#d97706';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.arc(256, 256, 75, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(256, 256, 68, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Runic Symbols Inside Crest
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 38px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('⚔ 🛡 ⚔', 256, 256);
+
+    const texture = new THREE.CanvasTexture(canvas);
     return texture;
   }
 
@@ -1668,17 +1840,29 @@
     return root;
   }
 
-  function createStylizedEnemyMesh(isBoss, isCaster, enemyLvl) {
+  function createStylizedEnemyMesh(isBoss, isCaster, enemyLvl, isMidBoss = false) {
     const root = new THREE.Group();
-    const scale = isBoss ? 2.5 : 1.0;
+    const scale = isBoss ? 2.5 : (isMidBoss ? 1.85 : 1.0);
 
     // Materials
-    const baseColor = isBoss ? 0x7f1d1d : (isCaster ? 0x4c1d95 : 0x3f3f46);
-    const accentColor = isBoss ? 0xf59e0b : (isCaster ? 0xa855f7 : 0xef4444);
+    const baseColor = isMidBoss ? 0x1c1917 : (isBoss ? 0x7f1d1d : (isCaster ? 0x4c1d95 : 0x3f3f46));
+    const accentColor = isMidBoss ? 0xf59e0b : (isBoss ? 0xf97316 : (isCaster ? 0xa855f7 : 0xef4444));
 
-    const bodyMat = new THREE.MeshStandardMaterial({ color: baseColor, roughness: 0.7, metalness: isBoss ? 0.8 : 0.3 });
-    const trimMat = new THREE.MeshStandardMaterial({ color: accentColor, roughness: 0.4 });
-    const eyeMat = new THREE.MeshBasicMaterial({ color: isBoss ? 0xf97316 : (isCaster ? 0x06b6d4 : 0xef4444) });
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: baseColor,
+      roughness: isMidBoss ? 0.4 : 0.7,
+      metalness: (isBoss || isMidBoss) ? 0.85 : 0.3
+    });
+    const trimMat = new THREE.MeshStandardMaterial({
+      color: accentColor,
+      roughness: 0.3,
+      metalness: 0.75,
+      emissive: (isMidBoss || isBoss) ? 0xd97706 : 0x000000,
+      emissiveIntensity: (isMidBoss || isBoss) ? 0.35 : 0
+    });
+    const eyeMat = new THREE.MeshBasicMaterial({
+      color: isMidBoss ? 0xfacc15 : (isBoss ? 0xf97316 : (isCaster ? 0x06b6d4 : 0xef4444))
+    });
     const boneMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.9 });
 
     // Torso
@@ -1691,21 +1875,35 @@
     torsoGroup.add(chest);
 
     // Spiked Pauldrons
-    const spL = new THREE.Mesh(new THREE.ConeGeometry(0.25 * scale, 0.5 * scale, 4), trimMat);
+    const spL = new THREE.Mesh(new THREE.ConeGeometry(0.28 * scale, 0.55 * scale, 4), trimMat);
     spL.position.set(-0.6 * scale, 0.5 * scale, 0);
     spL.rotation.z = Math.PI / 4;
     torsoGroup.add(spL);
 
-    const spR = new THREE.Mesh(new THREE.ConeGeometry(0.25 * scale, 0.5 * scale, 4), trimMat);
+    const spR = new THREE.Mesh(new THREE.ConeGeometry(0.28 * scale, 0.55 * scale, 4), trimMat);
     spR.position.set(0.6 * scale, 0.5 * scale, 0);
     spR.rotation.z = -Math.PI / 4;
     torsoGroup.add(spR);
+
+    // Mid-Boss / Titan Back Battle Standards
+    if (isMidBoss || isBoss) {
+      const bannerPole = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * scale, 0.06 * scale, 2.4 * scale, 6), trimMat);
+      bannerPole.position.set(0, 0.8 * scale, -0.35 * scale);
+      torsoGroup.add(bannerPole);
+
+      const bannerCloth = new THREE.Mesh(
+        new THREE.BoxGeometry(0.9 * scale, 1.2 * scale, 0.05 * scale),
+        new THREE.MeshStandardMaterial({ color: isMidBoss ? 0xb91c1c : 0x7c2d12, roughness: 0.8 })
+      );
+      bannerCloth.position.set(0, 1.3 * scale, -0.38 * scale);
+      torsoGroup.add(bannerCloth);
+    }
 
     // Head
     const headGroup = new THREE.Group();
     headGroup.position.set(0, 0.75 * scale, 0);
 
-    const skull = new THREE.Mesh(new THREE.BoxGeometry(0.6 * scale, 0.6 * scale, 0.6 * scale), isCaster ? bodyMat : boneMat);
+    const skull = new THREE.Mesh(new THREE.BoxGeometry(0.6 * scale, 0.6 * scale, 0.6 * scale), (isCaster && !isMidBoss) ? bodyMat : (isMidBoss ? bodyMat : boneMat));
     skull.castShadow = true;
     headGroup.add(skull);
 
@@ -1718,8 +1916,8 @@
     eyeR.position.set(0.16 * scale, 0.05 * scale, 0.32 * scale);
     headGroup.add(eyeR);
 
-    if (isBoss) {
-      // Blazing Crown Horns for Dread Titan
+    if (isBoss || isMidBoss) {
+      // Blazing Crown Horns
       const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.2 * scale, 0.9 * scale, 5), trimMat);
       hornL.position.set(-0.35 * scale, 0.5 * scale, 0);
       hornL.rotation.z = Math.PI / 6;
@@ -1741,8 +1939,12 @@
     armL.position.y = -0.35 * scale;
     leftArmPivot.add(armL);
 
-    if (!isCaster) {
-      // Offhand Bone Cleaver
+    if (isMidBoss) {
+      // Offhand Flaming Cleaver
+      const cleaver = new THREE.Mesh(new THREE.BoxGeometry(0.14 * scale, 1.2 * scale, 0.4 * scale), trimMat);
+      cleaver.position.set(0, -0.6 * scale, 0.3 * scale);
+      leftArmPivot.add(cleaver);
+    } else if (!isCaster) {
       const cleaver = new THREE.Mesh(new THREE.BoxGeometry(0.12 * scale, 0.8 * scale, 0.3 * scale), boneMat);
       cleaver.position.set(0, -0.6 * scale, 0.2 * scale);
       leftArmPivot.add(cleaver);
@@ -1757,7 +1959,7 @@
     armR.position.y = -0.35 * scale;
     rightArmPivot.add(armR);
 
-    if (isCaster) {
+    if (isCaster && !isMidBoss) {
       // Cultist Staff with Floating Orb
       const st = new THREE.Mesh(new THREE.CylinderGeometry(0.05 * scale, 0.05 * scale, 2.0 * scale, 6), trimMat);
       st.position.set(0, 0.2 * scale, 0.3 * scale);
@@ -1767,9 +1969,9 @@
       orb.position.set(0, 1.3 * scale, 0.3 * scale);
       rightArmPivot.add(orb);
     } else {
-      // Spiked Executioner Axe / Colossal Blade
-      const wGeo = new THREE.BoxGeometry(0.15 * scale, 1.6 * scale, 0.45 * scale);
-      const wMesh = new THREE.Mesh(wGeo, isBoss ? trimMat : boneMat);
+      // Spiked Executioner Axe / Greatblade
+      const wGeo = new THREE.BoxGeometry(0.16 * scale, 1.8 * scale, 0.5 * scale);
+      const wMesh = new THREE.Mesh(wGeo, (isBoss || isMidBoss) ? trimMat : boneMat);
       wMesh.position.set(0, 0.1 * scale, 0.4 * scale);
       wMesh.rotation.x = Math.PI / 4;
       wMesh.castShadow = true;
@@ -1810,31 +2012,49 @@
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x070d1a);
-    scene.fog = new THREE.FogExp2(0x070d1a, 0.012);
+    scene.fog = new THREE.FogExp2(0x070d1a, 0.0075); // Optimized fog for 512x512 vista
 
-    camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
+    camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 750);
     
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // Ambient and Directional Moonlight/Sunlight
-    const ambientLight = new THREE.AmbientLight(0x4a6582, 1.3);
+    const ambientLight = new THREE.AmbientLight(0x4a6582, 1.4);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xfff5dd, 1.4);
-    dirLight.position.set(50, 90, 60);
+    const dirLight = new THREE.DirectionalLight(0xfff5dd, 1.35);
+    dirLight.position.set(120, 180, 140);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 1024;
     dirLight.shadow.mapSize.height = 1024;
+    dirLight.shadow.camera.near = 10;
+    dirLight.shadow.camera.far = 600;
+    dirLight.shadow.camera.left = -260;
+    dirLight.shadow.camera.right = 260;
+    dirLight.shadow.camera.top = 260;
+    dirLight.shadow.camera.bottom = -260;
     scene.add(dirLight);
 
     // =========================================================================
-    // 256x256 STYLIZED FOREST & PLAINS GROUND TERRAIN
+    // 512x512 DISPLACED PROCEDURAL FOREST & PLAINS TERRAIN
     // =========================================================================
     const groundTex = createPlainsTerrainTexture();
-    const groundGeo = new THREE.PlaneGeometry(ARENA_SIZE, ARENA_SIZE, 32, 32);
+    groundTex.repeat.set(32, 32);
+
+    const groundGeo = new THREE.PlaneGeometry(ARENA_SIZE, ARENA_SIZE, 96, 96);
+    const posAttr = groundGeo.attributes.position;
+    for (let i = 0; i < posAttr.count; i++) {
+      const vx = posAttr.getX(i);
+      const vy = posAttr.getY(i);
+      // PlaneGeometry in XY: world X = vx, world Z = -vy
+      posAttr.setZ(i, getTerrainHeight(vx, -vy));
+    }
+    groundGeo.computeVertexNormals();
+
     const groundMat = new THREE.MeshStandardMaterial({
       map: groundTex,
       roughness: 0.88,
@@ -1845,10 +2065,78 @@
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Subtle natural boundary grid helper
-    const gridHelper = new THREE.GridHelper(ARENA_SIZE, 32, 0x166534, 0x14532d);
-    gridHelper.position.y = 0.02;
+    // Natural boundary grid helper
+    const gridHelper = new THREE.GridHelper(ARENA_SIZE, 64, 0x166534, 0x14532d);
+    gridHelper.position.y = 0.05;
     scene.add(gridHelper);
+
+    // =========================================================================
+    // 32-WIDE RIVER RUNNING ALONG MIDDLE EAST SIDE TOWARDS THE FORT
+    // =========================================================================
+    const riverSegments = 64;
+    const riverZStart = HALF_ARENA - 4; // 252
+    const riverZEnd = RIVER_NORTH_LIMIT; // -105
+    const riverZStep = (riverZEnd - riverZStart) / riverSegments;
+
+    const riverGeo = new THREE.BufferGeometry();
+    const riverVertices = [];
+    const riverIndices = [];
+    const riverUvs = [];
+
+    for (let i = 0; i <= riverSegments; i++) {
+      const cz = riverZStart + i * riverZStep;
+      const cx = getRiverCenterX(cz);
+      const waterY = -0.65; // Submerged water surface
+
+      // Left Bank & Right Bank (Width = 32, i.e. +-16)
+      riverVertices.push(cx - RIVER_HALF_WIDTH, waterY, cz);
+      riverVertices.push(cx + RIVER_HALF_WIDTH, waterY, cz);
+
+      riverUvs.push(0, i / 4);
+      riverUvs.push(1, i / 4);
+
+      if (i < riverSegments) {
+        const base = i * 2;
+        riverIndices.push(base, base + 1, base + 2);
+        riverIndices.push(base + 1, base + 3, base + 2);
+      }
+    }
+
+    riverGeo.setAttribute('position', new THREE.Float32BufferAttribute(riverVertices, 3));
+    riverGeo.setAttribute('uv', new THREE.Float32BufferAttribute(riverUvs, 2));
+    riverGeo.setIndex(riverIndices);
+    riverGeo.computeVertexNormals();
+
+    const riverMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      roughness: 0.1,
+      metalness: 0.85,
+      transparent: true,
+      opacity: 0.85
+    });
+    riverWaterMesh = new THREE.Mesh(riverGeo, riverMat);
+    riverWaterMesh.receiveShadow = true;
+    scene.add(riverWaterMesh);
+
+    // Riverhead Spring Pool & Rocky Outcrop at z = -105 near Fort Foothills
+    const springCenterX = getRiverCenterX(RIVER_NORTH_LIMIT);
+    const springPoolGeo = new THREE.CylinderGeometry(RIVER_HALF_WIDTH + 2, RIVER_HALF_WIDTH + 4, 1.2, 24);
+    const springPool = new THREE.Mesh(springPoolGeo, riverMat);
+    springPool.position.set(springCenterX, -0.65, RIVER_NORTH_LIMIT);
+    scene.add(springPool);
+
+    // Riverbed Rocks
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
+    for (let r = 0; r < 20; r++) {
+      const rz = riverZStart + (r / 20) * (riverZEnd - riverZStart);
+      const rx = getRiverCenterX(rz) + (Math.random() - 0.5) * 22;
+      const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8 + Math.random() * 1.4, 0), rockMat);
+      rock.position.set(rx, getTerrainHeight(rx, rz) + 0.3, rz);
+      rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+      rock.castShadow = true;
+      rock.receiveShadow = true;
+      scene.add(rock);
+    }
 
     // =========================================================================
     // DEDICATED START ZONE: ELEVATED ROUND TEMPLE (SAFE ZONE NO ENEMIES)
@@ -1856,35 +2144,21 @@
     const templeGroup = new THREE.Group();
     templeGroup.position.set(0, 0, 0);
 
-    const marbleMat = new THREE.MeshStandardMaterial({
-      color: 0xe2e8f0,
-      roughness: 0.45,
-      metalness: 0.15
-    });
-    const darkStoneMat = new THREE.MeshStandardMaterial({
-      color: 0x334155,
-      roughness: 0.75
-    });
-    const goldMat = new THREE.MeshStandardMaterial({
-      color: 0xf59e0b,
-      roughness: 0.25,
-      metalness: 0.85
-    });
+    const marbleMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.45, metalness: 0.15 });
+    const darkStoneMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.75 });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.25, metalness: 0.85 });
 
-    // 1. Tiered Stepped Round Foundation
-    // Step 1: Base Tier (Radius 18, Height 0.45)
+    // Tiered Stepped Round Foundation
     const baseStep = new THREE.Mesh(new THREE.CylinderGeometry(SANCTUARY_RADIUS, SANCTUARY_RADIUS + 0.6, 0.45, 48), darkStoneMat);
     baseStep.position.y = 0.225;
     baseStep.receiveShadow = true;
     templeGroup.add(baseStep);
 
-    // Step 2: Middle Tier (Radius 16, Height 0.45)
     const midStep = new THREE.Mesh(new THREE.CylinderGeometry(SANCTUARY_RADIUS - 2, SANCTUARY_RADIUS - 1.6, 0.45, 48), darkStoneMat);
     midStep.position.y = 0.675;
     midStep.receiveShadow = true;
     templeGroup.add(midStep);
 
-    // Step 3: Top Marble Temple Floor (Radius 14, Height 0.45 -> Floor level = 1.35)
     const topFloor = new THREE.Mesh(new THREE.CylinderGeometry(SANCTUARY_RADIUS - 4, SANCTUARY_RADIUS - 3.6, 0.45, 48), marbleMat);
     topFloor.position.y = 1.125;
     topFloor.receiveShadow = true;
@@ -1907,7 +2181,7 @@
     cyanRing.position.y = 1.36;
     templeGroup.add(cyanRing);
 
-    // 2. Classical Temple Circular Colonnade (10 Fluted Marble Pillars + Entablature Architrave Ring)
+    // Classical Temple Circular Colonnade
     const pillarCount = 10;
     const colonnadeRadius = 12.8;
     const pillarHeight = 7.0;
@@ -1920,19 +2194,16 @@
       const pGroup = new THREE.Group();
       pGroup.position.set(px, 1.35, pz);
 
-      // Pillar Base Plinth
       const plinth = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.5, 1.2), darkStoneMat);
       plinth.position.y = 0.25;
       plinth.castShadow = true;
       pGroup.add(plinth);
 
-      // Fluted Shaft
       const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.52, pillarHeight, 16), marbleMat);
       shaft.position.y = 0.5 + pillarHeight / 2;
       shaft.castShadow = true;
       pGroup.add(shaft);
 
-      // Ornate Capital Trim
       const capital = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.6, 1.3), goldMat);
       capital.position.y = 0.5 + pillarHeight + 0.3;
       capital.castShadow = true;
@@ -1941,26 +2212,17 @@
       templeGroup.add(pGroup);
     }
 
-    // Circular Temple Roof Entablature Ring atop the columns
-    const entablature = new THREE.Mesh(
-      new THREE.TorusGeometry(colonnadeRadius, 0.65, 12, 48),
-      darkStoneMat
-    );
+    const entablature = new THREE.Mesh(new THREE.TorusGeometry(colonnadeRadius, 0.65, 12, 48), darkStoneMat);
     entablature.rotation.x = Math.PI / 2;
     entablature.position.y = 1.35 + 0.5 + pillarHeight + 0.6;
     entablature.castShadow = true;
     templeGroup.add(entablature);
 
-    // 3. Central Temple Altar & Floating Sacred Beacon
+    // Sacred Floating Celestial Beacon Crystal
     const altarBase = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.8, 0.6, 8), darkStoneMat);
     altarBase.position.y = 1.65;
     templeGroup.add(altarBase);
 
-    const altarTop = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, 0.3, 8), goldMat);
-    altarTop.position.y = 2.0;
-    templeGroup.add(altarTop);
-
-    // Sacred Floating Celestial Beacon Crystal
     const crystalGeo = new THREE.OctahedronGeometry(1.5, 0);
     const crystalMat = new THREE.MeshStandardMaterial({
       color: 0x38bdf8,
@@ -1974,8 +2236,7 @@
     templeGroup.add(sanctuaryBeacon);
 
     // 4 Sacred Temple Torch Braziers
-    const torchAngles = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
-    torchAngles.forEach(ang => {
+    [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach(ang => {
       const tx = Math.cos(ang) * 9.5;
       const tz = Math.sin(ang) * 9.5;
 
@@ -1993,9 +2254,8 @@
       templeGroup.add(tLight);
     });
 
-    // 4 Step Ramps leading down to the plains (North, South, East, West)
-    const rampAngles = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
-    rampAngles.forEach(ang => {
+    // 4 Step Ramps
+    [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach(ang => {
       const rampGeo = new THREE.BoxGeometry(4.2, 0.45, 3.8);
       const rampMesh = new THREE.Mesh(rampGeo, darkStoneMat);
       rampMesh.position.set(
@@ -2011,10 +2271,181 @@
     scene.add(templeGroup);
 
     // =========================================================================
-    // 256x256 PERIMETER BRICK FORTRESS WALLS & CORNER TOWERS
+    // LARGE SINGLE-ROOM FORTRESS IN NORTHEAST SECTION (MID-LEVEL BOSS LAIR)
+    // =========================================================================
+    fortGroup = new THREE.Group();
+    fortGroup.position.set(FORT_X, FORT_ELEVATION, FORT_Z);
+
+    const fortWallMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.85,
+      metalness: 0.2
+    });
+    const fortTrimMat = new THREE.MeshStandardMaterial({
+      color: 0xd97706,
+      roughness: 0.35,
+      metalness: 0.8
+    });
+    const fortFloorMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.9
+    });
+
+    // 1. Fort Floor (64x64 single grand hall)
+    const fortFloor = new THREE.Mesh(new THREE.BoxGeometry(62, 0.6, 62), fortFloorMat);
+    fortFloor.position.y = 0.3;
+    fortFloor.receiveShadow = true;
+    fortGroup.add(fortFloor);
+
+    // Grand Royal Crimson Runner Carpet leading to Boss Dais
+    const carpet = new THREE.Mesh(
+      new THREE.BoxGeometry(14, 0.08, 48),
+      new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.85 })
+    );
+    carpet.position.set(0, 0.65, 4);
+    carpet.receiveShadow = true;
+    fortGroup.add(carpet);
+
+    // 2. High Stone Walls of Single Room Fort (Height 16, Thickness 4)
+    const fWallHeight = 16;
+    const fWallThick = 4;
+    const fHalf = 30;
+
+    // North Wall (Z = -30)
+    const fNorth = new THREE.Mesh(new THREE.BoxGeometry(64, fWallHeight, fWallThick), fortWallMat);
+    fNorth.position.set(0, fWallHeight / 2, -fHalf);
+    fNorth.castShadow = true;
+    fNorth.receiveShadow = true;
+    fortGroup.add(fNorth);
+
+    // East Wall (X = 30)
+    const fEast = new THREE.Mesh(new THREE.BoxGeometry(fWallThick, fWallHeight, 64), fortWallMat);
+    fEast.position.set(fHalf, fWallHeight / 2, 0);
+    fEast.castShadow = true;
+    fEast.receiveShadow = true;
+    fortGroup.add(fEast);
+
+    // West Wall (X = -30)
+    const fWest = new THREE.Mesh(new THREE.BoxGeometry(fWallThick, fWallHeight, 64), fortWallMat);
+    fWest.position.set(-fHalf, fWallHeight / 2, 0);
+    fWest.castShadow = true;
+    fWest.receiveShadow = true;
+    fortGroup.add(fWest);
+
+    // South Wall with Grand Arched Entrance Opening (X: -30..-9 and 9..30)
+    const fSouthLeft = new THREE.Mesh(new THREE.BoxGeometry(21, fWallHeight, fWallThick), fortWallMat);
+    fSouthLeft.position.set(-19.5, fWallHeight / 2, fHalf);
+    fSouthLeft.castShadow = true;
+    fortGroup.add(fSouthLeft);
+
+    const fSouthRight = new THREE.Mesh(new THREE.BoxGeometry(21, fWallHeight, fWallThick), fortWallMat);
+    fSouthRight.position.set(19.5, fWallHeight / 2, fHalf);
+    fSouthRight.castShadow = true;
+    fortGroup.add(fSouthRight);
+
+    // Entrance Arch Lintela atop gateway
+    const fArchLintel = new THREE.Mesh(new THREE.BoxGeometry(18, 5, fWallThick + 0.6), fortWallMat);
+    fArchLintel.position.set(0, fWallHeight - 2.5, fHalf);
+    fArchLintel.castShadow = true;
+    fortGroup.add(fArchLintel);
+
+    // 3. Runic Portcullis Gate & Magical Barrier
+    const gateGeo = new THREE.BoxGeometry(16, 11, 0.8);
+    const gateTex = createGateTexture();
+    const gateMat = new THREE.MeshStandardMaterial({
+      map: gateTex,
+      metalness: 0.7,
+      roughness: 0.35
+    });
+    fortGateMesh = new THREE.Mesh(gateGeo, gateMat);
+    fortGateMesh.position.set(0, 5.5, fHalf);
+    fortGateMesh.castShadow = true;
+    fortGateMesh.receiveShadow = true;
+    fortGroup.add(fortGateMesh);
+
+    // Glowing Runic Barrier Field (dissolves when 96 kills achieved)
+    const barrierGeo = new THREE.PlaneGeometry(16, 11);
+    const barrierMat = new THREE.MeshBasicMaterial({
+      color: 0xf59e0b,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.65,
+      wireframe: true
+    });
+    fortBarrierMesh = new THREE.Mesh(barrierGeo, barrierMat);
+    barrierMeshPos: fortBarrierMesh.position.set(0, 5.5, fHalf + 0.6);
+    fortGroup.add(fortBarrierMesh);
+
+    // 4. 4 Corner Bastion Watchtowers
+    [[-fHalf, -fHalf], [fHalf, -fHalf], [fHalf, fHalf], [-fHalf, fHalf]].forEach(([bx, bz]) => {
+      const bTower = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 6, 22, 16), fortWallMat);
+      bTower.position.set(bx, 11, bz);
+      bTower.castShadow = true;
+      fortGroup.add(bTower);
+
+      const bRoof = new THREE.Mesh(new THREE.ConeGeometry(7, 6, 16), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 }));
+      bRoof.position.set(bx, 25, bz);
+      bRoof.castShadow = true;
+      fortGroup.add(bRoof);
+    });
+
+    // 5. Grand Hall Colonnades (6 Carved Stone Pillars with Iron Fire Braziers)
+    const pillarPositions = [
+      [-12, -18], [12, -18],
+      [-12, -4], [12, -4],
+      [-12, 10], [12, 10]
+    ];
+    pillarPositions.forEach(([px, pz]) => {
+      const pil = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 14, 12), fortWallMat);
+      pil.position.set(px, 7, pz);
+      pil.castShadow = true;
+      fortGroup.add(pil);
+
+      // Iron Brazier atop pillar
+      const brazier = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 0.8, 1.2, 8), fortTrimMat);
+      brazier.position.set(px, 14.5, pz);
+      fortGroup.add(brazier);
+
+      const flame = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 8), new THREE.MeshBasicMaterial({ color: 0xf59e0b }));
+      flame.position.set(px, 15.6, pz);
+      fortGroup.add(flame);
+
+      const bLight = new THREE.PointLight(0xf59e0b, 1.2, 28);
+      bLight.position.set(px, 16.0, pz);
+      fortGroup.add(bLight);
+    });
+
+    // 6. Boss Throne Dais at North end
+    const dais = new THREE.Mesh(new THREE.CylinderGeometry(9, 10, 1.2, 16), fortTrimMat);
+    dais.position.set(0, 1.2, -18);
+    dais.receiveShadow = true;
+    fortGroup.add(dais);
+
+    // Glowing Summoning Rune Ring on Dais
+    const daisRune = new THREE.Mesh(
+      new THREE.RingGeometry(6.5, 7.5, 32),
+      new THREE.MeshBasicMaterial({ color: 0xef4444, side: THREE.DoubleSide })
+    );
+    daisRune.rotation.x = -Math.PI / 2;
+    daisRune.position.set(0, 1.85, -18);
+    fortGroup.add(daisRune);
+
+    // Warlord Throne Chair
+    const throneBase = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.0, 3.5), fortWallMat);
+    throneBase.position.set(0, 2.8, -22);
+    fortGroup.add(throneBase);
+
+    const throneBack = new THREE.Mesh(new THREE.BoxGeometry(4.2, 5.0, 0.8), fortTrimMat);
+    throneBack.position.set(0, 5.3, -23.5);
+    fortGroup.add(throneBack);
+
+    scene.add(fortGroup);
+
+    // =========================================================================
+    // 512x512 PERIMETER BRICK FORTRESS WALLS & CORNER BASTIONS
     // =========================================================================
     const brickTex = createBrickTexture();
-    brickTex.repeat.set(24, 2);
+    brickTex.repeat.set(48, 2);
 
     const wallMaterial = new THREE.MeshStandardMaterial({
       map: brickTex,
@@ -2022,32 +2453,32 @@
       metalness: 0.15
     });
 
-    const wallHeight = 12;
+    const wallHeight = 14;
     const wallThickness = 4;
-    const halfSpan = HALF_ARENA; // 128
+    const halfSpan = HALF_ARENA; // 256
 
-    // North Wall (Z = -128)
+    // North Wall (Z = -256)
     const northWall = new THREE.Mesh(new THREE.BoxGeometry(ARENA_SIZE, wallHeight, wallThickness), wallMaterial);
     northWall.position.set(0, wallHeight / 2, -halfSpan);
     northWall.castShadow = true;
     northWall.receiveShadow = true;
     scene.add(northWall);
 
-    // South Wall (Z = 128)
+    // South Wall (Z = 256)
     const southWall = new THREE.Mesh(new THREE.BoxGeometry(ARENA_SIZE, wallHeight, wallThickness), wallMaterial);
     southWall.position.set(0, wallHeight / 2, halfSpan);
     southWall.castShadow = true;
     southWall.receiveShadow = true;
     scene.add(southWall);
 
-    // East Wall (X = 128)
+    // East Wall (X = 256)
     const eastWall = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, wallHeight, ARENA_SIZE), wallMaterial);
     eastWall.position.set(halfSpan, wallHeight / 2, 0);
     eastWall.castShadow = true;
     eastWall.receiveShadow = true;
     scene.add(eastWall);
 
-    // West Wall (X = -128)
+    // West Wall (X = -256)
     const westWall = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, wallHeight, ARENA_SIZE), wallMaterial);
     westWall.position.set(-halfSpan, wallHeight / 2, 0);
     westWall.castShadow = true;
@@ -2056,21 +2487,21 @@
 
     // Castle Battlement Crenellations
     const crenMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
-    for (let pos = -halfSpan + 4; pos <= halfSpan - 4; pos += 8) {
-      const cN = new THREE.Mesh(new THREE.BoxGeometry(4, 2, wallThickness + 0.4), crenMat);
-      cN.position.set(pos, wallHeight + 1, -halfSpan);
+    for (let pos = -halfSpan + 6; pos <= halfSpan - 6; pos += 12) {
+      const cN = new THREE.Mesh(new THREE.BoxGeometry(6, 2.5, wallThickness + 0.4), crenMat);
+      cN.position.set(pos, wallHeight + 1.2, -halfSpan);
       scene.add(cN);
 
-      const cS = new THREE.Mesh(new THREE.BoxGeometry(4, 2, wallThickness + 0.4), crenMat);
-      cS.position.set(pos, wallHeight + 1, halfSpan);
+      const cS = new THREE.Mesh(new THREE.BoxGeometry(6, 2.5, wallThickness + 0.4), crenMat);
+      cS.position.set(pos, wallHeight + 1.2, halfSpan);
       scene.add(cS);
 
-      const cE = new THREE.Mesh(new THREE.BoxGeometry(wallThickness + 0.4, 2, 4), crenMat);
-      cE.position.set(halfSpan, wallHeight + 1, pos);
+      const cE = new THREE.Mesh(new THREE.BoxGeometry(wallThickness + 0.4, 2.5, 6), crenMat);
+      cE.position.set(halfSpan, wallHeight + 1.2, pos);
       scene.add(cE);
 
-      const cW = new THREE.Mesh(new THREE.BoxGeometry(wallThickness + 0.4, 2, 4), crenMat);
-      cW.position.set(-halfSpan, wallHeight + 1, pos);
+      const cW = new THREE.Mesh(new THREE.BoxGeometry(wallThickness + 0.4, 2.5, 6), crenMat);
+      cW.position.set(-halfSpan, wallHeight + 1.2, pos);
       scene.add(cW);
     }
 
@@ -2085,13 +2516,13 @@
       const towerGroup = new THREE.Group();
       towerGroup.position.set(cx, 0, cz);
 
-      const tBase = new THREE.Mesh(new THREE.CylinderGeometry(6, 6.5, 16, 16), wallMaterial);
-      tBase.position.y = 8;
+      const tBase = new THREE.Mesh(new THREE.CylinderGeometry(8, 8.5, 20, 16), wallMaterial);
+      tBase.position.y = 10;
       tBase.castShadow = true;
       towerGroup.add(tBase);
 
-      const tRoof = new THREE.Mesh(new THREE.ConeGeometry(7.5, 6, 16), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 }));
-      tRoof.position.y = 19;
+      const tRoof = new THREE.Mesh(new THREE.ConeGeometry(10, 8, 16), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 }));
+      tRoof.position.y = 24;
       tRoof.castShadow = true;
       towerGroup.add(tRoof);
 
@@ -2099,22 +2530,25 @@
     });
 
     // =========================================================================
-    // 3D TREES SCATTERED ACROSS 256x256 FOREST PLAINS
+    // 3D TREES SCATTERED ACROSS 512x512 FOREST PLAINS (CONFORMING TO TERRAIN HEIGHT)
     // =========================================================================
-    const treeCount = 75;
+    const treeCount = 135;
     for (let i = 0; i < treeCount; i++) {
-      let tx, tz, dist;
+      let tx, tz, distSanctuary, distFort, distRiver;
       let attempts = 0;
       do {
-        tx = (Math.random() - 0.5) * (ARENA_SIZE - 28);
-        tz = (Math.random() - 0.5) * (ARENA_SIZE - 28);
-        dist = Math.hypot(tx, tz);
+        tx = (Math.random() - 0.5) * (ARENA_SIZE - 40);
+        tz = (Math.random() - 0.5) * (ARENA_SIZE - 40);
+        distSanctuary = Math.hypot(tx, tz);
+        distFort = Math.hypot(tx - FORT_X, tz - FORT_Z);
+        distRiver = (tz > RIVER_NORTH_LIMIT && tz < (HALF_ARENA - 4)) ? Math.abs(tx - getRiverCenterX(tz)) : 999;
         attempts++;
-      } while (dist < (SANCTUARY_RADIUS + 6) && attempts < 25);
+      } while ((distSanctuary < (SANCTUARY_RADIUS + 8) || distFort < (FORT_SIZE / 2 + 10) || distRiver < (RIVER_HALF_WIDTH + 6)) && attempts < 30);
 
-      const scale = 0.85 + Math.random() * 0.6;
+      const scale = 0.85 + Math.random() * 0.65;
       const type = Math.random() > 0.45 ? 'pine' : 'oak';
       const tree = createTree(tx, tz, scale, type);
+      tree.position.y = getTerrainHeight(tx, tz);
       scene.add(tree);
     }
 
@@ -2122,12 +2556,11 @@
     // STYLIZED PLAYER CHARACTER MESH
     // =========================================================================
     playerMesh = createStylizedPlayerMesh(gameState.classType);
-    // Spawn player in center of elevated temple
     playerMesh.position.set(0, 1.35, 0);
     scene.add(playerMesh);
 
     // Player Follow Spotlight
-    playerLight = new THREE.PointLight(0x38bdf8, 1.5, 20);
+    playerLight = new THREE.PointLight(0x38bdf8, 1.5, 24);
     playerLight.position.set(0, 4, 0);
     scene.add(playerLight);
 
@@ -2155,7 +2588,7 @@
 
   // --- ENEMY SYSTEM ---
   function spawnInitialEnemies() {
-    const count = 18;
+    const count = 22;
     for (let i = 0; i < count; i++) {
       spawnRandomEnemy();
     }
@@ -2164,7 +2597,7 @@
   function spawnRandomEnemy(isBoss = false) {
     const minLvl = gameState.areaLevelMin;
     const maxLvl = gameState.areaLevelMax;
-    const enemyLvl = isBoss ? (maxLvl + 3) : Math.floor(minLvl + Math.random() * (maxLvl - minLvl + 1));
+    const enemyLvl = isBoss ? (maxLvl + 5) : Math.floor(minLvl + Math.random() * (maxLvl - minLvl + 1));
     
     const isCaster = Math.random() > 0.5;
     const enemyType = isBoss ? 'DREAD TITAN (BOSS)' : (isCaster ? 'Cultist Sorcerer' : 'Undead Berserker');
@@ -2172,15 +2605,25 @@
     const resists = ['fire', 'frost', 'lightning', 'melee', 'none'];
     const resist = resists[Math.floor(Math.random() * resists.length)];
 
-    const meshGroup = createStylizedEnemyMesh(isBoss, isCaster, enemyLvl);
+    const meshGroup = createStylizedEnemyMesh(isBoss, isCaster, enemyLvl, false);
 
-    // Spawn OUTSIDE Sanctuary (Radius > 26) and within fortress walls (< 118)
-    const rad = (SANCTUARY_RADIUS + 10) + Math.random() * (HALF_ARENA - (SANCTUARY_RADIUS + 25));
-    const angle = Math.random() * Math.PI * 2;
-    meshGroup.position.set(Math.cos(angle) * rad, 0, Math.sin(angle) * rad);
+    // Spawn OUTSIDE Sanctuary (Radius > 28) and within arena limits (< 240)
+    let ex, ez, distSanctuary, distFort, attempts = 0;
+    do {
+      const rad = (SANCTUARY_RADIUS + 12) + Math.random() * (HALF_ARENA - (SANCTUARY_RADIUS + 30));
+      const angle = Math.random() * Math.PI * 2;
+      ex = Math.cos(angle) * rad;
+      ez = Math.sin(angle) * rad;
+      distSanctuary = Math.hypot(ex, ez);
+      distFort = Math.hypot(ex - FORT_X, ez - FORT_Z);
+      attempts++;
+    } while ((distSanctuary < (SANCTUARY_RADIUS + 8) || (!gameState.fortUnlocked && distFort < (FORT_SIZE / 2 + 8))) && attempts < 30);
+
+    const ey = getTerrainHeight(ex, ez);
+    meshGroup.position.set(ex, ey, ez);
     scene.add(meshGroup);
 
-    const maxHp = (50 + enemyLvl * 24) * (isBoss ? 5.5 : 1.0);
+    const maxHp = (50 + enemyLvl * 24) * (isBoss ? 6.5 : 1.0);
 
     // Random wander vector
     const wanderAngle = Math.random() * Math.PI * 2;
@@ -2191,13 +2634,14 @@
       name: `${enemyType} [L${enemyLvl}]`,
       level: enemyLvl,
       isBoss,
+      isMidBoss: false,
       isCaster,
       hp: maxHp,
       maxHp: maxHp,
       mana: 100,
       maxMana: 100,
       resist,
-      speed: isBoss ? 2.5 : (3.5 + Math.random() * 1.5),
+      speed: isBoss ? 2.8 : (3.5 + Math.random() * 1.5),
       attackCooldown: 0,
       weaponSpeed: 2.5 + Math.random() * 2.0,
       // Random wandering AI state
@@ -2211,6 +2655,49 @@
     };
 
     enemies.push(enemyObj);
+  }
+
+  function spawnMidBoss() {
+    // Level 128 + random(3 to 9)
+    const randomBonus = Math.floor(Math.random() * 7) + 3; // 3 to 9
+    const bossLevel = 128 + randomBonus; // 131 to 137
+
+    const meshGroup = createStylizedEnemyMesh(false, false, bossLevel, true);
+    // Spawn in the Northeast Fort Throne Room
+    meshGroup.position.set(FORT_X, FORT_ELEVATION + 0.3, FORT_Z - 12);
+    meshGroup.rotation.y = Math.PI; // Facing towards south entrance
+    scene.add(meshGroup);
+
+    const maxHp = 6500 + bossLevel * 65; // Formidable mid-boss HP pool
+
+    const wanderAngle = Math.random() * Math.PI * 2;
+    const wanderDir = new THREE.Vector3(Math.cos(wanderAngle), 0, Math.sin(wanderAngle)).normalize();
+
+    const midBossObj = {
+      mesh: meshGroup,
+      name: `🔥 WARLORD MALAKOR [MID-BOSS L${bossLevel}]`,
+      level: bossLevel,
+      isBoss: false,
+      isMidBoss: true,
+      isCaster: false,
+      hp: maxHp,
+      maxHp: maxHp,
+      mana: 500,
+      maxMana: 500,
+      resist: 'fire',
+      speed: 3.8,
+      attackCooldown: 0,
+      weaponSpeed: 1.8,
+      state: 'guard',
+      wanderTimer: 3.0,
+      wanderDir: wanderDir,
+      wanderSpeed: 1.4,
+      isMoving: false,
+      walkCycle: 0,
+      attackAnimTimer: 0
+    };
+
+    enemies.push(midBossObj);
   }
 
   // --- DAMAGE & COMBAT CALCULATION ---
@@ -2371,29 +2858,30 @@
 
     gameState.areaKills++;
     gameState.totalKills++;
-    gameState.highScore += (enemy.level * 120) * (enemy.isBoss ? 8 : 1);
+    const scoreMultiplier = enemy.isBoss ? 10 : (enemy.isMidBoss ? 6 : 1);
+    gameState.highScore += (enemy.level * 120) * scoreMultiplier;
 
     // Diminished rewards if over 256 kills in area
     const isOver256 = gameState.areaKills > 256;
     const rewardFactor = isOver256 ? 0.35 : 1.0;
 
-    // Reduced Essence Drop (Limited amounts for purchasing abilities/stats)
-    const essenceGained = enemy.isBoss ? (8 + Math.floor(Math.random() * 5)) : (Math.random() < 0.35 ? 1 : 0);
+    // Essence Drop
+    const essenceGained = enemy.isBoss ? (10 + Math.floor(Math.random() * 6)) : (enemy.isMidBoss ? (6 + Math.floor(Math.random() * 4)) : (Math.random() < 0.35 ? 1 : 0));
     if (essenceGained > 0) {
       gameState.essence += essenceGained;
       showDamageNumber(enemy.mesh.position.x, enemy.mesh.position.y + 1.5, enemy.mesh.position.z, `+${essenceGained} Essence`, '#a855f7');
     }
 
-    // Reduced Experience Drop (Rebalanced progression)
-    const xpGained = Math.round((7 + enemy.level * 2.8) * rewardFactor * (enemy.isBoss ? 3.5 : 1));
+    // Experience Drop
+    const xpGained = Math.round((7 + enemy.level * 2.8) * rewardFactor * (enemy.isBoss ? 4.0 : (enemy.isMidBoss ? 3.0 : 1.0)));
     gainExperience(xpGained);
 
-    // Reduced Gear Drop Chance (Lower drop rate for balanced loot economy)
-    const dropChance = enemy.isBoss ? 0.9 : (0.12 * rewardFactor);
+    // Gear Drop Chance
+    const dropChance = (enemy.isBoss || enemy.isMidBoss) ? 1.0 : (0.12 * rewardFactor);
     if (Math.random() < dropChance) {
       const slots = ['head', 'shoulders', 'chest', 'belt', 'pants', 'boots', 'leftHand', 'rightHand'];
       const slot = slots[Math.floor(Math.random() * slots.length)];
-      const rarities = enemy.isBoss ? ['rare', 'epic', 'legendary'] : ['common', 'uncommon', 'rare'];
+      const rarities = (enemy.isBoss || enemy.isMidBoss) ? ['rare', 'epic', 'legendary'] : ['common', 'uncommon', 'rare'];
       const rarity = rarities[Math.floor(Math.random() * rarities.length)];
       const item = generateGearItem(slot, enemy.level, rarity);
       gameState.inventory.push(item);
@@ -2402,15 +2890,46 @@
       renderInventory();
     }
 
-    // Check Boss Spawn at 256 Kills
+    // Extra guaranteed high-tier item for defeating Mid-Boss
+    if (enemy.isMidBoss) {
+      const bonusSlots = ['leftHand', 'rightHand', 'chest', 'head'];
+      const bSlot = bonusSlots[Math.floor(Math.random() * bonusSlots.length)];
+      const bonusItem = generateGearItem(bSlot, enemy.level, 'legendary');
+      gameState.inventory.push(bonusItem);
+      showDamageNumber(enemy.mesh.position.x, enemy.mesh.position.y + 2.8, enemy.mesh.position.z, `★ LEGENDARY ${bonusItem.name}!`, '#f59e0b');
+      renderInventory();
+    }
+
+    // =========================================================================
+    // CHECK MID-LEVEL BOSS UNLOCK AT 96 KILLS
+    // =========================================================================
+    if (gameState.areaKills >= 96 && !gameState.midBossSpawned) {
+      gameState.midBossSpawned = true;
+      gameState.fortUnlocked = true;
+
+      // Raise fort portcullis gate & dissolve magic barrier
+      if (fortGateMesh) {
+        fortGateMesh.position.y = 18;
+      }
+      if (fortBarrierMesh) {
+        fortBarrierMesh.visible = false;
+      }
+
+      spawnMidBoss();
+      playSound('levelup');
+      showDamageNumber(playerMesh.position.x, playerMesh.position.y + 3, playerMesh.position.z, '🔥 FORTRESS UNLOCKED! Level 130+ Mid-Boss Awakened in Fort!', '#f59e0b');
+    }
+
+    // Check Dread Titan Boss Spawn at 256 Kills
     if (gameState.areaKills === 256 && !gameState.bossSpawned) {
       gameState.bossSpawned = true;
       spawnRandomEnemy(true);
       showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2, playerMesh.position.z, 'DREAD TITAN SPAWNED!', '#f59e0b');
     }
 
-    if (enemy.isBoss) {
-      gameState.bossDefeated = true;
+    if (enemy.isBoss || enemy.isMidBoss) {
+      if (enemy.isBoss) gameState.bossDefeated = true;
+      if (enemy.isMidBoss) gameState.midBossDefeated = true;
       document.getElementById('modal-portal').style.display = 'flex';
       document.getElementById('portal-area-num').innerText = gameState.currentArea;
       playSound('levelup');
@@ -2418,7 +2937,7 @@
     }
 
     // Respawn regular enemy to keep arena populated
-    if (!enemy.isBoss && enemies.length < 18) {
+    if (!enemy.isBoss && !enemy.isMidBoss && enemies.length < 22) {
       spawnRandomEnemy();
     }
 
@@ -2452,6 +2971,166 @@
     document.getElementById('target-resist').innerText = `Resist: ${targetEnemy.resist.toUpperCase()}`;
   }
 
+  // --- UTILITY CONTROLS & STATE ---
+  let autoWalk = false;
+  let lastDoorNoticeTime = 0;
+
+  function toggleAutoWalk() {
+    autoWalk = !autoWalk;
+    updateAutoWalkBtn();
+  }
+
+  function updateAutoWalkBtn() {
+    const btn = document.getElementById('btn-autowalk');
+    if (btn) {
+      if (autoWalk) {
+        btn.classList.add('active');
+        btn.innerText = '🏃 Auto-Walk: ON [X]';
+      } else {
+        btn.classList.remove('active');
+        btn.innerText = '🏃 Auto-Walk: OFF [X]';
+      }
+    }
+  }
+
+  function resetControls() {
+    keys = {};
+    isOrbiting = false;
+    autoWalk = false;
+    updateAutoWalkBtn();
+    if (playerMesh) {
+      showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2, playerMesh.position.z, 'Controls Reset!', '#38bdf8');
+    }
+  }
+
+  function warpToSanctuary() {
+    if (playerMesh) {
+      playerMesh.position.set(0, 1.35, 0);
+    }
+    targetEnemy = null;
+    const card = document.getElementById('target-frame');
+    if (card) card.style.display = 'none';
+    playSound('spell');
+    showDamageNumber(0, 3, 0, 'Warped to Temple Sanctuary', '#38bdf8');
+  }
+
+  function showLockedDoorNotice() {
+    const now = performance.now();
+    if (now - lastDoorNoticeTime > 2500) {
+      lastDoorNoticeTime = now;
+      playSound('hit');
+      if (playerMesh) {
+        showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2.5, playerMesh.position.z, '🔒 Portcullis Locked: Defeat 96 enemies to unlock Fortress!', '#f59e0b');
+      }
+    }
+  }
+
+  // --- PRECISE PHYSICS RESOLUTION ---
+  function resolvePlayerPhysics(pos, delta) {
+    const px = pos.x;
+    const pz = pos.z;
+
+    // 1. Check Fortress Collision Box
+    const dxFort = px - FORT_X;
+    const dzFort = pz - FORT_Z;
+    const inFortX = Math.abs(dxFort) <= 32;
+    const inFortZ = Math.abs(dzFort) <= 32;
+
+    if (inFortX && inFortZ) {
+      // 1a. Fort Gate Collision (at South side: Z = FORT_Z + 30 = -145, opening X in [FORT_X - 8.5, FORT_X + 8.5])
+      if (!gameState.fortUnlocked) {
+        // If gate is locked, block passage through the door threshold
+        if (Math.abs(dxFort) <= 8.5 && dzFort >= 27.5 && dzFort <= 32.5) {
+          pos.z = FORT_Z + 32.6; // Push outside the locked gate
+          showLockedDoorNotice();
+        }
+      }
+
+      // 1b. Fort Stone Outer Walls Collision (Perimeter box with wall thickness 4)
+      // North Wall (dzFort ~ -30)
+      if (dzFort <= -28.0 && dzFort >= -32.5 && Math.abs(dxFort) <= 32) {
+        if (dzFort > -30) pos.z = FORT_Z - 27.8;
+        else pos.z = FORT_Z - 32.8;
+      }
+      // East Wall (dxFort ~ 30)
+      if (dxFort >= 28.0 && dxFort <= 32.5 && Math.abs(dzFort) <= 32) {
+        if (dxFort < 30) pos.x = FORT_X + 27.8;
+        else pos.x = FORT_X + 32.8;
+      }
+      // West Wall (dxFort ~ -30)
+      if (dxFort <= -28.0 && dxFort >= -32.5 && Math.abs(dzFort) <= 32) {
+        if (dxFort > -30) pos.x = FORT_X - 27.8;
+        else pos.x = FORT_X - 32.8;
+      }
+      // South Wall Segments (left and right of the entrance opening)
+      if (dzFort >= 28.0 && dzFort <= 32.5) {
+        if (dxFort < -8.0) {
+          if (dzFort < 30) pos.z = FORT_Z + 27.8;
+          else pos.z = FORT_Z + 32.8;
+        } else if (dxFort > 8.0) {
+          if (dzFort < 30) pos.z = FORT_Z + 27.8;
+          else pos.z = FORT_Z + 32.8;
+        }
+      }
+
+      // 1c. Warlord Throne Chair Collision (Base at 175, -197, Back at 175, -198.5)
+      // dxFort in [-2.5, 2.5], dzFort in [-24.5, -20.0]
+      if (Math.abs(dxFort) < 2.5 && dzFort >= -24.5 && dzFort <= -20.0) {
+        if (dzFort > -21.5) pos.z = FORT_Z - 19.8;
+        else if (dxFort > 0) pos.x = FORT_X + 2.6;
+        else pos.x = FORT_X - 2.6;
+      }
+
+      // 1d. Grand Hall Colonnade Pillars Collision (6 pillars)
+      const pillars = [
+        [-12, -18], [12, -18],
+        [-12, -4], [12, -4],
+        [-12, 10], [12, 10]
+      ];
+      for (const [pxRel, pzRel] of pillars) {
+        const pillarX = FORT_X + pxRel;
+        const pillarZ = FORT_Z + pzRel;
+        const distPillar = Math.hypot(pos.x - pillarX, pos.z - pillarZ);
+        if (distPillar < 1.7) {
+          const pushX = (pos.x - pillarX) / (distPillar || 1);
+          const pushZ = (pos.z - pillarZ) / (distPillar || 1);
+          pos.x = pillarX + pushX * 1.72;
+          pos.z = pillarZ + pushZ * 1.72;
+        }
+      }
+    }
+
+    // 2. Resolve Floor Tile & Ground Height Physics (Rock Solid Stability)
+    let targetY = 0;
+    const distFromCenter = Math.hypot(pos.x, pos.z);
+
+    // 2a. Elevated Round Temple Sanctuary Floor Tiles
+    if (distFromCenter < 14.0) {
+      targetY = 1.35; // Upper Temple Platform
+    } else if (distFromCenter < 18.0) {
+      targetY = 0.70; // Middle Temple Step Ring
+    } else if (distFromCenter < 22.0) {
+      const t = (distFromCenter - 18.0) / 4.0;
+      targetY = 0.70 * (1 - t); // Smooth slope from step to ground
+    } else if (inFortX && inFortZ && Math.abs(dxFort) < 28 && Math.abs(dzFort) < 28) {
+      // 2b. Fort Interior Floor Tiles & Pedestal/Dais
+      const distToDais = Math.hypot(dxFort, dzFort - (-18));
+      if (distToDais <= 9.0) {
+        targetY = FORT_ELEVATION + 1.8; // 10.80 - Stand atop Boss Dais / Pedestal!
+      } else if (distToDais <= 10.2) {
+        const t = (distToDais - 9.0) / 1.2;
+        targetY = (FORT_ELEVATION + 1.8) * (1 - t) + (FORT_ELEVATION + 0.6) * t;
+      } else {
+        targetY = FORT_ELEVATION + 0.6; // 9.60 - Solid flat Fort tile floor
+      }
+    } else {
+      // 2c. Continuous Wilderness Terrain Height
+      targetY = getTerrainHeight(pos.x, pos.z);
+    }
+
+    return targetY;
+  }
+
   // --- CONTROLS & INPUT ---
   function onKeyDown(e) {
     keys[e.code] = true;
@@ -2471,12 +3150,28 @@
       toggleModal('modal-gear');
     } else if (e.code === 'KeyK') {
       toggleModal('modal-essence');
+    } else if (e.code === 'KeyX') {
+      toggleAutoWalk();
+    } else if (e.code === 'KeyR') {
+      resetControls();
+    } else if (e.code === 'KeyT') {
+      warpToSanctuary();
+    } else if (e.code === 'KeyS') {
+      if (autoWalk) {
+        autoWalk = false;
+        updateAutoWalkBtn();
+      }
     }
   }
 
   function onKeyUp(e) {
     keys[e.code] = false;
   }
+
+  window.addEventListener('blur', () => {
+    keys = {};
+    isOrbiting = false;
+  });
 
   function onMouseDown(e) {
     if (e.button === 0 || e.button === 2) {
@@ -2563,13 +3258,13 @@
     }
 
     // =========================================================================
-    // WASD KEYS: W (FORWARD), S (BACKWARD), A (STRAFE LEFT), D (STRAFE RIGHT)
+    // WASD KEYS + AUTO-WALK: W (FORWARD), S (BACKWARD), A (STRAFE LEFT), D (STRAFE RIGHT)
     // =========================================================================
     const moveSpeed = 11.0 * delta;
     let moveFwd = 0;
     let moveRight = 0;
 
-    if (keys['KeyW']) moveFwd += 1;
+    if (keys['KeyW'] || autoWalk) moveFwd += 1;
     if (keys['KeyS']) moveFwd -= 1;
     if (keys['KeyD']) moveRight += 1;
     if (keys['KeyA']) moveRight -= 1;
@@ -2598,18 +3293,12 @@
       playerMesh.rotation.y = cameraTheta + Math.PI;
     }
 
-    // Adjust Player Elevation on Temple Steps vs Plains Ground
-    const playerDistFromCenter = Math.hypot(playerMesh.position.x, playerMesh.position.z);
-    if (playerDistFromCenter < (SANCTUARY_RADIUS - 4)) {
-      playerMesh.position.y = 1.35; // Top elevated temple platform
-    } else if (playerDistFromCenter < SANCTUARY_RADIUS) {
-      playerMesh.position.y = 0.7; // Middle temple steps
-    } else {
-      playerMesh.position.y = 0; // Plains ground
-    }
+    // Resolve Precise Physics & Floor Tile / Terrain Heights
+    const targetFloorY = resolvePlayerPhysics(playerMesh.position, delta);
+    playerMesh.position.y = THREE.MathUtils.lerp(playerMesh.position.y, targetFloorY, delta * 20);
 
-    // Clamp player within 256x256 Brick Fortress Walls
-    const wallInnerLimit = HALF_ARENA - 6; // 122
+    // Clamp player within 512x512 Brick Fortress Walls (HALF_ARENA = 256)
+    const wallInnerLimit = HALF_ARENA - 6; // 250
     playerMesh.position.x = Math.max(-wallInnerLimit, Math.min(wallInnerLimit, playerMesh.position.x));
     playerMesh.position.z = Math.max(-wallInnerLimit, Math.min(wallInnerLimit, playerMesh.position.z));
 
@@ -2717,11 +3406,49 @@
     }
 
     // =========================================================================
-    // ENEMY AI: RANDOM WANDERING, CHASE & ATTACK ANIMATIONS
+    // SANCTUARY HEALING LOGIC
     // =========================================================================
     const playerDistToSanctuary = Math.hypot(playerMesh.position.x, playerMesh.position.z);
     const isPlayerInSanctuary = playerDistToSanctuary < (SANCTUARY_RADIUS + 1.5);
 
+    if (isPlayerInSanctuary) {
+      // Temple Sanctuary slowly restores Player HP & rapidly recharges Mana
+      if (gameState.hp < gameState.maxHp) {
+        gameState.hp = Math.min(gameState.maxHp, gameState.hp + (gameState.maxHp * 0.08 + 4) * delta);
+        document.getElementById('hud-hp-val').innerText = `${Math.ceil(gameState.hp)} / ${Math.ceil(gameState.maxHp)}`;
+        document.getElementById('hud-hp-bar').style.width = `${Math.max(0, (gameState.hp / gameState.maxHp) * 100)}%`;
+      }
+      if (gameState.mana < gameState.maxMana) {
+        gameState.mana = Math.min(gameState.maxMana, gameState.mana + 15 * delta);
+        document.getElementById('hud-mana-val').innerText = `${Math.ceil(gameState.mana)} / ${Math.ceil(gameState.maxMana)}`;
+        document.getElementById('hud-mana-bar').style.width = `${Math.max(0, (gameState.mana / gameState.maxMana) * 100)}%`;
+      }
+    } else {
+      // Outside Sanctuary: Passive HP Regeneration is DISABLED (only healing abilities or returning to sanctuary heals)
+      if (gameState.mana < gameState.maxMana) {
+        gameState.mana = Math.min(gameState.maxMana, gameState.mana + (3 + (gameState.statUpgrades.intelligence || 0)) * delta);
+        document.getElementById('hud-mana-val').innerText = `${Math.ceil(gameState.mana)} / ${Math.ceil(gameState.maxMana)}`;
+        document.getElementById('hud-mana-bar').style.width = `${Math.max(0, (gameState.mana / gameState.maxMana) * 100)}%`;
+      }
+    }
+
+    // =========================================================================
+    // TARGET HEALTH BAR PERSISTENCE & AREA OF INFLUENCE
+    // =========================================================================
+    if (targetEnemy) {
+      const targetDist = playerMesh.position.distanceTo(targetEnemy.mesh.position);
+      // Target bar disappears if player leaves the enemy's area of influence (> 20) or player is safe in sanctuary
+      if (targetDist > 20 || isPlayerInSanctuary || targetEnemy.hp <= 0) {
+        targetEnemy = null;
+        document.getElementById('target-frame').style.display = 'none';
+      } else {
+        updateTargetCard();
+      }
+    }
+
+    // =========================================================================
+    // ENEMY AI: LOWERED AREA OF INFLUENCE, PATROL, CHASE & ATTACK ANIMATIONS
+    // =========================================================================
     for (const enemy of enemies) {
       const dist = enemy.mesh.position.distanceTo(playerMesh.position);
       const enemyDistToCenter = Math.hypot(enemy.mesh.position.x, enemy.mesh.position.z);
@@ -2734,8 +3461,9 @@
         continue;
       }
 
-      // Chase Player ONLY if Player is OUTSIDE the dedicated safe Sanctuary
-      if (!isPlayerInSanctuary && dist < 34 && dist > 3.0) {
+      // Chase Player ONLY if Player is OUTSIDE safe sanctuary and WITHIN LOWERED AREA OF INFLUENCE (18 radius, 22 for bosses)
+      const aggroRange = enemy.isMidBoss ? 22 : 18;
+      if (!isPlayerInSanctuary && dist < aggroRange && dist > 3.0) {
         const dir = new THREE.Vector3().subVectors(playerMesh.position, enemy.mesh.position).normalize();
         enemy.mesh.position.addScaledVector(dir, enemy.speed * delta);
         enemy.mesh.rotation.y = Math.atan2(dir.x, dir.z);
@@ -2800,6 +3528,18 @@
           if (Math.abs(enemy.mesh.position.x) > wallBoundary || Math.abs(enemy.mesh.position.z) > wallBoundary) {
             enemy.wanderDir.set(-enemy.mesh.position.x, 0, -enemy.mesh.position.z).normalize();
           }
+        }
+      }
+
+      // Update enemy terrain elevation
+      if (enemy.isMidBoss && !gameState.fortUnlocked) {
+        enemy.mesh.position.y = FORT_ELEVATION + 1.8;
+      } else {
+        const dFort = Math.hypot(enemy.mesh.position.x - FORT_X, enemy.mesh.position.z - FORT_Z);
+        if (dFort < FORT_SIZE / 2) {
+          enemy.mesh.position.y = FORT_ELEVATION + 0.6;
+        } else {
+          enemy.mesh.position.y = getTerrainHeight(enemy.mesh.position.x, enemy.mesh.position.z);
         }
       }
 
@@ -3077,6 +3817,15 @@
   // Attach UI Buttons
   document.getElementById('select-melee-btn').onclick = () => startGame('melee');
   document.getElementById('select-caster-btn').onclick = () => startGame('caster');
+
+  const btnAutoWalkEl = document.getElementById('btn-autowalk');
+  if (btnAutoWalkEl) btnAutoWalkEl.onclick = toggleAutoWalk;
+
+  const btnResetControlsEl = document.getElementById('btn-reset-controls');
+  if (btnResetControlsEl) btnResetControlsEl.onclick = resetControls;
+
+  const btnWarpSanctuaryEl = document.getElementById('btn-warp-sanctuary');
+  if (btnWarpSanctuaryEl) btnWarpSanctuaryEl.onclick = warpToSanctuary;
 
   document.getElementById('btn-open-gear').onclick = () => toggleModal('modal-gear');
   document.getElementById('btn-close-gear').onclick = () => toggleModal('modal-gear');

@@ -251,30 +251,31 @@ export default function AuthLandingView({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans relative overflow-x-hidden modern-grid-pattern selection:bg-blue-600 selection:text-white">
-      {/* Soft Ambient Background Highlights */}
+    <div className="flex-1 flex flex-col min-h-screen bg-[#070b14] text-slate-100 font-sans relative overflow-x-hidden modern-grid-pattern selection:bg-orange-600 selection:text-white">
+      {/* Fiery Ambient Background Highlights */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[350px] bg-blue-600/10 rounded-full blur-3xl opacity-70" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[300px] bg-orange-600/10 rounded-full blur-3xl opacity-60" />
+        <div className="absolute top-0 left-1/4 w-[650px] h-[400px] bg-orange-600/15 rounded-full blur-3xl opacity-80" />
+        <div className="absolute top-1/3 right-1/4 w-[550px] h-[350px] bg-red-600/15 rounded-full blur-3xl opacity-70" />
+        <div className="absolute bottom-0 left-1/3 w-[600px] h-[300px] bg-amber-600/10 rounded-full blur-3xl opacity-60" />
       </div>
 
       {/* Top Disclaimer Banner */}
       <div
         id="landing-gemini-disclaimer"
-        className="relative z-40 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border-b border-blue-700/50 px-4 py-2 text-xs text-slate-100 flex items-center justify-between shadow-sm"
+        className="relative z-40 bg-gradient-to-r from-red-950 via-orange-950 to-slate-950 border-b border-orange-700/40 px-4 py-2 text-xs text-orange-200 flex items-center justify-between shadow-sm"
       >
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-cyan-300 animate-pulse" />
+            <Sparkles className="w-4 h-4 text-orange-400 animate-pulse" />
             <span className="font-semibold text-white">
-              Made with Google Gemini AI Studio
+              Firestorm Tournaments &bull; Made with Google Gemini AI Studio
             </span>
           </div>
           <a
             href="https://ai.studio/build"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-blue-300 hover:text-white font-bold hover:underline"
+            className="text-xs text-orange-400 hover:text-white font-bold hover:underline"
           >
             Explore Build
           </a>
@@ -282,18 +283,18 @@ export default function AuthLandingView({
       </div>
 
       {/* Navigation Header */}
-      <header className="relative z-30 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md px-4 sm:px-8 py-3.5 shrink-0 shadow-md">
+      <header className="relative z-30 border-b border-orange-900/40 bg-slate-950/90 backdrop-blur-md px-4 sm:px-8 py-3.5 shrink-0 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-orange-500 flex items-center justify-center text-white font-bold shadow-md">
-              <Flame className="w-6 h-6 fill-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-600 via-orange-500 to-amber-400 flex items-center justify-center text-white font-bold shadow-md shadow-orange-950/50">
+              <Flame className="w-6 h-6 fill-white animate-pulse" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-tight text-white leading-none">
-                PlayStorm
+              <span className="text-xl font-black tracking-wider text-white leading-none font-serif">
+                FIRESTORM
               </span>
-              <span className="text-xs font-semibold text-orange-400 tracking-wide uppercase leading-tight">
-                Tournaments
+              <span className="text-xs font-extrabold text-orange-400 tracking-widest uppercase leading-tight">
+                TOURNAMENTS &bull; SEASON 4
               </span>
             </div>
           </div>
@@ -307,12 +308,12 @@ export default function AuthLandingView({
                 setIsOutboxOpen(true);
                 playTacticalSound('click');
               }}
-              className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-xs font-bold text-slate-200 hover:text-white transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+              className="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-850 border border-orange-900/50 text-xs font-bold text-slate-200 hover:text-white transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
               title="View verification and recovery emails"
             >
-              <Mail className="w-4 h-4 text-blue-400" />
+              <Mail className="w-4 h-4 text-orange-400" />
               <span className="hidden sm:inline">Verification Outbox</span>
-              <span className="px-2 py-0.5 rounded-full bg-blue-900/60 border border-blue-500/40 text-xs font-bold text-blue-200">
+              <span className="px-2 py-0.5 rounded-full bg-orange-950/80 border border-orange-500/40 text-xs font-bold text-orange-300">
                 {outboxEmails.length}
               </span>
             </button>
@@ -321,10 +322,10 @@ export default function AuthLandingView({
               id="landing-sfx-btn"
               type="button"
               onClick={onToggleSfx}
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-lg bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
               title={sfxEnabled ? 'Sound On' : 'Sound Muted'}
             >
-              {sfxEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              {sfxEnabled ? <Volume2 className="w-4 h-4 text-orange-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
             </button>
           </div>
         </div>
@@ -336,44 +337,47 @@ export default function AuthLandingView({
           
           {/* Left Hero Content */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-bold uppercase tracking-wider">
-              <Zap className="w-3.5 h-3.5 text-blue-400" />
-              <span>Gaming Tournaments</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-red-950/80 to-orange-950/80 border border-orange-500/40 text-orange-300 text-xs font-black uppercase tracking-widest shadow-inner">
+              <Flame className="w-3.5 h-3.5 text-orange-400 fill-orange-400" />
+              <span>Championship Arena &bull; Season 4 Grand Prix</span>
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
-                Play, Compete &amp; Climb Leaderboards
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight font-serif">
+                Enter The Crucible: <br />
+                <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-red-400 bg-clip-text text-transparent">
+                  Firestorm Tournaments
+                </span>
               </h1>
               <p className="text-base sm:text-lg text-slate-300 max-w-xl leading-relaxed">
-                Join PlayStorm to play arcade games, track your verified high scores, stream music playlists, and share tips with the player community.
+                Compete in competitive arcade qualifiers, conquer the open 3D dungeon of <strong className="text-amber-300">Realm of Champions 3D</strong>, claim legendary loot, and ascend the verified global championship leaderboards.
               </p>
             </div>
 
             {/* Feature Highlights */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2">
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 shadow-sm">
-                <div className="flex items-center gap-2 text-blue-400 font-bold text-sm">
-                  <Gamepad2 className="w-4 h-4" />
-                  <span>Arcade Games</span>
+              <div className="p-4 rounded-xl bg-slate-900/90 border border-orange-900/40 space-y-1.5 shadow-md">
+                <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                  <Sparkles className="w-4 h-4" />
+                  <span>Realm of Champions 3D</span>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">Play Reaction Challenge &amp; Supply Grid in your browser.</p>
+                <p className="text-xs text-slate-300 leading-relaxed">Open 512x512 landscape, 8-slot gear, Northeast Fortress &amp; Dread Titan boss raids.</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 shadow-sm">
+              <div className="p-4 rounded-xl bg-slate-900/90 border border-orange-900/40 space-y-1.5 shadow-md">
                 <div className="flex items-center gap-2 text-orange-400 font-bold text-sm">
                   <Trophy className="w-4 h-4" />
-                  <span>High Scores</span>
+                  <span>Championship Brackets</span>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">Save your personal best records on verified leaderboards.</p>
+                <p className="text-xs text-slate-300 leading-relaxed">Verified high scores, seasonal leaderboard rankings, and competitive tournament records.</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 shadow-sm">
+              <div className="p-4 rounded-xl bg-slate-900/90 border border-orange-900/40 space-y-1.5 shadow-md">
                 <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                  <Users className="w-4 h-4" />
-                  <span>Community Hub</span>
+                  <Gamepad2 className="w-4 h-4" />
+                  <span>Arcade Qualifiers</span>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">Discuss strategies and share game screenshots with players.</p>
+                <p className="text-xs text-slate-300 leading-relaxed">Play Block Drop Matrix, Reaction Challenge &amp; stream synthwave tournament tracks.</p>
               </div>
             </div>
 
@@ -405,7 +409,7 @@ export default function AuthLandingView({
           <div className="lg:col-span-5">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
               {/* Top Tabs */}
-              <div className="flex border-b border-slate-800 bg-slate-850">
+              <div className="flex border-b border-orange-950/60 bg-slate-950">
                 <button
                   id="tab-login-btn"
                   type="button"
@@ -415,14 +419,14 @@ export default function AuthLandingView({
                     setAuthSuccess(null);
                     playTacticalSound('switch');
                   }}
-                  className={`flex-1 py-3.5 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`flex-1 py-3.5 px-4 text-sm font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     authMode === 'LOGIN' || authMode === 'FORGOT_PASSWORD' || authMode === 'RESET_CONFIRM'
-                      ? 'bg-slate-900 text-blue-400 border-b-2 border-blue-500'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      ? 'bg-slate-900 text-orange-400 border-b-2 border-orange-500 shadow-inner'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
                   }`}
                 >
                   <LogIn className="w-4 h-4" />
-                  <span>Log In</span>
+                  <span>Enter Arena (Log In)</span>
                 </button>
                 <button
                   id="tab-register-btn"
@@ -433,14 +437,14 @@ export default function AuthLandingView({
                     setAuthSuccess(null);
                     playTacticalSound('switch');
                   }}
-                  className={`flex-1 py-3.5 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`flex-1 py-3.5 px-4 text-sm font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     authMode === 'REGISTER' || authMode === 'VERIFY'
-                      ? 'bg-slate-900 text-blue-400 border-b-2 border-blue-500'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      ? 'bg-slate-900 text-orange-400 border-b-2 border-orange-500 shadow-inner'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
                   }`}
                 >
                   <UserPlus className="w-4 h-4" />
-                  <span>Sign Up</span>
+                  <span>Enlist (Sign Up)</span>
                 </button>
               </div>
 
@@ -463,7 +467,7 @@ export default function AuthLandingView({
                 <form onSubmit={handleLoginSubmit} className="p-6 space-y-4">
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                      Username / Email
+                      Gladiator Callsign / Email
                     </label>
                     <input
                       id="login-id-input"
@@ -472,7 +476,7 @@ export default function AuthLandingView({
                       value={loginIdentifier}
                       onChange={(e) => setLoginIdentifier(e.target.value)}
                       placeholder="GhostRider or player@firestorm.gg"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-orange-900/40 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
                     />
                   </div>
 
@@ -489,7 +493,7 @@ export default function AuthLandingView({
                           setAuthSuccess(null);
                           playTacticalSound('click');
                         }}
-                        className="text-xs text-blue-400 hover:text-blue-300 font-semibold cursor-pointer"
+                        className="text-xs text-orange-400 hover:text-orange-300 font-semibold cursor-pointer"
                       >
                         Forgot Password?
                       </button>
@@ -501,17 +505,17 @@ export default function AuthLandingView({
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-orange-900/40 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
                     />
                   </div>
 
                   <button
                     id="submit-login-btn"
                     type="submit"
-                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer mt-2"
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-red-600 via-orange-600 to-amber-500 hover:from-red-500 hover:via-orange-500 hover:to-amber-400 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg shadow-orange-950/60 transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
                   >
                     <LogIn className="w-4 h-4" />
-                    <span>Log In</span>
+                    <span>Enter Tournament</span>
                   </button>
                 </form>
               )}
