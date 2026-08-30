@@ -8,9 +8,6 @@
   <meta http-equiv="Expires" content="0">
   <title>Realm of Champions 3D • Firestorm Tournaments</title>
   
-  <!-- Three.js 3D Engine -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
   <style>
     :root {
       --bg-dark: #070b14;
@@ -131,15 +128,22 @@
     .mana-fill { background: linear-gradient(90deg, #2563eb, #38bdf8); }
     .xp-fill { background: linear-gradient(90deg, #7c3aed, #a855f7); }
 
-    /* OBJECTIVE & ESSENCE CARD */
+    /* OBJECTIVE & REALM INFO CARD WITH INTEGRATED HAMBURGER MENU */
     .zone-info-card {
+      position: relative;
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
       border-radius: 12px;
       padding: 10px 14px;
       backdrop-filter: blur(8px);
-      text-align: right;
-      min-width: 220px;
+      min-width: 260px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .zone-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
     .zone-title {
       font-size: 13px;
@@ -149,12 +153,12 @@
     .zone-kills {
       font-size: 11px;
       color: #cbd5e1;
-      margin-top: 3px;
+      margin-top: 2px;
     }
     .essence-counter {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
       gap: 6px;
       margin-top: 6px;
       font-size: 13px;
@@ -168,46 +172,382 @@
       clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
     }
 
-    /* TOP BUTTONS (INVENTORY, ESSENCE SHOP, AUDIO) */
-    .top-menu-buttons {
+    /* DECAYING SLAIN FOES & DROPS LOG (LEFT SIDE) */
+    .slain-loot-box {
+      margin-top: 8px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 8px 10px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      width: 100%;
+      box-sizing: border-box;
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      flex-direction: column;
+      gap: 6px;
     }
-    .hud-btn {
+    .slain-loot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #94a3b8;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      padding-bottom: 4px;
+    }
+    .slain-badge {
+      font-size: 9px;
+      font-weight: 800;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    .slain-loot-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .slain-entry {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 6px 8px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .slain-entry-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .slain-foe-name {
+      font-size: 11px;
+      font-weight: 800;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 170px;
+    }
+    .slain-drops-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .drop-tag {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .drop-tag-xp {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .drop-tag-essence {
+      background: rgba(14, 165, 233, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+    .drop-tag-item {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .drop-tag-item.rarity-rare {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    .drop-tag-item.rarity-epic {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border-color: rgba(168, 85, 247, 0.3);
+    }
+    .drop-tag-item.rarity-legendary {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border-color: rgba(245, 158, 11, 0.5);
+    }
+    .slain-decay-bar-track {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .slain-decay-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e);
+    }
+    .slain-empty-hint {
+      font-size: 10px;
+      color: #64748b;
+      text-align: center;
+      padding: 6px;
+    }
+
+    /* NEARBY FOES LIST UNDER REALM INFO */
+    .nearby-foes-box {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(51, 65, 85, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nearby-foes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #94a3b8;
+    }
+    .nearby-foes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-height: 120px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .foe-btn {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 4px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.12s;
+      color: #f1f5f9;
+      text-align: left;
+      font-family: inherit;
+    }
+    .foe-btn:hover {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: #f59e0b;
+      transform: translateX(-1px);
+    }
+    .foe-btn.target-active {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+    }
+    .foe-left {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      overflow: hidden;
+    }
+    .foe-lvl-badge {
+      font-size: 9px;
+      font-weight: 800;
+      background: #334155;
+      color: #fbbf24;
+      padding: 1px 4px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .foe-name-text {
+      font-size: 10px;
+      font-weight: 700;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 110px;
+    }
+    .foe-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .foe-dist-text {
+      font-size: 9px;
+      color: #94a3b8;
+      font-family: monospace;
+    }
+    .foe-hp-pill {
+      font-size: 9px;
+      font-weight: 800;
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    /* HAMBURGER BUTTON INSIDE REALM INFO BOX */
+    .realm-hamburger-btn {
       background: rgba(30, 41, 59, 0.85);
       border: 1px solid #334155;
       color: #e2e8f0;
-      padding: 7px 12px;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .realm-hamburger-btn:hover {
+      background: #334155;
+      border-color: var(--accent-gold);
+    }
+    .realm-hamburger-btn.active {
+      background: #1e293b;
+      border-color: var(--accent-gold);
+    }
+    .realm-hamburger-btn .bar {
+      width: 16px;
+      height: 2px;
+      background: #f1f5f9;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    .realm-hamburger-btn.active .bar:nth-child(1) {
+      transform: translateY(6px) rotate(45deg);
+    }
+    .realm-hamburger-btn.active .bar:nth-child(2) {
+      opacity: 0;
+    }
+    .realm-hamburger-btn.active .bar:nth-child(3) {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+
+    /* HAMBURGER DROPDOWN MENU */
+    .realm-hamburger-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 290px;
+      background: rgba(13, 20, 36, 0.98);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .realm-hamburger-dropdown.open {
+      display: flex;
+    }
+    .menu-heading {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      padding: 2px 6px 4px;
+      border-bottom: 1px solid #1e293b;
+      text-align: left;
+    }
+    .realm-menu-item {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      padding: 8px 10px;
       border-radius: 8px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
       transition: all 0.15s;
+      text-align: left;
     }
-    .hud-btn:hover {
+    .realm-menu-item:hover {
       background: #334155;
       border-color: #64748b;
       color: #fff;
     }
-    .hud-btn.active {
+    .realm-menu-item.active {
       background: #16a34a;
       border-color: #22c55e;
       color: #ffffff;
-      box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.35);
     }
-    .hud-btn-warp {
+    .realm-menu-item-warp {
       background: rgba(37, 99, 235, 0.25);
       border-color: rgba(59, 130, 246, 0.5);
     }
-    .hud-btn-warp:hover {
+    .realm-menu-item-warp:hover {
       background: #2563eb;
       border-color: #3b82f6;
     }
+    .key-tag {
+      font-size: 10px;
+      font-weight: 800;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .radar-panel {
+      margin-top: 4px;
+      padding: 8px;
+      background: rgba(7, 11, 20, 0.85);
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      font-size: 11px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .radar-title {
+      font-size: 10px;
+      font-weight: 800;
+      color: #38bdf8;
+      margin-bottom: 2px;
+    }
+    .radar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #94a3b8;
+    }
+    .radar-val {
+      font-family: monospace;
+      font-size: 10px;
+      color: #e2e8f0;
+    }
+    .text-emerald { color: #34d399; }
+    .text-amber { color: #f59e0b; }
+    .text-red { color: #ef4444; }
 
     /* TARGET CARD */
     .target-card {
@@ -589,37 +929,51 @@
   <div class="hud-overlay">
     <!-- TOP BAR -->
     <div class="top-stats-bar">
-      <!-- Player Vitals -->
-      <div class="player-vitals-card hud-interactive">
-        <div class="player-header">
-          <span class="player-name" id="hud-player-name">Hero</span>
-          <span class="player-level-badge" id="hud-player-lvl">LVL 1</span>
+      <!-- Left Column: Player Vitals & Decaying Slain Foes & Drops Log -->
+      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start; max-width: 280px; width: 100%;">
+        <!-- Player Vitals -->
+        <div class="player-vitals-card hud-interactive">
+          <div class="player-header">
+            <span class="player-name" id="hud-player-name">Hero</span>
+            <span class="player-level-badge" id="hud-player-lvl">LVL 1</span>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-label">
+              <span>HEALTH</span>
+              <span id="hud-hp-val">100 / 100</span>
+            </div>
+            <div class="stat-bar-outer">
+              <div class="stat-bar-fill hp-fill" id="hud-hp-bar" style="width: 100%"></div>
+            </div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-label">
+              <span>MANA</span>
+              <span id="hud-mana-val">50 / 50</span>
+            </div>
+            <div class="stat-bar-outer">
+              <div class="stat-bar-fill mana-fill" id="hud-mana-bar" style="width: 100%"></div>
+            </div>
+          </div>
+          <div class="bar-wrap" style="margin-bottom: 0;">
+            <div class="bar-label">
+              <span>EXPERIENCE (LVL 1 - 50)</span>
+              <span id="hud-xp-val">0 / 100</span>
+            </div>
+            <div class="stat-bar-outer">
+              <div class="stat-bar-fill xp-fill" id="hud-xp-bar" style="width: 0%"></div>
+            </div>
+          </div>
         </div>
-        <div class="bar-wrap">
-          <div class="bar-label">
-            <span>HEALTH</span>
-            <span id="hud-hp-val">100 / 100</span>
+
+        <!-- Decaying Slain Foes & Drops Log on the Left -->
+        <div class="slain-loot-box hud-interactive" id="slain-loot-box">
+          <div class="slain-loot-header">
+            <span>💀 Slain Foes &amp; Loot Drops</span>
+            <span id="slain-decay-badge" class="slain-badge">0 / 3</span>
           </div>
-          <div class="stat-bar-outer">
-            <div class="stat-bar-fill hp-fill" id="hud-hp-bar" style="width: 100%"></div>
-          </div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-label">
-            <span>MANA</span>
-            <span id="hud-mana-val">50 / 50</span>
-          </div>
-          <div class="stat-bar-outer">
-            <div class="stat-bar-fill mana-fill" id="hud-mana-bar" style="width: 100%"></div>
-          </div>
-        </div>
-        <div class="bar-wrap" style="margin-bottom: 0;">
-          <div class="bar-label">
-            <span>EXPERIENCE (LVL 1 - 50)</span>
-            <span id="hud-xp-val">0 / 100</span>
-          </div>
-          <div class="stat-bar-outer">
-            <div class="stat-bar-fill xp-fill" id="hud-xp-bar" style="width: 0%"></div>
+          <div class="slain-loot-list" id="slain-loot-list">
+            <div class="slain-empty-hint">Defeat enemies to log combat drops</div>
           </div>
         </div>
       </div>
@@ -633,24 +987,80 @@
         <div class="target-resist" id="target-resist">Resist: None</div>
       </div>
 
-      <!-- Right Zone & Menu Buttons -->
-      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
-        <div class="zone-info-card hud-interactive">
-          <div class="zone-title" id="hud-zone-title">Zone 1: Forbidden Ruins</div>
-          <div class="zone-kills" id="hud-zone-kills">Area Kills: 0 / 256 (Boss Unlocks)</div>
-          <div class="essence-counter">
-            <div class="essence-icon"></div>
-            <span id="hud-essence-val">0 Essence</span>
+      <!-- Right Realm Info Card with Integrated Hamburger Menu -->
+      <div class="zone-info-card hud-interactive" id="realm-info-card">
+        <div class="zone-header-row">
+          <div style="text-align: left;">
+            <div class="zone-title" id="hud-zone-title">Zone 1: Forbidden Ruins</div>
+            <div class="zone-kills" id="hud-zone-kills">Area Kills: 0 / 256 (Boss Unlocks)</div>
+          </div>
+          <button class="realm-hamburger-btn" id="btn-realm-hamburger" title="Realm Actions &amp; Settings Menu" aria-label="Realm Menu">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </button>
+        </div>
+
+        <div class="essence-counter">
+          <div class="essence-icon"></div>
+          <span id="hud-essence-val">0 Essence</span>
+        </div>
+
+        <!-- Nearby Foes List Under Realm Info -->
+        <div class="nearby-foes-box">
+          <div class="nearby-foes-header">
+            <span>Nearby Foes (Click to Target)</span>
+            <span id="foes-count-badge" style="color: #fbbf24;">0 Foes</span>
+          </div>
+          <div class="nearby-foes-list" id="nearby-foes-list">
+            <div style="font-size: 10px; color: #64748b; text-align: center; padding: 4px;">No enemies nearby</div>
           </div>
         </div>
 
-        <div class="top-menu-buttons hud-interactive">
-          <button class="hud-btn" id="btn-autowalk" title="Toggle Auto-Walk [X]">🏃 Auto-Walk: OFF [X]</button>
-          <button class="hud-btn" id="btn-reset-controls" title="Reset Stuck Controls [R]">🔄 Reset Controls [R]</button>
-          <button class="hud-btn hud-btn-warp" id="btn-warp-sanctuary" title="Warp Back to Temple Sanctuary [T]">🏛️ Warp to Start [T]</button>
-          <button class="hud-btn" id="btn-open-gear">🛡️ Gear &amp; Bag [I]</button>
-          <button class="hud-btn" id="btn-open-essence">💎 Essence Shop [K]</button>
-          <button class="hud-btn" id="btn-sound-toggle">🔊 Sound</button>
+        <!-- Hamburger Dropdown Menu inside Realm Info Box -->
+        <div class="realm-hamburger-dropdown" id="realm-hamburger-menu">
+          <div class="menu-heading">Realm Actions &amp; Gear Settings</div>
+          <button class="realm-menu-item" id="btn-open-gear">
+            <span>🛡️ Gear &amp; Bag</span>
+            <span class="key-tag">[I]</span>
+          </button>
+          <button class="realm-menu-item" id="btn-open-essence">
+            <span>💎 Essence Shop</span>
+            <span class="key-tag">[K]</span>
+          </button>
+          <button class="realm-menu-item" id="btn-autowalk">
+            <span id="autowalk-text">🏃 Auto-Walk: OFF</span>
+            <span class="key-tag">[X]</span>
+          </button>
+          <button class="realm-menu-item" id="btn-reset-controls">
+            <span>🔄 Reset Controls</span>
+            <span class="key-tag">[R]</span>
+          </button>
+          <button class="realm-menu-item realm-menu-item-warp" id="btn-warp-sanctuary" onclick="warpToSanctuary()" title="Teleport to Sanctuary Temple [T]">
+            <span>✨ Teleport to Sanctuary</span>
+            <span class="key-tag">[T]</span>
+          </button>
+          <button class="realm-menu-item" id="btn-sound-toggle">
+            <span id="sound-toggle-text">🔊 Sound: ON</span>
+            <span class="key-tag">SFX</span>
+          </button>
+
+          <!-- 3D Raycaster & Proximity Distance Radar -->
+          <div class="radar-panel">
+            <div class="radar-title">📡 3D Raycaster &amp; Proximity (vector.distanceTo)</div>
+            <div class="radar-row">
+              <span>Raycast Path:</span>
+              <strong id="radar-ray-status" class="radar-val text-emerald">Clear Ahead</strong>
+            </div>
+            <div class="radar-row">
+              <span>Nearest Obstacle:</span>
+              <strong id="radar-obs-status" class="radar-val">-</strong>
+            </div>
+            <div class="radar-row">
+              <span>Nearest Enemy:</span>
+              <strong id="radar-enemy-status" class="radar-val">-</strong>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -718,11 +1128,11 @@
       <div class="modal-title">⚔️ Choose Your Hero Archetype</div>
     </div>
     <p style="font-size: 13px; color: #94a3b8; line-height: 1.5;">
-      Select your starting class to enter the 256x256 3D RPG arena. Your Left Hand, Right Hand, Head, and Shoulders gear grant unique abilities and scale damage output!
+      Select your starting class to enter the 512x512 3D RPG arena. Your Left Hand, Right Hand, Head, and Shoulders gear grant unique abilities and scale damage output!
     </p>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px;">
-      <div class="class-select-card" id="select-melee-btn">
+      <div class="class-select-card" id="select-melee-btn" role="button" tabindex="0" onclick="startGame('melee')">
         <div class="class-icon">⚔️</div>
         <div class="class-title">Melee Warrior</div>
         <div class="class-desc">
@@ -733,7 +1143,7 @@
         </div>
       </div>
 
-      <div class="class-select-card" id="select-caster-btn">
+      <div class="class-select-card" id="select-caster-btn" role="button" tabindex="0" onclick="startGame('caster')">
         <div class="class-icon">🔮</div>
         <div class="class-title">Caster Mage</div>
         <div class="class-desc">
@@ -902,163 +1312,204 @@
   </div>
 </div>
 
-<script>
+<script type="module">
 /* =========================================================================
-   3D RPG GAME CORE ENGINE (THREE.JS + ACTION COMBAT + 256x256 ARENA)
+   3D RPG GAME CORE ENGINE (THREE.JS ES MODULE CDN + RAYCASTER + DISTANCE PROXIMITY)
    ========================================================================= */
 
-(function() {
-  // Audio synthesizer via Web Audio API
-  let audioCtx = null;
-  let sfxEnabled = true;
+import * as THREE from 'https://unpkg.com/three@latest/build/three.module.js';
 
-  function initAudio() {
-    if (!audioCtx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) audioCtx = new AudioContext();
+// Audio synthesizer via Web Audio API
+let audioCtx = null;
+let sfxEnabled = true;
+
+function initAudio() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) audioCtx = new AudioContext();
+  }
+}
+
+function playSound(type) {
+  if (!sfxEnabled) return;
+  initAudio();
+  if (!audioCtx) return;
+  try {
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === 'hit') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } else if (type === 'spell') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.22);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+      osc.start(now);
+      osc.stop(now + 0.22);
+    } else if (type === 'levelup') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.setValueAtTime(554.37, now + 0.1);
+      osc.frequency.setValueAtTime(659.25, now + 0.2);
+      osc.frequency.setValueAtTime(880, now + 0.3);
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
+      osc.start(now);
+      osc.stop(now + 0.45);
+    } else if (type === 'loot') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+      osc.start(now);
+      osc.stop(now + 0.15);
     }
+  } catch (e) {}
+}
+
+// --- GAME STATE ---
+const ARENA_SIZE = 512;
+const HALF_ARENA = ARENA_SIZE / 2; // 256
+const SANCTUARY_RADIUS = 18; // Compact sacred elevated round temple
+
+// Northeast Fort & River Constants
+const FORT_X = 175;
+const FORT_Z = -175;
+const FORT_SIZE = 64;
+const FORT_ELEVATION = 9.0;
+const RIVER_WIDTH = 32;
+const RIVER_HALF_WIDTH = 16;
+const RIVER_NORTH_LIMIT = -105; // River stops near the foothills, does not cross into fort
+
+let gameState = {
+  classType: 'melee',
+  characterName: 'Hero',
+  level: 1,
+  experience: 0,
+  experienceNext: 100,
+  essence: 0,
+  hp: 10,
+  maxHp: 10,
+  mana: 20,
+  maxMana: 20,
+  statUpgrades: {
+    strength: 0,
+    intelligence: 0,
+    vitality: 0,
+    armor: 0,
+    magicResist: 0,
+    critRate: 0
+  },
+  equipped: {
+    head: null,
+    shoulders: null,
+    chest: null,
+    belt: null,
+    pants: null,
+    boots: null,
+    leftHand: null,
+    rightHand: null
+  },
+  inventory: [],
+  currentArea: 1,
+  areaLevelMin: 1,
+  areaLevelMax: 7 + Math.floor(Math.random() * 4) + 1, // 1 through (7 + rand(1..4))
+  areaKills: 0,
+  totalKills: 0,
+  fortUnlocked: false,
+  midBossSpawned: false,
+  midBossDefeated: false,
+  bossSpawned: false,
+  bossDefeated: false,
+  highScore: 0,
+  defeatedFoesLog: []
+};
+
+// CONSTANT BOUNDS: 0, 65535, 65535, 0 (replaces NaN, Nin, Infinity, Math.min/max)
+const MIN_BOUND = 0;
+const MAX_BOUND = 65535;
+
+function safeClamp(val, min = MIN_BOUND, max = MAX_BOUND) {
+  if (val === null || val === undefined || Number.isNaN(val) || !Number.isFinite(val)) {
+    return min;
   }
+  if (val < min) return min;
+  if (val > max) return max;
+  return val;
+}
 
-  function playSound(type) {
-    if (!sfxEnabled) return;
-    initAudio();
-    if (!audioCtx) return;
-    try {
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
+// Damage and Healing: MUST be 0 or greater (clamped <= 65535)
+function safeCombatVal(val) {
+  return safeClamp(val, 0, MAX_BOUND);
+}
 
-      if (type === 'hit') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(140, now);
-        osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.1);
-      } else if (type === 'spell') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(320, now);
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.22);
-        gain.gain.setValueAtTime(0.18, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
-        osc.start(now);
-        osc.stop(now + 0.22);
-      } else if (type === 'levelup') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.setValueAtTime(554.37, now + 0.1);
-        osc.frequency.setValueAtTime(659.25, now + 0.2);
-        osc.frequency.setValueAtTime(880, now + 0.3);
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
-        osc.start(now);
-        osc.stop(now + 0.45);
-      } else if (type === 'loot') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-        osc.start(now);
-        osc.stop(now + 0.15);
-      }
-    } catch (e) {}
-  }
+// All gear and ability changes to stats or power: MUST be 1 or greater (clamped <= 65535)
+function safeStatVal(val) {
+  return safeClamp(val, 1, MAX_BOUND);
+}
 
-  // --- GAME STATE ---
-  const ARENA_SIZE = 512;
-  const HALF_ARENA = ARENA_SIZE / 2; // 256
-  const SANCTUARY_RADIUS = 18; // Compact sacred elevated round temple
-  
-  // Northeast Fort & River Constants
-  const FORT_X = 175;
-  const FORT_Z = -175;
-  const FORT_SIZE = 64;
-  const FORT_ELEVATION = 9.0;
-  const RIVER_WIDTH = 32;
-  const RIVER_HALF_WIDTH = 16;
-  const RIVER_NORTH_LIMIT = -105; // River stops near the foothills, does not cross into fort
+// Cooldown Trackers (in milliseconds)
+const cooldowns = {
+  attack: { current: 0, max: 2000 },
+  ab1: { current: 0, max: 2500 },
+  ab2: { current: 0, max: 3500 },
+  ab3: { current: 0, max: 4500 },
+  ab4: { current: 0, max: 5500 }
+};
 
-  let gameState = {
-    classType: 'melee',
-    characterName: 'Hero',
-    level: 1,
-    experience: 0,
-    experienceNext: 100,
-    essence: 0,
-    hp: 10,
-    maxHp: 10,
-    mana: 20,
-    maxMana: 20,
-    statUpgrades: {
-      strength: 0,
-      intelligence: 0,
-      vitality: 0,
-      armor: 0,
-      magicResist: 0,
-      critRate: 0
-    },
-    equipped: {
-      head: null,
-      shoulders: null,
-      chest: null,
-      belt: null,
-      pants: null,
-      boots: null,
-      leftHand: null,
-      rightHand: null
-    },
-    inventory: [],
-    currentArea: 1,
-    areaLevelMin: 1,
-    areaLevelMax: 7 + Math.floor(Math.random() * 4) + 1, // 1 through (7 + rand(1..4))
-    areaKills: 0,
-    totalKills: 0,
-    fortUnlocked: false,
-    midBossSpawned: false,
-    midBossDefeated: false,
-    bossSpawned: false,
-    bossDefeated: false,
-    highScore: 0
-  };
+// Three.js Scene Setup & Raycasting
+let scene, camera, renderer;
+let playerMesh, playerLight;
+let fortGateMesh, fortBarrierMesh, fortGroup;
+let riverWaterMesh;
+let enemies = [];
+let floatingTexts = [];
+let keys = {};
+let targetEnemy = null;
+let isOrbiting = false;
+let autoWalk = false;
+let previousMousePosition = { x: 0, y: 0 };
+let cameraDistance = 14;
+let cameraTheta = Math.PI; // angle around character
+let cameraPhi = 0.45; // pitch angle
 
-  // Cooldown Trackers (in milliseconds)
-  const cooldowns = {
-    attack: { current: 0, max: 2000 },
-    ab1: { current: 0, max: 2500 },
-    ab2: { current: 0, max: 3500 },
-    ab3: { current: 0, max: 4500 },
-    ab4: { current: 0, max: 5500 }
-  };
+// Raycaster & Obstacle Tracking for continuous movement raycasting and exact vector.distanceTo calculations
+const playerMovementRaycaster = new THREE.Raycaster();
+playerMovementRaycaster.far = 45;
+const worldObstacles = []; // { name, type, position: THREE.Vector3, mesh, radius }
+const raycastObstacleMeshes = [];
 
-  // Three.js Scene Setup
-  let scene, camera, renderer;
-  let playerMesh, playerLight;
-  let fortGateMesh, fortBarrierMesh, fortGroup;
-  let riverWaterMesh;
-  let enemies = [];
-  let floatingTexts = [];
-  let keys = {};
-  let targetEnemy = null;
-  let isOrbiting = false;
-  let previousMousePosition = { x: 0, y: 0 };
-  let cameraDistance = 14;
-  let cameraTheta = Math.PI; // angle around character
-  let cameraPhi = 0.45; // pitch angle
-
-  // Reusable vectors for 60 FPS performance without GC allocations
-  const _vForward = new THREE.Vector3();
-  const _vRight = new THREE.Vector3();
-  const _vMove = new THREE.Vector3();
-  const _vDir = new THREE.Vector3();
-  const _vScreen = new THREE.Vector3();
+// Reusable vectors for 60 FPS performance without GC allocations
+const _vForward = new THREE.Vector3();
+const _vRight = new THREE.Vector3();
+const _vMove = new THREE.Vector3();
+const _vDir = new THREE.Vector3();
+const _vScreen = new THREE.Vector3();
 
   // River Centerline Path along Middle East side
   function getRiverCenterX(z) {
     return 110 + 18 * Math.sin(z * 0.016);
+  }
+
+  // Helper: Check if a coordinate is within the river channel and banks
+  function isPointInRiverArea(x, z) {
+    if (z >= (RIVER_NORTH_LIMIT - 6) && z <= (HALF_ARENA + 4)) {
+      const rCenterX = getRiverCenterX(z);
+      return Math.abs(x - rCenterX) <= (RIVER_HALF_WIDTH + 4);
+    }
+    return false;
   }
 
   // Smooth Continuous Procedural Terrain Height Map
@@ -1113,7 +1564,28 @@
     return baseH;
   }
 
-  // Generate Equipment based on slot and level - EXACT SINGLE STAT EQUAL TO OR LESS THAN ENEMY LEVEL
+  // Format non-zero stat descriptions for gear cards, tooltips, and equipment paperdoll
+  function getItemStatDescription(item) {
+    if (!item) return '-';
+    const parts = [];
+    if (item.armor && item.armor > 0) parts.push(`+${item.armor} Armor`);
+    if (item.vitality && item.vitality > 0) parts.push(`+${item.vitality} Vit (+${item.vitality * 4} HP)`);
+    if (item.magicResist && item.magicResist > 0) parts.push(`+${item.magicResist} Resist`);
+    if (item.strength && item.strength > 0) parts.push(`+${item.strength} Str`);
+    if (item.intelligence && item.intelligence > 0) parts.push(`+${item.intelligence} Int (+${item.intelligence * 4} Mana)`);
+    
+    if (item.grantedAbility) {
+      const ab = item.grantedAbility;
+      const abStr = `⚡ ${ab.name} (${ab.damageBase} Dmg, ${ab.type.toUpperCase()})`;
+      if (parts.length > 0) {
+        return `${parts.join(', ')} • ${abStr}`;
+      }
+      return abStr;
+    }
+    return parts.length > 0 ? parts.join(', ') : '+1 Armor';
+  }
+
+  // Generate Equipment based on slot and level - ALL STATS AND POWER CHANGES MUST BE >= 1
   function generateGearItem(slot, level, rarity = 'common') {
     const isMeleeClass = gameState.classType === 'melee';
     const id = 'gear_' + Math.random().toString(36).substr(2, 9);
@@ -1131,20 +1603,22 @@
     let intelligence = 0;
     let vitality = 0;
 
-    // Stat crunch rule: each item has ONLY ONE stat, equal to or less than level
-    const statVal = Math.max(1, level);
+    // Stat values: MUST be 1 or greater
+    const statVal = Math.max(1, Math.round(safeStatVal(level)));
+    const subVal = Math.max(1, Math.floor(statVal / 2) || 1);
 
     switch(slot) {
       case 'rightHand':
         if (isMeleeClass) {
           name = `${rarity.toUpperCase()} Mountain Blade L${level}`;
           elementalType = 'melee';
-          strength = statVal; // ONLY ONE STAT: Strength <= level
+          strength = statVal; // Primary Stat >= 1
+          armor = subVal;     // Defensive sub-stat >= 1
           grantedAbility = {
             id: 'ab_cleave',
             name: 'Whirlwind Strike',
             type: 'melee',
-            damageBase: 3 + Math.max(1, Math.floor(level * 0.8)),
+            damageBase: Math.max(1, safeStatVal(3 + Math.floor(level * 0.8))),
             cooldown: 2.5,
             manaCost: 4,
             range: 6,
@@ -1153,12 +1627,13 @@
         } else {
           name = `${rarity.toUpperCase()} Pyromancer Staff L${level}`;
           elementalType = 'fire';
-          intelligence = statVal; // ONLY ONE STAT: Intelligence <= level
+          intelligence = statVal; // Primary Stat >= 1
+          magicResist = subVal;  // Defensive sub-stat >= 1
           grantedAbility = {
             id: 'ab_fireball',
             name: 'Pyroblast',
             type: 'fire',
-            damageBase: 4 + Math.max(1, Math.floor(level * 0.9)),
+            damageBase: Math.max(1, safeStatVal(4 + Math.floor(level * 0.9))),
             cooldown: 2.5,
             manaCost: 5,
             range: 22,
@@ -1171,12 +1646,13 @@
         if (isMeleeClass) {
           name = `${rarity.toUpperCase()} Stone Shield L${level}`;
           elementalType = 'melee';
-          armor = statVal; // ONLY ONE STAT: Armor <= level
+          armor = statVal;   // Primary Armor >= 1
+          vitality = subVal; // Sub-stat >= 1
           grantedAbility = {
             id: 'ab_shield_bash',
             name: 'Shield Slam',
             type: 'melee',
-            damageBase: 2 + Math.max(1, Math.floor(level * 0.6)),
+            damageBase: Math.max(1, safeStatVal(2 + Math.floor(level * 0.6))),
             cooldown: 3.5,
             manaCost: 4,
             range: 5,
@@ -1185,12 +1661,13 @@
         } else {
           name = `${rarity.toUpperCase()} Frost Tome L${level}`;
           elementalType = 'frost';
-          magicResist = statVal; // ONLY ONE STAT: Magic Resist <= level
+          magicResist = statVal;  // Primary Resist >= 1
+          intelligence = subVal; // Sub-stat >= 1
           grantedAbility = {
             id: 'ab_frost_nova',
             name: 'Frost Spike',
             type: 'frost',
-            damageBase: 3 + Math.max(1, Math.floor(level * 0.7)),
+            damageBase: Math.max(1, safeStatVal(3 + Math.floor(level * 0.7))),
             cooldown: 3.5,
             manaCost: 5,
             range: 18,
@@ -1202,12 +1679,13 @@
       case 'head':
         name = `${rarity.toUpperCase()} Helm of Thunder L${level}`;
         elementalType = 'lightning';
-        magicResist = statVal; // ONLY ONE STAT: Magic Resist <= level
+        magicResist = statVal; // Primary Resist >= 1
+        armor = subVal;        // Sub-stat >= 1
         grantedAbility = {
           id: 'ab_lightning_strike',
           name: 'Thunderbolt',
           type: 'lightning',
-          damageBase: 4 + Math.max(1, Math.floor(level * 0.9)),
+          damageBase: Math.max(1, safeStatVal(4 + Math.floor(level * 0.9))),
           cooldown: 4.5,
           manaCost: 6,
           range: 24,
@@ -1218,13 +1696,14 @@
       case 'shoulders':
         name = `${rarity.toUpperCase()} Pauldrons of Ruin L${level}`;
         elementalType = 'arcane';
-        strength = isMeleeClass ? statVal : 0; // ONLY ONE STAT
+        armor = statVal; // Primary Armor >= 1
+        strength = isMeleeClass ? statVal : 0;
         intelligence = isMeleeClass ? 0 : statVal;
         grantedAbility = {
           id: 'ab_arcane_burst',
           name: 'Arcane Nova',
           type: 'arcane',
-          damageBase: 5 + Math.max(1, Math.floor(level * 1.0)),
+          damageBase: Math.max(1, safeStatVal(5 + Math.floor(level * 1.0))),
           cooldown: 5.5,
           manaCost: 8,
           range: 14,
@@ -1234,19 +1713,26 @@
 
       case 'chest':
         name = `${rarity.toUpperCase()} Chestguard L${level}`;
-        vitality = statVal; // ONLY ONE STAT: Vitality <= level
+        armor = statVal;   // Primary Armor >= 1
+        vitality = statVal; // Vitality >= 1
         break;
+
       case 'belt':
         name = `${rarity.toUpperCase()} Girdle L${level}`;
-        armor = statVal; // ONLY ONE STAT: Armor <= level
+        armor = statVal;   // Primary Armor >= 1
+        vitality = subVal; // Vitality >= 1
         break;
+
       case 'pants':
         name = `${rarity.toUpperCase()} Greaves L${level}`;
-        vitality = statVal; // ONLY ONE STAT: Vitality <= level
+        armor = statVal;   // Primary Armor >= 1
+        vitality = statVal; // Vitality >= 1
         break;
+
       case 'boots':
         name = `${rarity.toUpperCase()} Treads L${level}`;
-        armor = statVal; // ONLY ONE STAT: Armor <= level
+        armor = statVal;      // Primary Armor >= 1
+        magicResist = subVal; // Magic Resist >= 1
         break;
     }
 
@@ -1268,18 +1754,18 @@
     };
   }
 
-  // Recalculate Player Total Stats from Gear and Essence Upgrades (Stat-crunched to 10 start HP)
+  // Recalculate Player Total Stats from Gear and Essence Upgrades
   function recalculateStats() {
-    let baseHp = 10 + (gameState.level - 1) * 2;
-    let baseMana = 20 + (gameState.level - 1) * 3;
+    let baseHp = 40 + (gameState.level - 1) * 6;
+    let baseMana = 30 + (gameState.level - 1) * 5;
 
-    let totalArmor = gameState.statUpgrades.armor;
-    let totalResist = gameState.statUpgrades.magicResist;
-    let totalStr = gameState.statUpgrades.strength;
-    let totalInt = gameState.statUpgrades.intelligence;
-    let totalVit = gameState.statUpgrades.vitality;
+    let totalArmor = gameState.statUpgrades.armor || 0;
+    let totalResist = gameState.statUpgrades.magicResist || 0;
+    let totalStr = gameState.statUpgrades.strength || 0;
+    let totalInt = gameState.statUpgrades.intelligence || 0;
+    let totalVit = gameState.statUpgrades.vitality || 0;
 
-    // Sum equipped items (each item gives exactly 1 stat <= level)
+    // Sum equipped items (each item gives stats >= 1)
     for (const slot in gameState.equipped) {
       const item = gameState.equipped[slot];
       if (item) {
@@ -1291,10 +1777,10 @@
       }
     }
 
-    gameState.maxHp = baseHp + totalVit * 2;
-    gameState.maxMana = baseMana + totalInt * 2;
-    gameState.hp = Math.min(gameState.hp, gameState.maxHp);
-    gameState.mana = Math.min(gameState.mana, gameState.maxMana);
+    gameState.maxHp = safeStatVal(baseHp + totalVit * 4);
+    gameState.maxMana = safeStatVal(baseMana + totalInt * 4);
+    gameState.hp = safeClamp(gameState.hp, 0, gameState.maxHp);
+    gameState.mana = safeClamp(gameState.mana, 0, gameState.maxMana);
 
     // Update Action Bar Icons & Names from Equipped Weapons / Armor
     const ab1 = gameState.equipped.rightHand?.grantedAbility;
@@ -1422,45 +1908,168 @@
     return texture;
   }
 
-  function createBrickTexture() {
+  // Stone Brick Texture for Fort Walls
+  function createFortStoneBrickTexture() {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
     
-    // Mortar background
-    ctx.fillStyle = '#0f172a';
+    // Deep dark slate mortar background
+    ctx.fillStyle = '#090d16';
     ctx.fillRect(0, 0, 512, 512);
 
-    const rows = 16;
+    const rows = 12;
     const rowHeight = 512 / rows;
     for (let r = 0; r < rows; r++) {
-      const cols = 8;
+      const cols = 6;
       const colWidth = 512 / cols;
       const offset = (r % 2 === 0) ? 0 : colWidth / 2;
       for (let c = -1; c <= cols; c++) {
         const x = c * colWidth + offset;
         const y = r * rowHeight;
         
-        // Brick stone color variations
-        const shade = 38 + Math.floor(Math.sin(r * 3 + c * 5) * 8) + Math.floor(Math.random() * 8);
-        const rVal = shade + 4;
-        const gVal = shade + 2;
-        const bVal = shade + 12;
+        // Fort stone brick variations
+        const shade = 42 + Math.floor(Math.sin(r * 4 + c * 7) * 10) + Math.floor(Math.random() * 8);
+        const rVal = shade + 6;
+        const gVal = shade + 8;
+        const bVal = shade + 16;
         ctx.fillStyle = `rgb(${rVal},${gVal},${bVal})`;
         ctx.fillRect(x + 2, y + 2, colWidth - 4, rowHeight - 4);
         
-        // Bevel highlight & shadow
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-        ctx.fillRect(x + 2, y + 2, colWidth - 4, 3);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-        ctx.fillRect(x + 2, y + rowHeight - 5, colWidth - 4, 3);
+        // Stone noise & grain
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        for (let s = 0; s < 12; s++) {
+          ctx.fillRect(x + 4 + (s * 7) % (colWidth - 8), y + 4 + (s * 5) % (rowHeight - 8), 2, 2);
+        }
+
+        // Top & left chiseled bevel highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.fillRect(x + 2, y + 2, colWidth - 4, 2);
+        ctx.fillRect(x + 2, y + 2, 2, rowHeight - 4);
+
+        // Bottom & right dark shadow bevel
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.fillRect(x + 2, y + rowHeight - 4, colWidth - 4, 2);
+        ctx.fillRect(x + colWidth - 4, y + 2, 2, rowHeight - 4);
       }
     }
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     return texture;
+  }
+
+  // Mountain View Texture with trees and vast expanses for perimeter walls
+  function createMountainViewTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // 1. Vast Panoramic Sky Gradient (Twilight Horizon with Alpine Glow)
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, 512);
+    skyGrad.addColorStop(0, '#0a1128');    // Deep sapphire dusk
+    skyGrad.addColorStop(0.35, '#1e1b4b'); // Twilight indigo
+    skyGrad.addColorStop(0.65, '#3b1d60'); // Mountain twilight purple
+    skyGrad.addColorStop(0.82, '#c2410c'); // Glowing amber horizon
+    skyGrad.addColorStop(1.0, '#381607');  // Deep mountain base
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // Glowing atmospheric horizon haze
+    const sunGrad = ctx.createRadialGradient(512, 380, 20, 512, 380, 320);
+    sunGrad.addColorStop(0, 'rgba(251, 191, 36, 0.35)');
+    sunGrad.addColorStop(0.5, 'rgba(217, 119, 6, 0.15)');
+    sunGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = sunGrad;
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // 2. Distant Snow-Capped Mountain Range (Distant High Peaks)
+    ctx.fillStyle = '#1e1b4b';
+    ctx.beginPath();
+    ctx.moveTo(0, 512);
+    for (let x = 0; x <= 1024; x += 16) {
+      const peakY = 210 + Math.sin(x * 0.008) * 80 + Math.sin(x * 0.024) * 35;
+      ctx.lineTo(x, peakY);
+    }
+    ctx.lineTo(1024, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Snow caps on distant peaks
+    ctx.fillStyle = 'rgba(224, 231, 255, 0.65)';
+    for (let px = 80; px < 1024; px += 180) {
+      const py = 210 + Math.sin(px * 0.008) * 80 + Math.sin(px * 0.024) * 35;
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(px + 40, py + 50);
+      ctx.lineTo(px - 40, py + 50);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // 3. Mid-Ground Rugged Alpine Ridges (Forested slopes)
+    ctx.fillStyle = '#0f291e';
+    ctx.beginPath();
+    ctx.moveTo(0, 512);
+    for (let x = 0; x <= 1024; x += 12) {
+      const midY = 300 + Math.sin(x * 0.012 + 1.2) * 55 + Math.sin(x * 0.035) * 20;
+      ctx.lineTo(x, midY);
+    }
+    ctx.lineTo(1024, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // 4. Foreground Foothills with Vast Expanses
+    ctx.fillStyle = '#061b12';
+    ctx.beginPath();
+    ctx.moveTo(0, 512);
+    for (let x = 0; x <= 1024; x += 10) {
+      const foreY = 390 + Math.sin(x * 0.015 + 2.4) * 30;
+      ctx.lineTo(x, foreY);
+    }
+    ctx.lineTo(1024, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Evergreen Pine Tree Silhouettes across expansive foothills
+    for (let tx = 8; tx < 1024; tx += 16 + (tx % 11)) {
+      const ty = 385 + Math.sin(tx * 0.015 + 2.4) * 30 + (tx % 14);
+      const treeH = 26 + (tx % 18);
+      const treeW = 10 + (tx % 6);
+
+      ctx.fillStyle = '#021f14';
+      ctx.beginPath();
+      ctx.moveTo(tx, ty - treeH);
+      ctx.lineTo(tx + treeW, ty);
+      ctx.lineTo(tx - treeW, ty);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(tx, ty - treeH * 0.55);
+      ctx.lineTo(tx + treeW * 1.25, ty + 6);
+      ctx.lineTo(tx - treeW * 1.25, ty + 6);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Atmospheric valley mist along base
+    const mistGrad = ctx.createLinearGradient(0, 420, 0, 512);
+    mistGrad.addColorStop(0, 'rgba(15, 23, 42, 0)');
+    mistGrad.addColorStop(1, 'rgba(15, 23, 42, 0.7)');
+    ctx.fillStyle = mistGrad;
+    ctx.fillRect(0, 420, 1024, 92);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    return texture;
+  }
+
+  function createBrickTexture() {
+    return createFortStoneBrickTexture();
   }
 
   function createGateTexture() {
@@ -1538,6 +2147,120 @@
     return texture;
   }
 
+  // Shimmering animated water caustics texture
+  function createShimmeringWaterTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Deep sapphire to azure turquoise water gradient
+    const grad = ctx.createLinearGradient(0, 0, 512, 512);
+    grad.addColorStop(0, '#0369a1');
+    grad.addColorStop(0.3, '#0284c7');
+    grad.addColorStop(0.7, '#0ea5e9');
+    grad.addColorStop(1, '#0369a1');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Flowing caustics and wave crests
+    ctx.strokeStyle = 'rgba(224, 242, 254, 0.45)';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+
+    for (let i = 0; i < 45; i++) {
+      ctx.beginPath();
+      const y = Math.random() * 512;
+      const x = Math.random() * 512;
+      const len = 35 + Math.random() * 65;
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x + len * 0.35, y - 8 + Math.random() * 16, x + len * 0.7, y - 8 + Math.random() * 16, x + len, y);
+      ctx.stroke();
+    }
+
+    // Glistening specular sparkle diamonds
+    for (let j = 0; j < 70; j++) {
+      const px = Math.random() * 512;
+      const py = Math.random() * 512;
+      const rad = 1.5 + Math.random() * 3.5;
+      const pGrad = ctx.createRadialGradient(px, py, 0, px, py, rad);
+      pGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      pGrad.addColorStop(0.4, 'rgba(186, 230, 253, 0.6)');
+      pGrad.addColorStop(1, 'rgba(2, 132, 199, 0)');
+      ctx.fillStyle = pGrad;
+      ctx.beginPath();
+      ctx.arc(px, py, rad, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(3, 12);
+    return tex;
+  }
+
+  // Terrain Land-Only Grid Helper that excludes river/water areas and sanctuary floor
+  function createLandGridHelper() {
+    const linePositions = [];
+    const half = HALF_ARENA; // 256
+    const divisions = 64;
+    const step = ARENA_SIZE / divisions; // 8
+
+    // Lines along X (varying Z)
+    for (let i = 0; i <= divisions; i++) {
+      const x = -half + i * step;
+      let segStart = null;
+      for (let z = -half; z <= half; z += 4) {
+        const inRiver = isPointInRiverArea(x, z);
+        const inTemple = (x * x + z * z) < (SANCTUARY_RADIUS * SANCTUARY_RADIUS);
+        if (inRiver || inTemple) {
+          segStart = null;
+          continue;
+        }
+        const y = getTerrainHeight(x, z) + 0.05;
+        if (segStart === null) {
+          segStart = [x, y, z];
+        } else {
+          linePositions.push(segStart[0], segStart[1], segStart[2]);
+          linePositions.push(x, y, z);
+          segStart = [x, y, z];
+        }
+      }
+    }
+
+    // Lines along Z (varying X)
+    for (let j = 0; j <= divisions; j++) {
+      const z = -half + j * step;
+      let segStart = null;
+      for (let x = -half; x <= half; x += 4) {
+        const inRiver = isPointInRiverArea(x, z);
+        const inTemple = (x * x + z * z) < (SANCTUARY_RADIUS * SANCTUARY_RADIUS);
+        if (inRiver || inTemple) {
+          segStart = null;
+          continue;
+        }
+        const y = getTerrainHeight(x, z) + 0.05;
+        if (segStart === null) {
+          segStart = [x, y, z];
+        } else {
+          linePositions.push(segStart[0], segStart[1], segStart[2]);
+          linePositions.push(x, y, z);
+          segStart = [x, y, z];
+        }
+      }
+    }
+
+    const gridGeo = new THREE.BufferGeometry();
+    gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+    const gridMat = new THREE.LineBasicMaterial({
+      color: 0x166534,
+      transparent: true,
+      opacity: 0.45
+    });
+    return new THREE.LineSegments(gridGeo, gridMat);
+  }
+
   function createTree(x, z, scale = 1, treeType = 'pine') {
     const treeGroup = new THREE.Group();
     treeGroup.position.set(x, 0, z);
@@ -1549,6 +2272,7 @@
     trunk.position.y = 2.1 * scale;
     trunk.castShadow = true;
     trunk.receiveShadow = true;
+    trunk.userData = { obstacleName: `${treeType === 'pine' ? 'Pine' : 'Oak'} Tree`, obstacleType: 'tree' };
     treeGroup.add(trunk);
 
     if (treeType === 'pine') {
@@ -1584,7 +2308,31 @@
     }
 
     treeGroup.rotation.y = Math.random() * Math.PI * 2;
+    treeGroup.userData = { obstacleName: `${treeType === 'pine' ? 'Pine Tree' : 'Oak Tree'}`, obstacleType: 'tree', radius: 1.6 * scale };
     return treeGroup;
+  }
+
+  function createRock(x, z, scale = 1) {
+    const rockGroup = new THREE.Group();
+    rockGroup.position.set(x, 0, z);
+
+    const rockMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.9,
+      metalness: 0.1
+    });
+
+    const rockMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5 * scale, 1), rockMat);
+    rockMesh.position.y = 0.8 * scale;
+    rockMesh.scale.set(1.2, 0.85, 1.0);
+    rockMesh.rotation.set(Math.random() * 0.4, Math.random() * Math.PI, Math.random() * 0.4);
+    rockMesh.castShadow = true;
+    rockMesh.receiveShadow = true;
+    rockMesh.userData = { obstacleName: 'Granite Rock', obstacleType: 'rock' };
+    rockGroup.add(rockMesh);
+
+    rockGroup.userData = { obstacleName: 'Granite Rock', obstacleType: 'rock', radius: 1.5 * scale };
+    return rockGroup;
   }
 
   // --- STYLIZED CHARACTER GENERATION WITH LIMB RIGGING ---
@@ -2065,10 +2813,9 @@
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Natural boundary grid helper
-    const gridHelper = new THREE.GridHelper(ARENA_SIZE, 64, 0x166534, 0x14532d);
-    gridHelper.position.y = 0.05;
-    scene.add(gridHelper);
+    // Natural boundary grid helper on land only (explicitly excludes river and water areas)
+    const landGridHelper = createLandGridHelper();
+    scene.add(landGridHelper);
 
     // =========================================================================
     // 32-WIDE RIVER RUNNING ALONG MIDDLE EAST SIDE TOWARDS THE FORT
@@ -2107,12 +2854,14 @@
     riverGeo.setIndex(riverIndices);
     riverGeo.computeVertexNormals();
 
+    const waterTex = createShimmeringWaterTexture();
     const riverMat = new THREE.MeshStandardMaterial({
-      color: 0x0284c7,
-      roughness: 0.1,
-      metalness: 0.85,
+      map: waterTex,
+      color: 0x38bdf8,
+      roughness: 0.12,
+      metalness: 0.88,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.88
     });
     riverWaterMesh = new THREE.Mesh(riverGeo, riverMat);
     riverWaterMesh.receiveShadow = true;
@@ -2125,17 +2874,29 @@
     springPool.position.set(springCenterX, -0.65, RIVER_NORTH_LIMIT);
     scene.add(springPool);
 
-    // Riverbed Rocks
+    // Riverbed Rocks (Characters can freely walk through these in the river area)
     const rockMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
     for (let r = 0; r < 20; r++) {
       const rz = riverZStart + (r / 20) * (riverZEnd - riverZStart);
       const rx = getRiverCenterX(rz) + (Math.random() - 0.5) * 22;
-      const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8 + Math.random() * 1.4, 0), rockMat);
-      rock.position.set(rx, getTerrainHeight(rx, rz) + 0.3, rz);
+      const rockScale = 0.8 + Math.random() * 1.4;
+      const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(rockScale, 0), rockMat);
+      const ry = getTerrainHeight(rx, rz) + 0.3;
+      rock.position.set(rx, ry, rz);
       rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
       rock.castShadow = true;
       rock.receiveShadow = true;
       scene.add(rock);
+
+      // Register river rock with inRiver: true so characters can walk through it in the river area everywhere
+      worldObstacles.push({
+        name: 'River Stone',
+        type: 'rock',
+        inRiver: true,
+        position: new THREE.Vector3(rx, ry, rz),
+        mesh: rock,
+        radius: rockScale
+      });
     }
 
     // =========================================================================
@@ -2276,8 +3037,11 @@
     fortGroup = new THREE.Group();
     fortGroup.position.set(FORT_X, FORT_ELEVATION, FORT_Z);
 
+    const fortStoneBrickTex = createFortStoneBrickTexture();
+    fortStoneBrickTex.repeat.set(6, 4);
+
     const fortWallMat = new THREE.MeshStandardMaterial({
-      color: 0x1e293b,
+      map: fortStoneBrickTex,
       roughness: 0.85,
       metalness: 0.2
     });
@@ -2373,7 +3137,7 @@
       wireframe: true
     });
     fortBarrierMesh = new THREE.Mesh(barrierGeo, barrierMat);
-    barrierMeshPos: fortBarrierMesh.position.set(0, 5.5, fHalf + 0.6);
+    fortBarrierMesh.position.set(0, 5.5, fHalf + 0.6);
     fortGroup.add(fortBarrierMesh);
 
     // 4. 4 Corner Bastion Watchtowers
@@ -2442,15 +3206,15 @@
     scene.add(fortGroup);
 
     // =========================================================================
-    // 512x512 PERIMETER BRICK FORTRESS WALLS & CORNER BASTIONS
+    // 512x512 PERIMETER MOUNTAIN VIEW EXPANSES OUTER WALLS & CORNER BASTIONS
     // =========================================================================
-    const brickTex = createBrickTexture();
-    brickTex.repeat.set(48, 2);
+    const mountainViewTex = createMountainViewTexture();
+    mountainViewTex.repeat.set(16, 1);
 
     const wallMaterial = new THREE.MeshStandardMaterial({
-      map: brickTex,
+      map: mountainViewTex,
       roughness: 0.85,
-      metalness: 0.15
+      metalness: 0.05
     });
 
     const wallHeight = 14;
@@ -2532,6 +3296,31 @@
     // =========================================================================
     // 3D TREES SCATTERED ACROSS 512x512 FOREST PLAINS (CONFORMING TO TERRAIN HEIGHT)
     // =========================================================================
+    // =========================================================================
+    // 3D TREES & ROCKS SCATTERED ACROSS 512x512 FOREST PLAINS (CONFORMING TO TERRAIN HEIGHT)
+    // =========================================================================
+    worldObstacles.length = 0;
+    raycastObstacleMeshes.length = 0;
+
+    // Sanctuary Temple Center Beacon as obstacle
+    worldObstacles.push({
+      name: 'Sanctuary Beacon',
+      type: 'sanctuary',
+      position: new THREE.Vector3(0, 1.35, 0),
+      radius: 4.0
+    });
+
+    // Northeast Fort Obstacle Registration
+    worldObstacles.push({
+      name: 'Fort Fortress Bastion',
+      type: 'fort',
+      position: new THREE.Vector3(FORT_X, FORT_ELEVATION, FORT_Z),
+      radius: 32.0
+    });
+    if (fortGroup) {
+      raycastObstacleMeshes.push(fortGroup);
+    }
+
     const treeCount = 135;
     for (let i = 0; i < treeCount; i++) {
       let tx, tz, distSanctuary, distFort, distRiver;
@@ -2548,8 +3337,54 @@
       const scale = 0.85 + Math.random() * 0.65;
       const type = Math.random() > 0.45 ? 'pine' : 'oak';
       const tree = createTree(tx, tz, scale, type);
-      tree.position.y = getTerrainHeight(tx, tz);
+      const ty = getTerrainHeight(tx, tz);
+      tree.position.y = ty;
       scene.add(tree);
+
+      const treePos = new THREE.Vector3(tx, ty, tz);
+      worldObstacles.push({
+        name: `${type === 'pine' ? 'Pine' : 'Oak'} Tree`,
+        type: 'tree',
+        position: treePos,
+        mesh: tree,
+        radius: 1.6 * scale
+      });
+      raycastObstacleMeshes.push(tree);
+    }
+
+    // 40 Granite Rock Formations / Boulders
+    const rockCount = 40;
+    for (let i = 0; i < rockCount; i++) {
+      let rx, rz, distSanctuary, distFort, distRiver;
+      let attempts = 0;
+      do {
+        rx = (Math.random() - 0.5) * (ARENA_SIZE - 48);
+        rz = (Math.random() - 0.5) * (ARENA_SIZE - 48);
+        distSanctuary = Math.hypot(rx, rz);
+        distFort = Math.hypot(rx - FORT_X, rz - FORT_Z);
+        distRiver = (rz > RIVER_NORTH_LIMIT && rz < (HALF_ARENA - 4)) ? Math.abs(rx - getRiverCenterX(rz)) : 999;
+        attempts++;
+      } while ((distSanctuary < (SANCTUARY_RADIUS + 8) || distFort < (FORT_SIZE / 2 + 10) || distRiver < (RIVER_HALF_WIDTH + 6)) && attempts < 30);
+
+      const scale = 0.9 + Math.random() * 0.8;
+      const rock = createRock(rx, rz, scale);
+      const ry = getTerrainHeight(rx, rz);
+      rock.position.y = ry;
+      scene.add(rock);
+
+      const rockPos = new THREE.Vector3(rx, ry, rz);
+      const inRiver = isPointInRiverArea(rx, rz);
+      worldObstacles.push({
+        name: 'Granite Rock',
+        type: 'rock',
+        inRiver: inRiver,
+        position: rockPos,
+        mesh: rock,
+        radius: 1.5 * scale
+      });
+      if (!inRiver) {
+        raycastObstacleMeshes.push(rock);
+      }
     }
 
     // =========================================================================
@@ -2623,13 +3458,15 @@
     meshGroup.position.set(ex, ey, ez);
     scene.add(meshGroup);
 
-    const maxHp = (50 + enemyLvl * 24) * (isBoss ? 6.5 : 1.0);
+    const maxHp = safeStatVal((28 + enemyLvl * 14) * (isBoss ? 4.5 : 1.0));
+    const enemyId = 'foe_' + Math.random().toString(36).substr(2, 9);
 
     // Random wander vector
     const wanderAngle = Math.random() * Math.PI * 2;
     const wanderDir = new THREE.Vector3(Math.cos(wanderAngle), 0, Math.sin(wanderAngle)).normalize();
 
     const enemyObj = {
+      id: enemyId,
       mesh: meshGroup,
       name: `${enemyType} [L${enemyLvl}]`,
       level: enemyLvl,
@@ -2668,12 +3505,14 @@
     meshGroup.rotation.y = Math.PI; // Facing towards south entrance
     scene.add(meshGroup);
 
-    const maxHp = 6500 + bossLevel * 65; // Formidable mid-boss HP pool
+    const maxHp = safeStatVal(1500 + bossLevel * 30);
+    const midBossId = 'foe_midboss_' + Math.random().toString(36).substr(2, 9);
 
     const wanderAngle = Math.random() * Math.PI * 2;
     const wanderDir = new THREE.Vector3(Math.cos(wanderAngle), 0, Math.sin(wanderAngle)).normalize();
 
     const midBossObj = {
+      id: midBossId,
       mesh: meshGroup,
       name: `🔥 WARLORD MALAKOR [MID-BOSS L${bossLevel}]`,
       level: bossLevel,
@@ -2704,7 +3543,12 @@
   function showDamageNumber(x, y, z, damage, color = '#fff') {
     const div = document.createElement('div');
     div.className = 'damage-text';
-    div.innerText = Math.round(damage);
+    if (typeof damage === 'number') {
+      const safeD = safeCombatVal(damage);
+      div.innerText = Math.round(safeD);
+    } else {
+      div.innerText = damage;
+    }
     div.style.color = color;
 
     document.getElementById('game-container').appendChild(div);
@@ -2722,10 +3566,12 @@
       let closest = null;
       let minDist = 999;
       for (const e of enemies) {
-        const d = playerMesh.position.distanceTo(e.mesh.position);
-        if (d < minDist) {
-          minDist = d;
-          closest = e;
+        if (e && e.hp > 0 && e.mesh) {
+          const d = playerMesh.position.distanceTo(e.mesh.position);
+          if (d < minDist) {
+            minDist = d;
+            closest = e;
+          }
         }
       }
       if (closest && minDist < 28) {
@@ -2734,7 +3580,7 @@
       }
     }
 
-    if (!targetEnemy) return;
+    if (!targetEnemy || targetEnemy.hp <= 0) return;
 
     const dist = playerMesh.position.distanceTo(targetEnemy.mesh.position);
     let requiredRange = 6;
@@ -2746,7 +3592,7 @@
       if (cooldowns.attack.current > 0) return;
       const weaponSpeed = gameState.equipped.rightHand?.weaponSpeed || 2.0;
       const damageMult = gameState.equipped.rightHand?.damageMultiplier || 0.25;
-      baseDmg = (baseDmg + (gameState.classType === 'melee' ? gameState.statUpgrades.strength * 5 : gameState.statUpgrades.intelligence * 5)) * damageMult;
+      baseDmg = (baseDmg + (gameState.classType === 'melee' ? (gameState.statUpgrades.strength || 0) * 5 : (gameState.statUpgrades.intelligence || 0) * 5)) * damageMult;
       cooldowns.attack.current = cooldowns.attack.max;
       playSound('hit');
 
@@ -2763,11 +3609,11 @@
       const ab = gameState.equipped.rightHand?.grantedAbility;
       if (!ab || cooldowns.ab1.current > 0 || gameState.mana < ab.manaCost) return;
       requiredRange = ab.range;
-      baseDmg = ab.damageBase + (gameState.statUpgrades.strength + gameState.statUpgrades.intelligence) * 4;
+      baseDmg = ab.damageBase + ((gameState.statUpgrades.strength || 0) + (gameState.statUpgrades.intelligence || 0)) * 4;
       elemType = ab.type;
       manaReq = ab.manaCost;
       cooldowns.ab1.current = ab.cooldown * 1000;
-      gameState.mana -= manaReq;
+      gameState.mana = safeClamp(gameState.mana - manaReq, 0, gameState.maxMana);
       playSound('spell');
 
       // Trigger Cast or Swing Animation
@@ -2783,11 +3629,11 @@
       const ab = gameState.equipped.leftHand?.grantedAbility;
       if (!ab || cooldowns.ab2.current > 0 || gameState.mana < ab.manaCost) return;
       requiredRange = ab.range;
-      baseDmg = ab.damageBase + gameState.statUpgrades.vitality * 4;
+      baseDmg = ab.damageBase + (gameState.statUpgrades.vitality || 0) * 4;
       elemType = ab.type;
       manaReq = ab.manaCost;
       cooldowns.ab2.current = ab.cooldown * 1000;
-      gameState.mana -= manaReq;
+      gameState.mana = safeClamp(gameState.mana - manaReq, 0, gameState.maxMana);
       playSound('spell');
 
       playerAnimState.castTime = 0.001;
@@ -2797,11 +3643,11 @@
       const ab = gameState.equipped.head?.grantedAbility;
       if (!ab || cooldowns.ab3.current > 0 || gameState.mana < ab.manaCost) return;
       requiredRange = ab.range;
-      baseDmg = ab.damageBase + gameState.statUpgrades.intelligence * 5;
+      baseDmg = ab.damageBase + (gameState.statUpgrades.intelligence || 0) * 5;
       elemType = ab.type;
       manaReq = ab.manaCost;
       cooldowns.ab3.current = ab.cooldown * 1000;
-      gameState.mana -= manaReq;
+      gameState.mana = safeClamp(gameState.mana - manaReq, 0, gameState.maxMana);
       playSound('spell');
 
       playerAnimState.castTime = 0.001;
@@ -2811,11 +3657,11 @@
       const ab = gameState.equipped.shoulders?.grantedAbility;
       if (!ab || cooldowns.ab4.current > 0 || gameState.mana < ab.manaCost) return;
       requiredRange = ab.range;
-      baseDmg = ab.damageBase + gameState.statUpgrades.vitality * 5;
+      baseDmg = ab.damageBase + (gameState.statUpgrades.vitality || 0) * 5;
       elemType = ab.type;
       manaReq = ab.manaCost;
       cooldowns.ab4.current = ab.cooldown * 1000;
-      gameState.mana -= manaReq;
+      gameState.mana = safeClamp(gameState.mana - manaReq, 0, gameState.maxMana);
       playSound('spell');
 
       playerAnimState.castTime = 0.001;
@@ -2829,20 +3675,21 @@
     }
 
     // Apply Enemy Elemental Resistances
-    let finalDmg = baseDmg;
+    let finalDmg = safeCombatVal(baseDmg);
     if (targetEnemy.resist === elemType) {
-      finalDmg *= 0.5; // 50% resistance
+      finalDmg = safeCombatVal(finalDmg * 0.5); // 50% resistance
     }
 
     // Critical Strike Check
-    const isCrit = Math.random() < (0.05 + gameState.statUpgrades.critRate * 0.02);
-    if (isCrit) finalDmg *= 2.0;
+    const isCrit = Math.random() < (0.05 + (gameState.statUpgrades.critRate || 0) * 0.02);
+    if (isCrit) finalDmg = safeCombatVal(finalDmg * 2.0);
 
-    targetEnemy.hp -= finalDmg;
+    targetEnemy.hp = safeClamp(targetEnemy.hp - finalDmg, 0, targetEnemy.maxHp);
     const dmgColor = isCrit ? '#f59e0b' : (elemType === 'fire' ? '#ef4444' : elemType === 'frost' ? '#38bdf8' : elemType === 'lightning' ? '#eab308' : '#fff');
     showDamageNumber(targetEnemy.mesh.position.x, targetEnemy.mesh.position.y + 1, targetEnemy.mesh.position.z, finalDmg, dmgColor);
 
     updateTargetCard();
+    updateNearbyEnemiesList();
 
     // Check Enemy Defeat
     if (targetEnemy.hp <= 0) {
@@ -2865,16 +3712,20 @@
     const isOver256 = gameState.areaKills > 256;
     const rewardFactor = isOver256 ? 0.35 : 1.0;
 
+    const droppedLoot = [];
+
     // Essence Drop
     const essenceGained = enemy.isBoss ? (10 + Math.floor(Math.random() * 6)) : (enemy.isMidBoss ? (6 + Math.floor(Math.random() * 4)) : (Math.random() < 0.35 ? 1 : 0));
     if (essenceGained > 0) {
       gameState.essence += essenceGained;
+      droppedLoot.push({ type: 'essence', amount: essenceGained });
       showDamageNumber(enemy.mesh.position.x, enemy.mesh.position.y + 1.5, enemy.mesh.position.z, `+${essenceGained} Essence`, '#a855f7');
     }
 
     // Experience Drop
     const xpGained = Math.round((7 + enemy.level * 2.8) * rewardFactor * (enemy.isBoss ? 4.0 : (enemy.isMidBoss ? 3.0 : 1.0)));
     gainExperience(xpGained);
+    droppedLoot.push({ type: 'xp', amount: xpGained });
 
     // Gear Drop Chance
     const dropChance = (enemy.isBoss || enemy.isMidBoss) ? 1.0 : (0.12 * rewardFactor);
@@ -2885,6 +3736,7 @@
       const rarity = rarities[Math.floor(Math.random() * rarities.length)];
       const item = generateGearItem(slot, enemy.level, rarity);
       gameState.inventory.push(item);
+      droppedLoot.push({ type: 'item', name: item.name, rarity: item.rarity || 'common' });
       playSound('loot');
       showDamageNumber(enemy.mesh.position.x, enemy.mesh.position.y + 2.0, enemy.mesh.position.z, `Found ${item.name}!`, '#fbbf24');
       renderInventory();
@@ -2896,9 +3748,28 @@
       const bSlot = bonusSlots[Math.floor(Math.random() * bonusSlots.length)];
       const bonusItem = generateGearItem(bSlot, enemy.level, 'legendary');
       gameState.inventory.push(bonusItem);
+      droppedLoot.push({ type: 'item', name: bonusItem.name, rarity: 'legendary' });
       showDamageNumber(enemy.mesh.position.x, enemy.mesh.position.y + 2.8, enemy.mesh.position.z, `★ LEGENDARY ${bonusItem.name}!`, '#f59e0b');
       renderInventory();
     }
+
+    // Push to decaying list of last 3 defeated enemies and all their loot
+    if (!gameState.defeatedFoesLog) gameState.defeatedFoesLog = [];
+    gameState.defeatedFoesLog.unshift({
+      id: 'slain_' + Math.random().toString(36).substr(2, 9),
+      name: enemy.name.replace(/\[L\d+\]/, '').trim(),
+      level: enemy.level,
+      isBoss: enemy.isBoss,
+      isMidBoss: enemy.isMidBoss,
+      time: performance.now(),
+      duration: 18000, // 18-second smooth decay
+      drops: droppedLoot
+    });
+
+    if (gameState.defeatedFoesLog.length > 3) {
+      gameState.defeatedFoesLog.length = 3;
+    }
+    updateSlainFoesUI();
 
     // =========================================================================
     // CHECK MID-LEVEL BOSS UNLOCK AT 96 KILLS
@@ -2971,8 +3842,150 @@
     document.getElementById('target-resist').innerText = `Resist: ${targetEnemy.resist.toUpperCase()}`;
   }
 
+  function updateNearbyEnemiesList() {
+    const listEl = document.getElementById('nearby-foes-list');
+    const badgeEl = document.getElementById('foes-count-badge');
+    if (!listEl) return;
+
+    if (!playerMesh || !enemies || enemies.length === 0) {
+      listEl.innerHTML = '<div style="font-size: 10px; color: #64748b; text-align: center; padding: 4px;">No enemies nearby</div>';
+      if (badgeEl) badgeEl.innerText = '0 / 3 Foes';
+      return;
+    }
+
+    const aliveFoes = [];
+    for (let i = 0; i < enemies.length; i++) {
+      const e = enemies[i];
+      if (e && e.hp > 0 && e.mesh) {
+        const dist = playerMesh.position.distanceTo(e.mesh.position);
+        aliveFoes.push({ enemy: e, dist });
+      }
+    }
+
+    aliveFoes.sort((a, b) => a.dist - b.dist);
+
+    const topFoes = aliveFoes.slice(0, 3);
+
+    if (badgeEl) {
+      badgeEl.innerText = `${topFoes.length} / 3 Foes`;
+    }
+
+    if (topFoes.length === 0) {
+      listEl.innerHTML = '<div style="font-size: 10px; color: #64748b; text-align: center; padding: 4px;">No enemies nearby</div>';
+      return;
+    }
+
+    let html = '';
+    for (let i = 0; i < topFoes.length; i++) {
+      const item = topFoes[i];
+      const e = item.enemy;
+      const distM = Math.round(item.dist);
+      const isTargeted = (targetEnemy === e);
+      const cleanName = e.name.replace(/\[L\d+\]/, '').trim();
+
+      html += `
+        <button class="foe-btn ${isTargeted ? 'target-active' : ''}" onclick="selectNearbyEnemy('${e.id}')" title="Target ${cleanName}">
+          <div class="foe-left">
+            <span class="foe-lvl-badge">L${e.level}</span>
+            <span class="foe-name-text">${cleanName}</span>
+          </div>
+          <div class="foe-right">
+            <span class="foe-dist-text">${distM}m</span>
+            <span class="foe-hp-pill">${Math.ceil(e.hp)} HP</span>
+          </div>
+        </button>
+      `;
+    }
+
+    listEl.innerHTML = html;
+  }
+
+  function updateSlainFoesUI() {
+    const container = document.getElementById('slain-loot-list');
+    const badge = document.getElementById('slain-decay-badge');
+    if (!container) return;
+
+    if (!gameState.defeatedFoesLog) {
+      gameState.defeatedFoesLog = [];
+    }
+
+    const now = performance.now();
+    // Decay and remove expired slain foe logs
+    for (let i = gameState.defeatedFoesLog.length - 1; i >= 0; i--) {
+      const entry = gameState.defeatedFoesLog[i];
+      if (now - entry.time > entry.duration) {
+        gameState.defeatedFoesLog.splice(i, 1);
+      }
+    }
+
+    if (badge) {
+      badge.innerText = `${gameState.defeatedFoesLog.length} / 3`;
+    }
+
+    if (gameState.defeatedFoesLog.length === 0) {
+      container.innerHTML = '<div class="slain-empty-hint">Defeat enemies to log combat drops</div>';
+      return;
+    }
+
+    let html = '';
+    gameState.defeatedFoesLog.forEach(foe => {
+      const elapsed = now - foe.time;
+      const progress = Math.max(0, 1 - (elapsed / foe.duration)); // 1.0 down to 0.0
+      const opacity = Math.max(0.18, progress);
+      const foeIcon = foe.isBoss ? '👑' : (foe.isMidBoss ? '🏰' : '💀');
+      const foeColor = foe.isBoss ? '#ef4444' : (foe.isMidBoss ? '#f59e0b' : '#f1f5f9');
+
+      let dropsHtml = '';
+      if (foe.drops && foe.drops.length > 0) {
+        foe.drops.forEach(d => {
+          if (d.type === 'item') {
+            const rarityClass = d.rarity ? `rarity-${d.rarity}` : 'rarity-common';
+            dropsHtml += `<span class="drop-tag drop-tag-item ${rarityClass}">📦 ${d.name}</span>`;
+          } else if (d.type === 'essence') {
+            dropsHtml += `<span class="drop-tag drop-tag-essence">💎 +${d.amount}</span>`;
+          } else if (d.type === 'xp') {
+            dropsHtml += `<span class="drop-tag drop-tag-xp">⚡ +${d.amount} XP</span>`;
+          }
+        });
+      } else {
+        dropsHtml = '<span style="font-size: 9px; color: #64748b;">No loot</span>';
+      }
+
+      html += `
+        <div class="slain-entry" style="opacity: ${opacity.toFixed(2)};">
+          <div class="slain-entry-top">
+            <div class="slain-foe-name" style="color: ${foeColor};">
+              <span>${foeIcon}</span>
+              <span title="${foe.name}">${foe.name}</span>
+            </div>
+            <span style="font-size: 9px; font-weight: 800; color: #fbbf24; background: #1e293b; padding: 1px 5px; border-radius: 3px;">L${foe.level}</span>
+          </div>
+          <div class="slain-drops-row">
+            ${dropsHtml}
+          </div>
+          <div class="slain-decay-bar-track">
+            <div class="slain-decay-bar-fill" style="width: ${(progress * 100).toFixed(1)}%;"></div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function selectNearbyEnemy(enemyId) {
+    if (!enemies) return;
+    const found = enemies.find(e => e.id === enemyId && e.hp > 0);
+    if (found) {
+      targetEnemy = found;
+      updateTargetCard();
+      playSound('click');
+      updateNearbyEnemiesList();
+    }
+  }
+  window.selectNearbyEnemy = selectNearbyEnemy;
+
   // --- UTILITY CONTROLS & STATE ---
-  let autoWalk = false;
   let lastDoorNoticeTime = 0;
 
   function toggleAutoWalk() {
@@ -3013,6 +4026,7 @@
     playSound('spell');
     showDamageNumber(0, 3, 0, 'Warped to Temple Sanctuary', '#38bdf8');
   }
+  window.warpToSanctuary = warpToSanctuary;
 
   function showLockedDoorNotice() {
     const now = performance.now();
@@ -3025,63 +4039,79 @@
     }
   }
 
-  // --- PRECISE PHYSICS RESOLUTION ---
-  function resolvePlayerPhysics(pos, delta) {
-    const px = pos.x;
-    const pz = pos.z;
+  // --- PRECISE UNIFIED COLLISION & PHYSICS RESOLUTION ---
+  function resolveEntityObstacleCollisions(pos, entityRadius = 1.2) {
+    // 1. Boundary Perimeter Outer Walls
+    const wallInnerLimit = HALF_ARENA - (2.5 + entityRadius);
+    pos.x = safeClamp(pos.x, -wallInnerLimit, wallInnerLimit);
+    pos.z = safeClamp(pos.z, -wallInnerLimit, wallInnerLimit);
 
-    // 1. Check Fortress Collision Box
-    const dxFort = px - FORT_X;
-    const dzFort = pz - FORT_Z;
-    const inFortX = Math.abs(dxFort) <= 32;
-    const inFortZ = Math.abs(dzFort) <= 32;
+    // 2. Check Fortress Structure & Outer Columns Collision
+    const dxFort = pos.x - FORT_X;
+    const dzFort = pos.z - FORT_Z;
+    const inFortArea = Math.abs(dxFort) <= 42 && Math.abs(dzFort) <= 42;
 
-    if (inFortX && inFortZ) {
-      // 1a. Fort Gate Collision (at South side: Z = FORT_Z + 30 = -145, opening X in [FORT_X - 8.5, FORT_X + 8.5])
-      if (!gameState.fortUnlocked) {
-        // If gate is locked, block passage through the door threshold
-        if (Math.abs(dxFort) <= 8.5 && dzFort >= 27.5 && dzFort <= 32.5) {
-          pos.z = FORT_Z + 32.6; // Push outside the locked gate
-          showLockedDoorNotice();
+    if (inFortArea) {
+      // 2a. Fort Outer Corner Bastion Columns (4 massive corner watchtowers)
+      const bastions = [
+        [-30, -30], [30, -30], [30, 30], [-30, 30]
+      ];
+      for (const [bx, bz] of bastions) {
+        const colX = FORT_X + bx;
+        const colZ = FORT_Z + bz;
+        const distCol = Math.hypot(pos.x - colX, pos.z - colZ);
+        const minBastionDist = 6.2 + entityRadius;
+        if (distCol < minBastionDist && distCol > 0.0001) {
+          const pushX = (pos.x - colX) / distCol;
+          const pushZ = (pos.z - colZ) / distCol;
+          pos.x = colX + pushX * minBastionDist;
+          pos.z = colZ + pushZ * minBastionDist;
         }
       }
 
-      // 1b. Fort Stone Outer Walls Collision (Perimeter box with wall thickness 4)
-      // North Wall (dzFort ~ -30)
-      if (dzFort <= -28.0 && dzFort >= -32.5 && Math.abs(dxFort) <= 32) {
-        if (dzFort > -30) pos.z = FORT_Z - 27.8;
+      // 2b. Fort Gate Threshold Collision
+      if (!gameState.fortUnlocked) {
+        if (Math.abs(dxFort) <= 8.8 && dzFort >= 27.0 && dzFort <= 33.0) {
+          pos.z = FORT_Z + 33.2;
+          if (pos === playerMesh.position) showLockedDoorNotice();
+        }
+      }
+
+      // 2c. Fort Stone Outer Walls (Thickness 4 at ±30)
+      // North Wall
+      if (dzFort <= -27.5 && dzFort >= -32.5 && Math.abs(dxFort) <= 30) {
+        if (dzFort > -30) pos.z = FORT_Z - 27.2;
         else pos.z = FORT_Z - 32.8;
       }
-      // East Wall (dxFort ~ 30)
-      if (dxFort >= 28.0 && dxFort <= 32.5 && Math.abs(dzFort) <= 32) {
-        if (dxFort < 30) pos.x = FORT_X + 27.8;
+      // East Wall
+      if (dxFort >= 27.5 && dxFort <= 32.5 && Math.abs(dzFort) <= 30) {
+        if (dxFort < 30) pos.x = FORT_X + 27.2;
         else pos.x = FORT_X + 32.8;
       }
-      // West Wall (dxFort ~ -30)
-      if (dxFort <= -28.0 && dxFort >= -32.5 && Math.abs(dzFort) <= 32) {
-        if (dxFort > -30) pos.x = FORT_X - 27.8;
+      // West Wall
+      if (dxFort <= -27.5 && dxFort >= -32.5 && Math.abs(dzFort) <= 30) {
+        if (dxFort > -30) pos.x = FORT_X - 27.2;
         else pos.x = FORT_X - 32.8;
       }
-      // South Wall Segments (left and right of the entrance opening)
-      if (dzFort >= 28.0 && dzFort <= 32.5) {
-        if (dxFort < -8.0) {
-          if (dzFort < 30) pos.z = FORT_Z + 27.8;
+      // South Wall Segments
+      if (dzFort >= 27.5 && dzFort <= 32.5) {
+        if (dxFort < -8.5) {
+          if (dzFort < 30) pos.z = FORT_Z + 27.2;
           else pos.z = FORT_Z + 32.8;
-        } else if (dxFort > 8.0) {
-          if (dzFort < 30) pos.z = FORT_Z + 27.8;
+        } else if (dxFort > 8.5) {
+          if (dzFort < 30) pos.z = FORT_Z + 27.2;
           else pos.z = FORT_Z + 32.8;
         }
       }
 
-      // 1c. Warlord Throne Chair Collision (Base at 175, -197, Back at 175, -198.5)
-      // dxFort in [-2.5, 2.5], dzFort in [-24.5, -20.0]
-      if (Math.abs(dxFort) < 2.5 && dzFort >= -24.5 && dzFort <= -20.0) {
-        if (dzFort > -21.5) pos.z = FORT_Z - 19.8;
-        else if (dxFort > 0) pos.x = FORT_X + 2.6;
-        else pos.x = FORT_X - 2.6;
+      // 2d. Warlord Throne Chair Collision
+      if (Math.abs(dxFort) < (2.5 + entityRadius) && dzFort >= -24.5 && dzFort <= -19.5) {
+        if (dzFort > -21.5) pos.z = FORT_Z - 19.3;
+        else if (dxFort > 0) pos.x = FORT_X + 2.7 + entityRadius;
+        else pos.x = FORT_X - (2.7 + entityRadius);
       }
 
-      // 1d. Grand Hall Colonnade Pillars Collision (6 pillars)
+      // 2e. Grand Hall Colonnade Pillars Collision (6 pillars)
       const pillars = [
         [-12, -18], [12, -18],
         [-12, -4], [12, -4],
@@ -3091,14 +4121,49 @@
         const pillarX = FORT_X + pxRel;
         const pillarZ = FORT_Z + pzRel;
         const distPillar = Math.hypot(pos.x - pillarX, pos.z - pillarZ);
-        if (distPillar < 1.7) {
-          const pushX = (pos.x - pillarX) / (distPillar || 1);
-          const pushZ = (pos.z - pillarZ) / (distPillar || 1);
-          pos.x = pillarX + pushX * 1.72;
-          pos.z = pillarZ + pushZ * 1.72;
+        const minPillarDist = 1.4 + entityRadius;
+        if (distPillar < minPillarDist && distPillar > 0.0001) {
+          const pushX = (pos.x - pillarX) / distPillar;
+          const pushZ = (pos.z - pillarZ) / distPillar;
+          pos.x = pillarX + pushX * minPillarDist;
+          pos.z = pillarZ + pushZ * minPillarDist;
         }
       }
     }
+
+    // 3. Collision with All Registered World Trees and Rocks (Conforming to wall collision pushback)
+    for (let i = 0; i < worldObstacles.length; i++) {
+      const obs = worldObstacles[i];
+      if (obs.type === 'rock') {
+        if (obs.inRiver || isPointInRiverArea(obs.position.x, obs.position.z)) {
+          continue; // Characters can walk through the rock in the river area everywhere, but not the other rocks
+        }
+      }
+      if (obs.type === 'tree' || obs.type === 'rock') {
+        const dX = pos.x - obs.position.x;
+        const dZ = pos.z - obs.position.z;
+        const dist = Math.hypot(dX, dZ);
+        const minDist = obs.radius + entityRadius;
+        if (dist < minDist && dist > 0.0001) {
+          const pushX = dX / dist;
+          const pushZ = dZ / dist;
+          pos.x = obs.position.x + pushX * minDist;
+          pos.z = obs.position.z + pushZ * minDist;
+        }
+      }
+    }
+  }
+
+  function resolvePlayerPhysics(pos, delta) {
+    // 1. Resolve obstacles (walls, fort columns, rocks, trees)
+    resolveEntityObstacleCollisions(pos, 1.2);
+
+    const px = pos.x;
+    const pz = pos.z;
+    const dxFort = px - FORT_X;
+    const dzFort = pz - FORT_Z;
+    const inFortX = Math.abs(dxFort) <= 32;
+    const inFortZ = Math.abs(dzFort) <= 32;
 
     // 2. Resolve Floor Tile & Ground Height Physics (Rock Solid Stability)
     let targetY = 0;
@@ -3116,12 +4181,12 @@
       // 2b. Fort Interior Floor Tiles & Pedestal/Dais
       const distToDais = Math.hypot(dxFort, dzFort - (-18));
       if (distToDais <= 9.0) {
-        targetY = FORT_ELEVATION + 1.8; // 10.80 - Stand atop Boss Dais / Pedestal!
+        targetY = FORT_ELEVATION + 1.8; // Stand atop Boss Dais / Pedestal!
       } else if (distToDais <= 10.2) {
         const t = (distToDais - 9.0) / 1.2;
         targetY = (FORT_ELEVATION + 1.8) * (1 - t) + (FORT_ELEVATION + 0.6) * t;
       } else {
-        targetY = FORT_ELEVATION + 0.6; // 9.60 - Solid flat Fort tile floor
+        targetY = FORT_ELEVATION + 0.6; // Solid flat Fort tile floor
       }
     } else {
       // 2c. Continuous Wilderness Terrain Height
@@ -3292,6 +4357,66 @@
       // Idle: Orient player facing forward with camera
       playerMesh.rotation.y = cameraTheta + Math.PI;
     }
+
+    // =========================================================================
+    // CONTINUOUS THREE.JS RAYCASTER IN PLAYER MOVEMENT DIRECTION
+    // =========================================================================
+    let playerMoveDir = new THREE.Vector3();
+    if (isMoving) {
+      const len = Math.hypot(moveFwd, moveRight);
+      const normFwd = moveFwd / len;
+      const normRight = moveRight / len;
+      playerMoveDir.addScaledVector(forward, normFwd).addScaledVector(right, normRight).normalize();
+    } else {
+      playerMoveDir.set(Math.sin(playerMesh.rotation.y), 0, Math.cos(playerMesh.rotation.y)).normalize();
+    }
+
+    // Cast ray forward from player character center height
+    const rayOrigin = playerMesh.position.clone().add(new THREE.Vector3(0, 1.2, 0));
+    playerMovementRaycaster.set(rayOrigin, playerMoveDir);
+
+    const enemyMeshes = enemies.map(e => e.mesh).filter(Boolean);
+    const raycastTargets = [...raycastObstacleMeshes, ...enemyMeshes];
+    const rayIntersections = playerMovementRaycaster.intersectObjects(raycastTargets, true);
+
+    // =========================================================================
+    // EXACT 3D DISTANCE CALCULATIONS VIA vector.distanceTo()
+    // =========================================================================
+    let nearestObstacle = null;
+    let minObsDist = Infinity;
+
+    for (let i = 0; i < worldObstacles.length; i++) {
+      const obs = worldObstacles[i];
+      // Calculate exact 3D distance between player character and obstacle (rocks, trees, etc.) using vector.distanceTo()
+      const dist = playerMesh.position.distanceTo(obs.position);
+      if (dist < minObsDist) {
+        minObsDist = dist;
+        nearestObstacle = { name: obs.name, type: obs.type, position: obs.position, distance: dist };
+      }
+    }
+
+    let nearestEnemy = null;
+    let minEnemyDist = Infinity;
+
+    for (let i = 0; i < enemies.length; i++) {
+      const enemy = enemies[i];
+      // Calculate exact 3D distance between player character and enemy using vector.distanceTo()
+      const dist = playerMesh.position.distanceTo(enemy.mesh.position);
+      enemy.exactPlayerDist = dist;
+
+      if (dist < minEnemyDist) {
+        minEnemyDist = dist;
+        nearestEnemy = { name: enemy.name, distance: dist, enemy };
+      }
+
+      // Calculate exact 3D distance between enemy and nearest obstacle using vector.distanceTo()
+      if (nearestObstacle) {
+        enemy.exactObstacleDist = enemy.mesh.position.distanceTo(nearestObstacle.position);
+      }
+    }
+
+    // Update Live Radar Panel in Realm Menu
+    updateRadarPanel(rayIntersections, nearestObstacle, nearestEnemy);
 
     // Resolve Precise Physics & Floor Tile / Terrain Heights
     const targetFloorY = resolvePlayerPhysics(playerMesh.position, delta);
@@ -3466,6 +4591,7 @@
       if (!isPlayerInSanctuary && dist < aggroRange && dist > 3.0) {
         const dir = new THREE.Vector3().subVectors(playerMesh.position, enemy.mesh.position).normalize();
         enemy.mesh.position.addScaledVector(dir, enemy.speed * delta);
+        resolveEntityObstacleCollisions(enemy.mesh.position, 1.0);
         enemy.mesh.rotation.y = Math.atan2(dir.x, dir.z);
         enemy.isMoving = true;
       } else if (!isPlayerInSanctuary && dist <= 3.0) {
@@ -3475,8 +4601,9 @@
         if (enemy.attackCooldown <= 0) {
           enemy.attackCooldown = enemy.weaponSpeed;
           enemy.attackAnimTimer = 0.35; // Trigger enemy strike animation
-          const enemyDmg = Math.max(2, (8 + enemy.level * 3) - gameState.statUpgrades.armor * 2);
-          gameState.hp -= enemyDmg;
+          const rawDmg = (4 + enemy.level * 1.6) - (gameState.statUpgrades.armor || 0) * 0.8;
+          const enemyDmg = safeCombatVal(rawDmg < 1 ? 1 : rawDmg);
+          gameState.hp = safeClamp(gameState.hp - enemyDmg, 0, gameState.maxHp);
           showDamageNumber(playerMesh.position.x, playerMesh.position.y + 1, playerMesh.position.z, enemyDmg, '#ef4444');
           updateHud();
 
@@ -3500,6 +4627,7 @@
             playSound('hit');
             showDamageNumber(0, 4, 0, 'DEFEATED! Enemies restored to full health. Returned to Temple.', '#f87171');
             updateHud();
+            updateNearbyEnemiesList();
           }
         }
       } else {
@@ -3521,6 +4649,7 @@
 
         if (enemy.isMoving) {
           enemy.mesh.position.addScaledVector(enemy.wanderDir, enemy.wanderSpeed * delta);
+          resolveEntityObstacleCollisions(enemy.mesh.position, 1.0);
           enemy.mesh.rotation.y = Math.atan2(enemy.wanderDir.x, enemy.wanderDir.z);
 
           // Avoid arena fortress walls
@@ -3605,12 +4734,74 @@
 
     // Mana natural regeneration
     if (gameState.mana < gameState.maxMana) {
-      gameState.mana = Math.min(gameState.maxMana, gameState.mana + 4 * delta);
+      gameState.mana = safeClamp(gameState.mana + 4 * delta, 0, gameState.maxMana);
       document.getElementById('hud-mana-val').innerText = `${Math.ceil(gameState.mana)} / ${Math.ceil(gameState.maxMana)}`;
       document.getElementById('hud-mana-bar').style.width = `${Math.max(0, (gameState.mana / gameState.maxMana) * 100)}%`;
     }
 
+    // Shimmer water texture offset
+    if (riverWaterMesh && riverWaterMesh.material && riverWaterMesh.material.map) {
+      riverWaterMesh.material.map.offset.y = (riverWaterMesh.material.map.offset.y + delta * 0.12) % 1;
+      riverWaterMesh.material.map.offset.x = (riverWaterMesh.material.map.offset.x + delta * 0.04) % 1;
+    }
+
+    // Update Slain Foes & Drops Log decay animation
+    if (!window._lastSlainFoesUpdate || performance.now() - window._lastSlainFoesUpdate > 100) {
+      window._lastSlainFoesUpdate = performance.now();
+      updateSlainFoesUI();
+    }
+
+    // Update Nearby Enemies list in Realm HUD
+    if (!window._lastNearbyFoesUpdate || performance.now() - window._lastNearbyFoesUpdate > 150) {
+      window._lastNearbyFoesUpdate = performance.now();
+      updateNearbyEnemiesList();
+    }
+
     renderer.render(scene, camera);
+  }
+
+  // --- 3D RAYCASTER & PROXIMITY TELEMETRY RADAR ---
+  function updateRadarPanel(rayIntersections, nearestObstacle, nearestEnemy) {
+    const rayEl = document.getElementById('radar-ray-status');
+    const obsEl = document.getElementById('radar-obs-status');
+    const enemyEl = document.getElementById('radar-enemy-status');
+
+    if (rayEl) {
+      if (rayIntersections && rayIntersections.length > 0) {
+        const hit = rayIntersections[0];
+        let hitLabel = 'Obstacle';
+        if (hit.object && hit.object.userData && hit.object.userData.obstacleName) {
+          hitLabel = hit.object.userData.obstacleName;
+        } else if (hit.object && hit.object.parent && hit.object.parent.userData && hit.object.parent.userData.obstacleName) {
+          hitLabel = hit.object.parent.userData.obstacleName;
+        } else if (hit.object && hit.object.userData && hit.object.userData.enemyName) {
+          hitLabel = hit.object.userData.enemyName;
+        }
+        rayEl.innerText = `${hitLabel} (${hit.distance.toFixed(1)}m)`;
+        rayEl.className = 'radar-val ' + (hit.distance < 3.5 ? 'text-red' : (hit.distance < 12 ? 'text-amber' : 'text-emerald'));
+      } else {
+        rayEl.innerText = 'Clear Ahead';
+        rayEl.className = 'radar-val text-emerald';
+      }
+    }
+
+    if (obsEl) {
+      if (nearestObstacle) {
+        obsEl.innerText = `${nearestObstacle.name} (${nearestObstacle.distance.toFixed(1)}m)`;
+      } else {
+        obsEl.innerText = 'None in range';
+      }
+    }
+
+    if (enemyEl) {
+      if (nearestEnemy) {
+        enemyEl.innerText = `${nearestEnemy.name} (${nearestEnemy.distance.toFixed(1)}m)`;
+        enemyEl.className = 'radar-val ' + (nearestEnemy.distance < 5.0 ? 'text-red' : (nearestEnemy.distance < 18 ? 'text-amber' : 'text-emerald'));
+      } else {
+        enemyEl.innerText = 'No enemies in area';
+        enemyEl.className = 'radar-val';
+      }
+    }
   }
 
   // --- INVENTORY & UI MODALS ---
@@ -3633,7 +4824,7 @@
       if (item) {
         nameEl.innerText = item.name;
         nameEl.className = `gear-slot-name rarity-${item.rarity}`;
-        statEl.innerText = item.grantedAbility ? `Ability: ${item.grantedAbility.name}` : `Armor +${item.armor || 0}`;
+        statEl.innerText = getItemStatDescription(item);
       } else {
         nameEl.innerText = 'Empty';
         nameEl.className = 'gear-slot-name';
@@ -3645,15 +4836,22 @@
 
   function renderInventory() {
     const container = document.getElementById('inventory-list');
+    if (!container) return;
     container.innerHTML = '';
-    document.getElementById('inv-count').innerText = `${gameState.inventory.length} items`;
+    const countEl = document.getElementById('inv-count');
+    if (countEl) countEl.innerText = `${gameState.inventory.length} items`;
 
     gameState.inventory.forEach((item, index) => {
       const div = document.createElement('div');
       div.className = `inv-item rarity-${item.rarity}`;
       div.innerHTML = `
-        <span style="font-size: 16px;">${item.slot.includes('Hand') ? '⚔️' : '🛡️'}</span>
-        <span class="inv-item-name">${item.name}</span>
+        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+          <span style="font-size: 16px;">${item.slot.includes('Hand') ? '⚔️' : '🛡️'}</span>
+          <div style="display: flex; flex-direction: column; text-align: left; flex: 1; min-width: 0;">
+            <span class="inv-item-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</span>
+            <span style="font-size: 10px; color: #94a3b8; font-weight: 500;">${getItemStatDescription(item)}</span>
+          </div>
+        </div>
       `;
       div.onclick = () => {
         equipItem(index);
@@ -3765,32 +4963,40 @@
 
   // --- INITIALIZATION HANDLERS ---
   function startGame(classType) {
-    gameState.classType = classType;
-    document.getElementById('modal-class-select').style.display = 'none';
-
-    // Start with basic Level 1 gear for some slots
-    gameState.equipped.rightHand = generateGearItem('rightHand', 1, 'common');
-    gameState.equipped.leftHand = generateGearItem('leftHand', 1, 'common');
-    gameState.equipped.head = generateGearItem('head', 1, 'common');
-    gameState.equipped.shoulders = generateGearItem('shoulders', 1, 'common');
-    gameState.equipped.chest = generateGearItem('chest', 1, 'common');
-    gameState.equipped.boots = generateGearItem('boots', 1, 'common');
-
-    // Add extra items to inventory
-    gameState.inventory.push(generateGearItem('belt', 1, 'common'));
-    gameState.inventory.push(generateGearItem('pants', 1, 'common'));
-
-    init3DWorld();
-    recalculateStats();
-    animate();
-
-    // Request persistent data from Firestorm Parent frame
     try {
-      if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'FIRESTORM_REQUEST_INIT' }, '*');
-      }
-    } catch(e) {}
+      gameState.classType = classType || 'melee';
+      const modalEl = document.getElementById('modal-class-select');
+      if (modalEl) modalEl.style.display = 'none';
+
+      // Start with basic Level 1 gear for some slots
+      gameState.equipped.rightHand = generateGearItem('rightHand', 1, 'common');
+      gameState.equipped.leftHand = generateGearItem('leftHand', 1, 'common');
+      gameState.equipped.head = generateGearItem('head', 1, 'common');
+      gameState.equipped.shoulders = generateGearItem('shoulders', 1, 'common');
+      gameState.equipped.chest = generateGearItem('chest', 1, 'common');
+      gameState.equipped.boots = generateGearItem('boots', 1, 'common');
+
+      // Add extra items to inventory
+      gameState.inventory.push(generateGearItem('belt', 1, 'common'));
+      gameState.inventory.push(generateGearItem('pants', 1, 'common'));
+
+      init3DWorld();
+      recalculateStats();
+      updateNearbyEnemiesList();
+      animate();
+
+      // Request persistent data from Firestorm Parent frame
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'FIRESTORM_REQUEST_INIT' }, '*');
+        }
+      } catch(e) {}
+    } catch (err) {
+      console.error('Failed to start RPG game:', err);
+    }
   }
+  window.startGame = startGame;
+  window.selectHeroArchetype = startGame;
 
   // Listen for parent load response
   window.addEventListener('message', (event) => {
@@ -3848,12 +5054,36 @@
   document.getElementById('buy-res-btn').onclick = () => buyStatUpgrade('magicResist', 5);
   document.getElementById('buy-crit-btn').onclick = () => buyStatUpgrade('critRate', 8);
 
+  // Hook up Hamburger Menu Inside Realm Info Box
+  const btnRealmHamburger = document.getElementById('btn-realm-hamburger');
+  const realmHamburgerMenu = document.getElementById('realm-hamburger-menu');
+  if (btnRealmHamburger && realmHamburgerMenu) {
+    btnRealmHamburger.onclick = (e) => {
+      e.stopPropagation();
+      const isOpen = realmHamburgerMenu.classList.toggle('open');
+      btnRealmHamburger.classList.toggle('active', isOpen);
+    };
+
+    // Close dropdown menu when clicking anywhere else on page
+    window.addEventListener('click', (e) => {
+      if (!realmHamburgerMenu.contains(e.target) && e.target !== btnRealmHamburger) {
+        realmHamburgerMenu.classList.remove('open');
+        btnRealmHamburger.classList.remove('active');
+      }
+    });
+  }
+
   document.getElementById('btn-sound-toggle').onclick = () => {
     sfxEnabled = !sfxEnabled;
-    document.getElementById('btn-sound-toggle').innerText = sfxEnabled ? '🔊 Sound' : '🔇 Muted';
+    const soundText = sfxEnabled ? '🔊 Sound: ON' : '🔇 Sound: MUTED';
+    const soundBtn = document.getElementById('btn-sound-toggle');
+    if (soundBtn) {
+      const soundTextEl = document.getElementById('sound-toggle-text');
+      if (soundTextEl) soundTextEl.innerText = soundText;
+      else soundBtn.innerText = soundText;
+    }
   };
 
-})();
 </script>
 </body>
 </html>
