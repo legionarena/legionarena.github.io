@@ -458,7 +458,7 @@ export function saveDatabase(state: DbState): void {
 // ==========================================
 
 export function saveGameHighScore(
-  gameId: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game',
+  gameId: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game' | 'emoji-tactics',
   score: number,
   details: string,
   userOverride?: User | null
@@ -474,6 +474,7 @@ export function saveGameHighScore(
   if (gameId === 'code-pressed') gameName = 'Reaction Challenge';
   if (gameId === 'slots-up') gameName = 'Supply Grid';
   if (gameId === 'rpg-game') gameName = 'Realm of Champions 3D';
+  if (gameId === 'emoji-tactics') gameName = 'Emoji Tactics 3D';
 
   let isNewPersonalBest = false;
   let savedEntry: GameHighScore;
@@ -531,12 +532,14 @@ export function saveGameHighScore(
       else if (gameId === 'slots-up') currentBest = user.highScores.slotsUp || 0;
       else if (gameId === 'block-drop') currentBest = user.highScores.blockDrop || 0;
       else if (gameId === 'rpg-game') currentBest = user.highScores.rpgGame || 0;
+      else if (gameId === 'emoji-tactics') currentBest = user.highScores.emojiTactics || 0;
 
       if (score > currentBest) {
         if (gameId === 'code-pressed') user.highScores.codePressed = score;
         else if (gameId === 'slots-up') user.highScores.slotsUp = score;
         else if (gameId === 'block-drop') user.highScores.blockDrop = score;
         else if (gameId === 'rpg-game') user.highScores.rpgGame = score;
+        else if (gameId === 'emoji-tactics') user.highScores.emojiTactics = score;
 
         // Give rating boost for breaking personal records
         user.rating = (user.rating || 1000) + Math.min(150, Math.floor(score / 5));
@@ -555,7 +558,7 @@ export function saveGameHighScore(
   return { success: true, isNewPersonalBest, highScore: savedEntry };
 }
 
-export function getHighScores(gameId?: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game'): GameHighScore[] {
+export function getHighScores(gameId?: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game' | 'emoji-tactics'): GameHighScore[] {
   const state = loadDatabase();
   let scores = state.highScores || [];
   if (gameId) {
@@ -573,14 +576,15 @@ export function getHighScores(gameId?: 'code-pressed' | 'slots-up' | 'block-drop
   return Array.from(userBestMap.values()).sort((a, b) => b.score - a.score);
 }
 
-export function getUserPersonalBests(userId: string): { codePressed: number; slotsUp: number; blockDrop: number; rpgGame: number } {
+export function getUserPersonalBests(userId: string): { codePressed: number; slotsUp: number; blockDrop: number; rpgGame: number; emojiTactics: number } {
   const state = loadDatabase();
   const user = state.users.find(u => u.id === userId);
   return {
     codePressed: user?.highScores?.codePressed || 0,
     slotsUp: user?.highScores?.slotsUp || 0,
     blockDrop: user?.highScores?.blockDrop || 0,
-    rpgGame: user?.highScores?.rpgGame || 0
+    rpgGame: user?.highScores?.rpgGame || 0,
+    emojiTactics: user?.highScores?.emojiTactics || 0
   };
 }
 

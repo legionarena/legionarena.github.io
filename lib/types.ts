@@ -16,6 +16,7 @@ export interface User {
     slotsUp?: number;
     blockDrop?: number;
     rpgGame?: number;
+    emojiTactics?: number;
   };
   createdAt: string;
   lastLoginAt: string;
@@ -34,7 +35,7 @@ export interface DispatchedEmail {
 
 export interface GameHighScore {
   id: string;
-  gameId: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game';
+  gameId: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game' | 'emoji-tactics';
   gameName: string;
   userId: string;
   userCallsign: string;

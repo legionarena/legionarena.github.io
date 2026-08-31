@@ -29,7 +29,8 @@ import {
   User as UserIcon,
   CheckCircle2,
   Boxes,
-  RotateCcw
+  RotateCcw,
+  Crown
 } from 'lucide-react';
 import { User, DispatchedEmail } from '@/lib/types';
 import {
@@ -61,6 +62,20 @@ interface StationInfo {
 }
 
 const STATIONS: StationInfo[] = [
+  {
+    id: 'emoji-tactics',
+    name: 'Emoji Tactics 3D',
+    url: '/emoji-tactics.html',
+    icon: Crown,
+    tag: '3D TACTICS',
+    category: 'Auto Chess Arena (8x8 Grid)',
+    themeColor: 'text-violet-400',
+    accentBg: 'bg-violet-500/10',
+    borderAccent: 'border-violet-500/30',
+    badgeClass: 'bg-violet-900/60 text-violet-200 border-violet-500/40',
+    description: '3D Auto-battler with 24 emoji characters, Match-3 fusing up to 5 stars, 8x8 tactical grid with benches, drafting pool, and gold economy.',
+    status: 'ONLINE'
+  },
   {
     id: 'rpg-game',
     name: 'Realm of Champions 3D',
@@ -261,12 +276,12 @@ export default function Home() {
         if (typeof score === 'number') {
           const res = saveGameHighScore(gameId, score, details || '', activeUser);
           playTacticalSound('success');
-          // High score notifications disabled for rpg-game and slots-up as requested
-          if (gameId !== 'rpg-game' && gameId !== 'slots-up') {
+          // High score notifications disabled for rpg-game, slots-up, and emoji-tactics as requested
+          if (gameId !== 'rpg-game' && gameId !== 'slots-up' && gameId !== 'emoji-tactics') {
             setHighScoreNotification({
               id: Date.now().toString(),
               gameId,
-              gameName: gameId === 'block-drop' ? 'Block Drop Matrix' : gameId === 'code-pressed' ? 'Reaction Challenge' : 'Supply Grid',
+              gameName: gameId === 'emoji-tactics' ? 'Emoji Tactics 3D' : gameId === 'block-drop' ? 'Block Drop Matrix' : gameId === 'code-pressed' ? 'Reaction Challenge' : 'Supply Grid',
               score,
               details,
               isNewPersonalBest: res?.isNewPersonalBest

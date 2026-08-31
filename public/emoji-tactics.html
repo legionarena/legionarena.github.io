@@ -1,0 +1,2902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emoji Tactics 3D - Auto Chess Arena</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background-color: #030712;
+      color: #f3f4f6;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+    #canvas-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      cursor: grab;
+    }
+    #canvas-container:active {
+      cursor: grabbing;
+    }
+    #game-ui {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px;
+    }
+    .interactive {
+      pointer-events: auto;
+    }
+    
+    /* Top Bar HUD */
+    .top-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .hud-card {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      border-radius: 12px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    .hp-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .hp-bar-container {
+      width: 90px;
+      height: 10px;
+      background: #1e293b;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+    .hp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ef4444, #10b981);
+      transition: width 0.3s ease;
+    }
+    .hp-enemy-fill {
+      background: linear-gradient(90deg, #f59e0b, #ef4444);
+    }
+    .gold-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 800;
+      color: #fbbf24;
+      font-size: 15px;
+    }
+    .wins-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 800;
+      color: #c084fc;
+      font-size: 13px;
+    }
+    .round-badge {
+      font-weight: 800;
+      color: #38bdf8;
+      font-size: 14px;
+    }
+    .phase-badge {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+    }
+    .phase-combat {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #f87171;
+    }
+    .phase-draft {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: rgba(245, 158, 11, 0.5);
+      color: #fbbf24;
+    }
+
+    /* Action Buttons & Navigation Controls */
+    .controls-panel {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .btn {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #f8fafc;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .btn:hover {
+      background: #334155;
+      border-color: #64748b;
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      transform: translateY(1px);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      border-color: #3b82f6;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+    .btn-battle {
+      background: linear-gradient(135deg, #dc2626, #991b1b);
+      border-color: #ef4444;
+      font-size: 13px;
+      padding: 8px 16px;
+    }
+    .btn-battle:hover {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      border-color: #f59e0b;
+    }
+
+    /* 3D Camera Floating Toolbar (Top Right) */
+    .camera-hud {
+      position: absolute;
+      top: 64px;
+      right: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 6px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .cam-btn {
+      width: 32px;
+      height: 32px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      border-radius: 6px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .cam-btn:hover {
+      background: #3b82f6;
+      border-color: #60a5fa;
+    }
+
+    /* Floating Center Notification */
+    #center-announcement {
+      position: absolute;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.92);
+      border: 2px solid #38bdf8;
+      border-radius: 16px;
+      padding: 10px 22px;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      z-index: 50;
+    }
+    #center-announcement.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #announcement-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: #38bdf8;
+    }
+    #announcement-sub {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+
+    /* Closable Unit Inspector Window */
+    #unit-info-card {
+      position: absolute;
+      bottom: 24px;
+      left: 16px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(14px);
+      border: 2px solid #38bdf8;
+      border-radius: 14px;
+      padding: 14px;
+      width: 320px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.8);
+      display: none;
+      z-index: 40;
+      animation: popIn 0.2s ease-out;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .unit-info-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .unit-avatar {
+      font-size: 30px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1e293b;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
+    .unit-title-box {
+      flex: 1;
+    }
+    .unit-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+    .unit-stars {
+      color: #fbbf24;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+    .unit-close-btn {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 24px;
+      height: 24px;
+      background: #334155;
+      border: 1px solid #64748b;
+      color: #cbd5e1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .unit-close-btn:hover {
+      background: #ef4444;
+      border-color: #f87171;
+      color: #fff;
+    }
+    .unit-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 10px;
+      font-size: 11px;
+      color: #cbd5e1;
+      background: #0b1329;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .unit-ability-box {
+      font-size: 11px;
+      background: #1e1b4b;
+      border: 1px solid #4338ca;
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: #c7d2fe;
+      margin-bottom: 10px;
+    }
+    .unit-ability-title {
+      font-weight: 800;
+      color: #a5b4fc;
+      margin-bottom: 2px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Bottom Dock: Draft Shop & Minimized Banner */
+    .bottom-hud {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      position: relative;
+    }
+    
+    #draft-shop-container {
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(12px);
+      border: 2px solid rgba(245, 158, 11, 0.6);
+      border-radius: 16px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 860px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+      transition: all 0.25s ease-in-out;
+    }
+    #draft-shop-container.minimized {
+      display: none;
+    }
+    
+    /* Minimized Shop Bar */
+    #minimized-shop-bar {
+      display: none;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(245, 158, 11, 0.6);
+      border-radius: 30px;
+      padding: 6px 18px;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+    #minimized-shop-bar:hover {
+      background: rgba(30, 41, 59, 0.95);
+      border-color: #fbbf24;
+    }
+    
+    .shop-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fbbf24;
+    }
+    .shop-cards-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .shop-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .shop-card:hover {
+      background: #334155;
+      border-color: #38bdf8;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(56, 189, 248, 0.25);
+    }
+    .shop-card.tier-1 { border-left: 3px solid #94a3b8; }
+    .shop-card.tier-2 { border-left: 3px solid #10b981; }
+    .shop-card.tier-3 { border-left: 3px solid #3b82f6; }
+    .shop-card.tier-4 { border-left: 3px solid #a855f7; }
+    .shop-card.tier-5 { border-left: 3px solid #f59e0b; }
+    .shop-card-emoji {
+      font-size: 26px;
+      line-height: 1;
+    }
+    .shop-card-name {
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .shop-card-stats {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+    .shop-card-cost {
+      font-size: 11px;
+      font-weight: 800;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-top: 2px;
+    }
+    .shop-card.disabled {
+      opacity: 0.45;
+      pointer-events: none;
+      filter: grayscale(0.7);
+    }
+
+    /* Modal Dialogs */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-box {
+      background: #0f172a;
+      border: 2px solid #38bdf8;
+      border-radius: 18px;
+      max-width: 540px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #38bdf8;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-body {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .rule-item {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 10px 12px;
+      border-left: 3px solid #38bdf8;
+    }
+    .rule-item strong {
+      color: #f8fafc;
+    }
+
+    /* Match 3 Upgrade FX Toast */
+    .upgrade-toast {
+      position: absolute;
+      bottom: 240px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0f172a;
+      font-weight: 900;
+      font-size: 16px;
+      padding: 10px 24px;
+      border-radius: 9999px;
+      box-shadow: 0 8px 24px rgba(245, 158, 11, 0.6);
+      z-index: 60;
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .upgrade-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) scale(1.1);
+    }
+
+    /* Floating 3D Damage Numbers */
+    .dmg-number {
+      position: absolute;
+      font-weight: 900;
+      pointer-events: none;
+      z-index: 35;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Grid Row Indicators */
+    .grid-legend {
+      position: absolute;
+      left: 12px;
+      top: 64px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: #94a3b8;
+    }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/webgpu": "https://unpkg.com/three@0.170.0/build/three.webgpu.js",
+        "three/tsl": "https://unpkg.com/three@0.170.0/build/three.tsl.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div id="damage-container" style="position: absolute; inset: 0; pointer-events: none; z-index: 30;"></div>
+
+  <!-- In-Game UI Overlay -->
+  <div id="game-ui">
+    <!-- Top HUD Bar -->
+    <div class="top-hud">
+      <!-- Player Commander Health -->
+      <div class="hud-card interactive">
+        <div class="hp-badge">
+          <span>🛡️ Player</span>
+          <div class="hp-bar-container">
+            <div id="player-hp-bar" class="hp-bar-fill" style="width: 100%;"></div>
+          </div>
+          <span id="player-hp-text" style="color: #10b981;">10/10</span>
+        </div>
+        <div class="gold-badge">
+          <span>🪙</span>
+          <span id="player-gold-text">4 Gold</span>
+        </div>
+        <div class="wins-badge">
+          <span>🏆</span>
+          <span id="player-wins-text">0 Wins</span>
+        </div>
+      </div>
+
+      <!-- Center Round & Phase Indicator -->
+      <div class="hud-card interactive" style="flex-direction: column; gap: 4px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="round-badge" id="round-text">ROUND 1</span>
+          <span id="phase-badge" class="phase-badge phase-draft">DRAFT & PREP</span>
+        </div>
+        <span id="timer-text" style="font-size: 11px; color: #94a3b8;">Prep Time: 25s</span>
+      </div>
+
+      <!-- Enemy Commander Health -->
+      <div class="hud-card interactive">
+        <div class="hp-badge">
+          <span>👑 Rival AI</span>
+          <div class="hp-bar-container">
+            <div id="enemy-hp-bar" class="hp-bar-fill hp-enemy-fill" style="width: 100%;"></div>
+          </div>
+          <span id="enemy-hp-text" style="color: #ef4444;">10/10</span>
+        </div>
+        <div class="gold-badge" style="color: #94a3b8;">
+          <span>🪙</span>
+          <span id="enemy-gold-text">4</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3D Camera Controls Floating HUD (Top Right) -->
+    <div class="camera-hud interactive">
+      <button class="cam-btn" title="Rotate Left" onclick="rotateCamera(-0.35)">↺</button>
+      <button class="cam-btn" title="Rotate Right" onclick="rotateCamera(0.35)">↻</button>
+      <button class="cam-btn" title="Pitch Up" onclick="pitchCamera(0.15)">⬆</button>
+      <button class="cam-btn" title="Pitch Down" onclick="pitchCamera(-0.15)">⬇</button>
+      <button class="cam-btn" title="Zoom In" onclick="zoomCamera(-4)">🔍</button>
+      <button class="cam-btn" title="Zoom Out" onclick="zoomCamera(4)">🔎</button>
+      <button class="cam-btn" title="Reset View" onclick="resetCameraView()">🎯</button>
+    </div>
+
+    <!-- Center Floating Announcement Banner -->
+    <div id="center-announcement">
+      <div id="announcement-title">ROUND 1 PREPARATION</div>
+      <div id="announcement-sub">Pick characters from draft pool! Drag or use 3D camera controls to inspect.</div>
+    </div>
+
+    <!-- Match 3 Upgrade Star Banner -->
+    <div id="upgrade-toast" class="upgrade-toast">
+      ⭐ MATCH 3! UNIT UPGRADED TO ★2! ⭐
+    </div>
+
+    <!-- Left Floating Grid Legend -->
+    <div class="grid-legend interactive">
+      <div class="legend-row"><span class="legend-dot" style="background: #ef4444;"></span><span>Row 0: Enemy Bench (8 slots)</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background: #dc2626;"></span><span>Row 1-3: Enemy Attack (3 rows)</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background: #38bdf8;"></span><span>Row 4: Free Range Move Row (1 row)</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background: #2563eb;"></span><span>Row 5-7: Player Attack (3 rows)</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background: #10b981;"></span><span>Row 8: Player Bench (8 slots)</span></div>
+    </div>
+
+    <!-- Closable Unit Inspector Window -->
+    <div id="unit-info-card" class="interactive">
+      <button class="unit-close-btn" onclick="closeUnitInspector()">✕</button>
+      <div class="unit-info-header">
+        <div id="inspector-avatar" class="unit-avatar">🐉🔥</div>
+        <div class="unit-title-box">
+          <div id="inspector-name" class="unit-name">Dragon Pyromancer</div>
+          <div id="inspector-stars" class="unit-stars">★★☆☆☆ (Tier 5)</div>
+        </div>
+      </div>
+      <div class="unit-stats-grid">
+        <div>❤️ HP: <span id="inspector-hp" style="font-weight:700; color:#10b981;">680/680</span></div>
+        <div>⚔️ ATK: <span id="inspector-atk" style="font-weight:700; color:#f87171;">95</span></div>
+        <div>⚡ SPD: <span id="inspector-spd" style="font-weight:700; color:#38bdf8;">0.85s</span></div>
+        <div>🎯 RNG: <span id="inspector-rng" style="font-weight:700; color:#fbbf24;">3 Tiles</span></div>
+        <div>🛡️ DEF: <span id="inspector-def" style="font-weight:700; color:#94a3b8;">25%</span></div>
+        <div>✨ PWR: <span id="inspector-pwr" style="font-weight:700; color:#c084fc;">Level 1</span></div>
+      </div>
+      <div class="unit-ability-box">
+        <div class="unit-ability-title">
+          <span id="inspector-ability-name">Inferno Cataclysm</span>
+          <span id="inspector-mana" style="color: #38bdf8; font-size: 10px;">100 Mana</span>
+        </div>
+        <div id="inspector-ability-desc">Rains hellfire upon enemy board dealing 450 AoE damage.</div>
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: space-between;">
+        <button id="inspector-sell-btn" class="btn" style="background: #7f1d1d; border-color: #ef4444; color: #fecaca; font-size: 11px; padding: 6px 12px;" onclick="sellInspectedUnit()">
+          <span>💰 Sell (+<span id="inspector-sell-gold">1</span>🪙)</span>
+        </button>
+        <button class="btn btn-primary" style="font-size: 11px; padding: 6px 14px;" onclick="closeUnitInspector()">
+          <span>Close Window</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom HUD Dock -->
+    <div class="bottom-hud">
+      <!-- Minimized Draft Shop Bar -->
+      <div id="minimized-shop-bar" class="interactive" onclick="toggleDraftShop(true)">
+        <span style="font-size: 16px;">🛒</span>
+        <span style="font-size: 13px; font-weight: 800; color: #fbbf24;">Draft Pool Available (<span id="minimized-card-count">4</span> Units)</span>
+        <span class="btn btn-gold" style="font-size: 11px; padding: 4px 10px; border-radius: 20px;">🔼 Expand Shop</span>
+      </div>
+
+      <!-- Full Draft Marketplace / Shop Container -->
+      <div id="draft-shop-container" class="interactive">
+        <div class="shop-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>🛒 DRAFT POOL (FREE RANGE ROW)</span>
+            <span style="font-size: 11px; color: #94a3b8;">Click unit to buy to bench (Match 3 to Star Up!)</span>
+          </div>
+          <div class="controls-panel">
+            <button id="minimize-shop-btn" class="btn" style="background: #334155; border-color: #64748b;" onclick="toggleDraftShop(false)" title="Minimize draft window to see battlefield">
+              <span>🔽 Minimize</span>
+            </button>
+            <button id="reroll-btn" class="btn btn-gold" onclick="rerollShop()">
+              <span>🔄 Reroll (2🪙)</span>
+            </button>
+            <button id="start-battle-btn" class="btn btn-battle" onclick="triggerCombatPhase()">
+              <span>⚔️ START BATTLE</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Character Draft Cards -->
+        <div class="shop-cards-row" id="shop-cards-row">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Quick Action Toolbar -->
+      <div class="controls-panel interactive">
+        <button class="btn" onclick="toggleHelpModal()">
+          <span>📖 Game Rules</span>
+        </button>
+        <button class="btn" onclick="rotateCamera(Math.PI / 4)">
+          <span>🔄 Rotate 45°</span>
+        </button>
+        <button class="btn" onclick="resetCameraView()">
+          <span>🎯 Center Camera</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules / Tutorial Modal -->
+  <div id="help-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>⚔️</span>
+        <span>Emoji Tactics 3D Rules</span>
+      </div>
+      <div class="modal-body">
+        <div class="rule-item">
+          <strong>🎭 24 Low-Poly 3D Characters:</strong> From Tier 1 (1🪙) to Tier 5 (5🪙) with custom 3D low-poly models, distinct power levels, auto-attacks, and animated ultimate power abilities!
+        </div>
+        <div class="rule-item">
+          <strong>⭐ Match-3 Evolution (Up to 5 Stars):</strong> Whenever you collect 3 units of the exact same character and star level, they fuse into a higher star unit (★1 ➔ ★2 ➔ ★3 ➔ ★4 ➔ ★5) multiplying stats, size, and abilities!
+        </div>
+        <div class="rule-item">
+          <strong>📐 The 8x8 Tactical Grid & Benches:</strong>
+          <br>• Row 0: Enemy Bench (8 slots)
+          <br>• Rows 1-3: Enemy Attack Rows (Deploy up to 24 units)
+          <br>• Row 4: Neutral Free Range Row (Drafting pool & open movement)
+          <br>• Rows 5-7: Player Attack Rows (Deploy your army)
+          <br>• Row 8: Player Bench (Store up to 8 reserve units)
+        </div>
+        <div class="rule-item">
+          <strong>🎥 3D Camera Controls:</strong> Left-click and drag on empty ground to rotate 360° around the arena! Use the top-right camera HUD to zoom, pitch, and reset.
+        </div>
+        <div class="rule-item">
+          <strong>🪙 Economy & High Scores:</strong> Start at <strong>4 Gold</strong>. Win a battle to earn <strong>6 Gold</strong>, or earn <strong>2 Gold</strong> on defeat. Total Wins are saved as your persistent High Score!
+        </div>
+        <div class="rule-item">
+          <strong>❤️ Commander Health:</strong> Both commanders start with <strong>10 HP</strong> and lose <strong>1 HP</strong> on battle defeat.
+        </div>
+      </div>
+      <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+        <button class="btn btn-primary" onclick="toggleHelpModal()">
+          <span>Understood, Let's Battle!</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div id="game-over-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-box" style="text-align: center;">
+      <div id="game-over-title" class="modal-title" style="justify-content: center; font-size: 28px;">
+        VICTORY!
+      </div>
+      <div id="game-over-desc" style="color: #cbd5e1; margin: 12px 0 20px 0; font-size: 14px;">
+        You crushed the Rival AI Commander and claimed the Grand Master Champion title!
+      </div>
+      <div id="game-over-stats" style="background: #1e293b; padding: 14px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; text-align: left; display: flex; flex-direction: column; gap: 6px;">
+        <!-- Stats summary -->
+      </div>
+      <button class="btn btn-battle" style="width: 100%; justify-content: center;" onclick="resetGame()">
+        <span>Play Again</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- THREE.JS WEBGPU MODULE SCRIPT -->
+  <script type="module">
+    import * as THREE from 'three';
+
+    // =========================================================================
+    // 24 UNIQUE EMOJI CHARACTERS DATABASE (TIERS 1 TO 5)
+    // =========================================================================
+    const CHARACTERS_DATABASE = [
+      // --- TIER 1 (Cost: 1 Gold) ---
+      {
+        id: 'boar_berserk',
+        emoji: '🐗💥',
+        name: 'Berserk Boar',
+        tier: 1,
+        cost: 1,
+        archetype: 'beast_tusks',
+        baseHp: 380,
+        baseAtk: 32,
+        attackSpeed: 1.0,
+        range: 1,
+        defense: 10,
+        colorHex: '#b45309',
+        ability: {
+          name: 'Wild Stampede',
+          desc: 'Rushes enemy for 90 physical damage and stuns.',
+          power: 90,
+          type: 'physical_rush'
+        }
+      },
+      {
+        id: 'fairy_flora',
+        emoji: '🧚‍♀️🌸',
+        name: 'Flora Fairy',
+        tier: 1,
+        cost: 1,
+        archetype: 'winged_mystic',
+        baseHp: 260,
+        baseAtk: 24,
+        attackSpeed: 0.9,
+        range: 3,
+        defense: 5,
+        colorHex: '#ec4899',
+        ability: {
+          name: 'Nature Healing',
+          desc: 'Heals the lowest-health ally for 140 HP.',
+          power: 140,
+          type: 'heal'
+        }
+      },
+      {
+        id: 'viper_venom',
+        emoji: '🐍🧪',
+        name: 'Venom Viper',
+        tier: 1,
+        cost: 1,
+        archetype: 'serpent',
+        baseHp: 310,
+        baseAtk: 28,
+        attackSpeed: 1.1,
+        range: 2,
+        defense: 8,
+        colorHex: '#10b981',
+        ability: {
+          name: 'Toxic Spit',
+          desc: 'Poisons target for 110 damage over 3 seconds.',
+          power: 110,
+          type: 'poison'
+        }
+      },
+      {
+        id: 'owl_sage',
+        emoji: '🦉📖',
+        name: 'Sage Owl',
+        tier: 1,
+        cost: 1,
+        archetype: 'winged_mystic',
+        baseHp: 280,
+        baseAtk: 26,
+        attackSpeed: 1.0,
+        range: 3,
+        defense: 6,
+        colorHex: '#64748b',
+        ability: {
+          name: 'Mystic Sight',
+          desc: 'Blasts foe with arcane light for 100 magic damage.',
+          power: 100,
+          type: 'arcane_beam'
+        }
+      },
+      {
+        id: 'rhino_titan',
+        emoji: '🛡️🦏',
+        name: 'Titan Rhino',
+        tier: 1,
+        cost: 1,
+        archetype: 'beast_horn',
+        baseHp: 440,
+        baseAtk: 25,
+        attackSpeed: 1.2,
+        range: 1,
+        defense: 20,
+        colorHex: '#475569',
+        ability: {
+          name: 'Iron Guard',
+          desc: 'Gains a 160 HP protective shield for 4s.',
+          power: 160,
+          type: 'shield'
+        }
+      },
+
+      // --- TIER 2 (Cost: 2 Gold) ---
+      {
+        id: 'ranger_sylvan',
+        emoji: '🏹🌿',
+        name: 'Sylvan Ranger',
+        tier: 2,
+        cost: 2,
+        archetype: 'humanoid_archer',
+        baseHp: 340,
+        baseAtk: 45,
+        attackSpeed: 0.85,
+        range: 4,
+        defense: 8,
+        colorHex: '#15803d',
+        ability: {
+          name: 'Piercing Arrow',
+          desc: 'Fires a sniper shot piercing in a straight line for 150 damage.',
+          power: 150,
+          type: 'projectile'
+        }
+      },
+      {
+        id: 'wolf_thunder',
+        emoji: '⚡🐺',
+        name: 'Thunder Wolf',
+        tier: 2,
+        cost: 2,
+        archetype: 'beast_tusks',
+        baseHp: 390,
+        baseAtk: 42,
+        attackSpeed: 0.9,
+        range: 1,
+        defense: 12,
+        colorHex: '#eab308',
+        ability: {
+          name: 'Static Leap',
+          desc: 'Leaps behind target and shocks for 140 lightning damage.',
+          power: 140,
+          type: 'lightning'
+        }
+      },
+      {
+        id: 'bear_frost',
+        emoji: '🐻❄️',
+        name: 'Frost Bear',
+        tier: 2,
+        cost: 2,
+        archetype: 'beast_tusks',
+        baseHp: 480,
+        baseAtk: 38,
+        attackSpeed: 1.1,
+        range: 1,
+        defense: 18,
+        colorHex: '#38bdf8',
+        ability: {
+          name: 'Glacial Slam',
+          desc: 'Slams ground chilling nearby enemies for 130 damage.',
+          power: 130,
+          type: 'ice_slam'
+        }
+      },
+      {
+        id: 'spider_shadow',
+        emoji: '🕷️🕸️',
+        name: 'Shadow Weaver',
+        tier: 2,
+        cost: 2,
+        archetype: 'serpent',
+        baseHp: 320,
+        baseAtk: 40,
+        attackSpeed: 0.95,
+        range: 2,
+        defense: 10,
+        colorHex: '#581c87',
+        ability: {
+          name: 'Cocoon Web',
+          desc: 'Traps opponent in silk dealing 135 damage.',
+          power: 135,
+          type: 'web'
+        }
+      },
+      {
+        id: 'kitsune_mystic',
+        emoji: '🦊🔥',
+        name: 'Kitsune Mystic',
+        tier: 2,
+        cost: 2,
+        archetype: 'humanoid_mage',
+        baseHp: 350,
+        baseAtk: 44,
+        attackSpeed: 0.95,
+        range: 3,
+        defense: 10,
+        colorHex: '#ea580c',
+        ability: {
+          name: 'Fox Fire Orb',
+          desc: 'Launches 3 homing spirit flames dealing 160 total damage.',
+          power: 160,
+          type: 'fireball'
+        }
+      },
+
+      // --- TIER 3 (Cost: 3 Gold) ---
+      {
+        id: 'samurai_cyber',
+        emoji: '🤖⚔️',
+        name: 'Cyber Samurai',
+        tier: 3,
+        cost: 3,
+        archetype: 'humanoid_warrior',
+        baseHp: 460,
+        baseAtk: 60,
+        attackSpeed: 0.8,
+        range: 1,
+        defense: 16,
+        colorHex: '#06b6d4',
+        ability: {
+          name: 'Plasma Blade Slash',
+          desc: 'Performs a swift dual-strike dealing 220 critical damage.',
+          power: 220,
+          type: 'blade_dance'
+        }
+      },
+      {
+        id: 'slayer_necro',
+        emoji: '💀🗡️',
+        name: 'Necro Slayer',
+        tier: 3,
+        cost: 3,
+        archetype: 'humanoid_warrior',
+        baseHp: 420,
+        baseAtk: 58,
+        attackSpeed: 0.85,
+        range: 2,
+        defense: 14,
+        colorHex: '#475569',
+        ability: {
+          name: 'Soul Reap',
+          desc: 'Drains soul dealing 200 damage and restoring 100 HP.',
+          power: 200,
+          type: 'life_drain'
+        }
+      },
+      {
+        id: 'vampire_blood',
+        emoji: '🧛‍♂️🩸',
+        name: 'Blood Vampire',
+        tier: 3,
+        cost: 3,
+        archetype: 'humanoid_mage',
+        baseHp: 450,
+        baseAtk: 55,
+        attackSpeed: 0.9,
+        range: 1,
+        defense: 15,
+        colorHex: '#be123c',
+        ability: {
+          name: 'Crimson Surge',
+          desc: 'Burst of blood needles hitting 2 foes for 190 damage each.',
+          power: 190,
+          type: 'blood_surge'
+        }
+      },
+      {
+        id: 'gryphon_storm',
+        emoji: '🦅🌪️',
+        name: 'Storm Gryphon',
+        tier: 3,
+        cost: 3,
+        archetype: 'winged_mystic',
+        baseHp: 400,
+        baseAtk: 62,
+        attackSpeed: 0.85,
+        range: 3,
+        defense: 12,
+        colorHex: '#0284c7',
+        ability: {
+          name: 'Thunder Vortex',
+          desc: 'Summons a whirlwind pulling foes for 210 magic damage.',
+          power: 210,
+          type: 'vortex'
+        }
+      },
+      {
+        id: 'shark_abyssal',
+        emoji: '🦈🌊',
+        name: 'Abyssal Shark',
+        tier: 3,
+        cost: 3,
+        archetype: 'beast_tusks',
+        baseHp: 520,
+        baseAtk: 54,
+        attackSpeed: 1.0,
+        range: 1,
+        defense: 22,
+        colorHex: '#0369a1',
+        ability: {
+          name: 'Deep Sea Bite',
+          desc: 'Rips through enemy armor for 230 true damage.',
+          power: 230,
+          type: 'bite'
+        }
+      },
+
+      // --- TIER 4 (Cost: 4 Gold) ---
+      {
+        id: 'mage_astral',
+        emoji: '🧙‍♂️✨',
+        name: 'Astral Mage',
+        tier: 4,
+        cost: 4,
+        archetype: 'humanoid_mage',
+        baseHp: 440,
+        baseAtk: 72,
+        attackSpeed: 0.9,
+        range: 4,
+        defense: 12,
+        colorHex: '#8b5cf6',
+        ability: {
+          name: 'Supernova Burst',
+          desc: 'Detonates a mini star dealing 300 AoE magic damage.',
+          power: 300,
+          type: 'supernova'
+        }
+      },
+      {
+        id: 'lion_solar',
+        emoji: '🦁👑',
+        name: 'Solar Lion',
+        tier: 4,
+        cost: 4,
+        archetype: 'golem_titan',
+        baseHp: 580,
+        baseAtk: 68,
+        attackSpeed: 0.95,
+        range: 1,
+        defense: 24,
+        colorHex: '#eab308',
+        ability: {
+          name: 'Sunfire Roar',
+          desc: 'Roars empowering all allies and dealing 260 area damage.',
+          power: 260,
+          type: 'roar'
+        }
+      },
+      {
+        id: 'poseidon_ocean',
+        emoji: '🌊🔱',
+        name: 'Ocean Poseidon',
+        tier: 4,
+        cost: 4,
+        archetype: 'humanoid_warrior',
+        baseHp: 530,
+        baseAtk: 70,
+        attackSpeed: 0.9,
+        range: 2,
+        defense: 20,
+        colorHex: '#0ea5e9',
+        ability: {
+          name: 'Tidal Wave',
+          desc: 'Crashing wave knocks back all enemies in row for 280 damage.',
+          power: 280,
+          type: 'tidal_wave'
+        }
+      },
+      {
+        id: 'monkey_king',
+        emoji: '🐵👑',
+        name: 'Monkey King',
+        tier: 4,
+        cost: 4,
+        archetype: 'humanoid_warrior',
+        baseHp: 500,
+        baseAtk: 75,
+        attackSpeed: 0.8,
+        range: 2,
+        defense: 18,
+        colorHex: '#d97706',
+        ability: {
+          name: 'Golden Staff Crush',
+          desc: 'Giant staff slams 3 tiles forward for 310 physical damage.',
+          power: 310,
+          type: 'staff_slam'
+        }
+      },
+      {
+        id: 'golem_magma',
+        emoji: '🌋🗿',
+        name: 'Magma Golem',
+        tier: 4,
+        cost: 4,
+        archetype: 'golem_titan',
+        baseHp: 650,
+        baseAtk: 64,
+        attackSpeed: 1.1,
+        range: 1,
+        defense: 30,
+        colorHex: '#b91c1c',
+        ability: {
+          name: 'Volcanic Eruption',
+          desc: 'Ignites surrounding tiles dealing 270 fire damage.',
+          power: 270,
+          type: 'eruption'
+        }
+      },
+
+      // --- TIER 5 (Cost: 5 Gold - Legendary) ---
+      {
+        id: 'dragon_pyro',
+        emoji: '🐉🔥',
+        name: 'Dragon Pyromancer',
+        tier: 5,
+        cost: 5,
+        archetype: 'winged_dragon',
+        baseHp: 680,
+        baseAtk: 95,
+        attackSpeed: 0.85,
+        range: 3,
+        defense: 25,
+        colorHex: '#dc2626',
+        ability: {
+          name: 'Inferno Cataclysm',
+          desc: 'Rains hellfire upon the enemy board dealing 450 AoE damage.',
+          power: 450,
+          type: 'cataclysm'
+        }
+      },
+      {
+        id: 'valkyrie_cosmic',
+        emoji: '☄️💫',
+        name: 'Cosmic Valkyrie',
+        tier: 5,
+        cost: 5,
+        archetype: 'winged_mystic',
+        baseHp: 620,
+        baseAtk: 92,
+        attackSpeed: 0.8,
+        range: 2,
+        defense: 24,
+        colorHex: '#c084fc',
+        ability: {
+          name: 'Starlight Judgment',
+          desc: 'Beams divine cosmic energy down for 420 true damage.',
+          power: 420,
+          type: 'starlight'
+        }
+      },
+      {
+        id: 'unicorn_prismatic',
+        emoji: '🦄🌈',
+        name: 'Prismatic Unicorn',
+        tier: 5,
+        cost: 5,
+        archetype: 'beast_horn',
+        baseHp: 600,
+        baseAtk: 88,
+        attackSpeed: 0.85,
+        range: 3,
+        defense: 22,
+        colorHex: '#f472b6',
+        ability: {
+          name: 'Rainbow Blessing',
+          desc: 'Shields all allies for 300 HP and smites foes for 350 damage.',
+          power: 350,
+          type: 'rainbow'
+        }
+      },
+      {
+        id: 'drake_wind',
+        emoji: '🐲💨',
+        name: 'Wind Drake',
+        tier: 5,
+        cost: 5,
+        archetype: 'winged_dragon',
+        baseHp: 640,
+        baseAtk: 90,
+        attackSpeed: 0.8,
+        range: 3,
+        defense: 22,
+        colorHex: '#14b8a6',
+        ability: {
+          name: 'Cyclone Devastation',
+          desc: 'Sweeps across the board dealing 400 wind damage to all targets.',
+          power: 400,
+          type: 'cyclone'
+        }
+      }
+    ];
+
+    // =========================================================================
+    // GAME STATE & GRID STRUCTURE (8x8 Main Grid + 2 Benches of 8 slots)
+    // =========================================================================
+    const GRID_COLS = 8;
+    const GRID_TOTAL_ROWS = 9; // Rows 0 to 8
+    const TILE_SIZE = 3.2;
+    const GRID_OFFSET_X = -(GRID_COLS * TILE_SIZE) / 2 + TILE_SIZE / 2;
+    const GRID_OFFSET_Z = -(GRID_TOTAL_ROWS * TILE_SIZE) / 2 + TILE_SIZE / 2;
+
+    const gameState = {
+      round: 1,
+      phase: 'draft', // 'draft', 'prep', 'combat', 'round_end'
+      prepTimeLeft: 25,
+      playerHp: 10,
+      enemyHp: 10,
+      playerGold: 4, // START AT 4 GOLD AS REQUESTED
+      enemyGold: 4,
+      wins: 0,
+      losses: 0,
+      totalDamageDealt: 0,
+      inspectedUnit: null,
+      selectedUnit: null,
+      draftPool: [],
+      playerUnits: [],
+      enemyUnits: [],
+      projectiles: [],
+      visualEffects: [],
+      isShopMinimized: false
+    };
+
+    // Camera Orbit State
+    const cameraOrbit = {
+      radius: 38,
+      theta: Math.PI / 2, // horizontal angle
+      phi: Math.PI / 3.2, // vertical pitch
+      target: new THREE.Vector3(0, 1.5, 0),
+      isDragging: false,
+      prevMouseX: 0,
+      prevMouseY: 0
+    };
+
+    // Audio synthesizer
+    let audioCtx = null;
+    function playAudio(type) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.start(now); osc.stop(now + 0.05);
+        } else if (type === 'buy') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(660, now + 0.08);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.start(now); osc.stop(now + 0.18);
+        } else if (type === 'upgrade') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.1);
+          osc.frequency.setValueAtTime(783.99, now + 0.2);
+          osc.frequency.setValueAtTime(1046.50, now + 0.3);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          osc.start(now); osc.stop(now + 0.45);
+        } else if (type === 'attack') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.1);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.start(now); osc.stop(now + 0.1);
+        } else if (type === 'ability') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(350, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.25);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.start(now); osc.stop(now + 0.25);
+        } else if (type === 'victory') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(554.37, now + 0.15);
+          osc.frequency.setValueAtTime(659.25, now + 0.3);
+          osc.frequency.setValueAtTime(880, now + 0.45);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+          osc.start(now); osc.stop(now + 0.7);
+        } else if (type === 'defeat') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(120, now + 0.4);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.start(now); osc.stop(now + 0.4);
+        }
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // THREE.JS SETUP WITH WEBGPU & CAMERA ORBIT
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050b14);
+    scene.fog = new THREE.FogExp2(0x050b14, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 350);
+    updateCameraOrbit();
+
+    let renderer;
+    try {
+      if (THREE.WebGPURenderer) {
+        renderer = new THREE.WebGPURenderer({ antialias: true, powerPreference: 'high-performance' });
+        if (renderer.init) {
+          await renderer.init();
+        }
+      } else {
+        renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      }
+    } catch (e) {
+      console.warn('Falling back to WebGL renderer:', e);
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    }
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    dirLight.position.set(25, 45, 30);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 10;
+    dirLight.shadow.camera.far = 100;
+    dirLight.shadow.camera.left = -25;
+    dirLight.shadow.camera.right = 25;
+    dirLight.shadow.camera.top = 25;
+    dirLight.shadow.camera.bottom = -25;
+    scene.add(dirLight);
+
+    const blueSpot = new THREE.SpotLight(0x38bdf8, 3.5, 60, Math.PI / 4, 0.5, 1);
+    blueSpot.position.set(0, 30, 20);
+    scene.add(blueSpot);
+
+    const redSpot = new THREE.SpotLight(0xef4444, 3.5, 60, Math.PI / 4, 0.5, 1);
+    redSpot.position.set(0, 30, -20);
+    scene.add(redSpot);
+
+    // =========================================================================
+    // MANDATORY INSTANCEDMESH: 8x8 BOARD TILES + BENCHES
+    // =========================================================================
+    const TOTAL_TILES = GRID_COLS * GRID_TOTAL_ROWS; // 72 tiles
+    const tileGeometry = new THREE.BoxGeometry(TILE_SIZE * 0.92, 0.5, TILE_SIZE * 0.92);
+    const tileMaterial = new THREE.MeshStandardMaterial({
+      roughness: 0.35,
+      metalness: 0.25
+    });
+
+    const instancedBoardMesh = new THREE.InstancedMesh(tileGeometry, tileMaterial, TOTAL_TILES);
+    instancedBoardMesh.receiveShadow = true;
+    instancedBoardMesh.castShadow = false;
+
+    const tileMetadata = [];
+    const dummyMat = new THREE.Matrix4();
+
+    let tileIndex = 0;
+    for (let r = 0; r < GRID_TOTAL_ROWS; r++) {
+      for (let c = 0; c < GRID_COLS; c++) {
+        const wx = GRID_OFFSET_X + c * TILE_SIZE;
+        const wz = GRID_OFFSET_Z + r * TILE_SIZE;
+        const wy = 0;
+
+        dummyMat.setPosition(wx, wy, wz);
+        instancedBoardMesh.setMatrixAt(tileIndex, dummyMat);
+
+        let tileType = 'player_attack';
+        let baseColor = new THREE.Color(0x1d4ed8);
+
+        if (r === 0) {
+          tileType = 'enemy_bench';
+          baseColor = new THREE.Color(0x7f1d1d);
+        } else if (r >= 1 && r <= 3) {
+          tileType = 'enemy_attack';
+          baseColor = new THREE.Color(0x991b1b);
+        } else if (r === 4) {
+          tileType = 'free_range';
+          baseColor = new THREE.Color(0x0284c7);
+        } else if (r >= 5 && r <= 7) {
+          tileType = 'player_attack';
+          baseColor = new THREE.Color(0x1e40af);
+        } else if (r === 8) {
+          tileType = 'player_bench';
+          baseColor = new THREE.Color(0x065f46);
+        }
+
+        if ((r + c) % 2 === 1) {
+          baseColor.offsetHSL(0, 0, 0.05);
+        }
+
+        instancedBoardMesh.setColorAt(tileIndex, baseColor);
+        tileMetadata.push({
+          index: tileIndex,
+          row: r,
+          col: c,
+          position: new THREE.Vector3(wx, wy, wz),
+          type: tileType,
+          baseColor: baseColor.clone()
+        });
+
+        tileIndex++;
+      }
+    }
+    instancedBoardMesh.instanceMatrix.needsUpdate = true;
+    if (instancedBoardMesh.instanceColor) instancedBoardMesh.instanceColor.needsUpdate = true;
+    scene.add(instancedBoardMesh);
+
+    // Arena Perimeter Pillars with InstancedMesh
+    const pillarCount = 8;
+    const pillarGeo = new THREE.CylinderGeometry(0.7, 0.9, 6, 16);
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 });
+    const pillarsMesh = new THREE.InstancedMesh(pillarGeo, pillarMat, pillarCount);
+    pillarsMesh.castShadow = true;
+    pillarsMesh.receiveShadow = true;
+
+    const pillarPositions = [
+      [-16, 3, -17], [16, 3, -17],
+      [-16, 3, -4], [16, 3, -4],
+      [-16, 3, 4], [16, 3, 4],
+      [-16, 3, 17], [16, 3, 17]
+    ];
+    pillarPositions.forEach((pos, idx) => {
+      dummyMat.setPosition(pos[0], pos[1], pos[2]);
+      pillarsMesh.setMatrixAt(idx, dummyMat);
+      pillarsMesh.setColorAt(idx, new THREE.Color(0x38bdf8));
+    });
+    pillarsMesh.instanceMatrix.needsUpdate = true;
+    if (pillarsMesh.instanceColor) pillarsMesh.instanceColor.needsUpdate = true;
+    scene.add(pillarsMesh);
+
+    // Floor Base
+    const arenaFloor = new THREE.Mesh(
+      new THREE.BoxGeometry(40, 1.0, 42),
+      new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.9 })
+    );
+    arenaFloor.position.y = -0.7;
+    arenaFloor.receiveShadow = true;
+    scene.add(arenaFloor);
+
+    // =========================================================================
+    // LOW-POLY 3D CHARACTER COMPOUND MESH GENERATOR
+    // =========================================================================
+    function buildLowPolyCharacterModel(characterDef, starLevel, isEnemy) {
+      const group = new THREE.Group();
+      const color = new THREE.Color(characterDef.colorHex);
+      const teamGlowColor = isEnemy ? 0xef4444 : 0x3b82f6;
+
+      // Base Pedestal
+      const baseGeo = new THREE.CylinderGeometry(1.0, 1.15, 0.35, 12);
+      const baseMat = new THREE.MeshStandardMaterial({
+        color: isEnemy ? 0x881337 : 0x1e3a8a,
+        roughness: 0.4,
+        metalness: 0.5
+      });
+      const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+      baseMesh.position.y = 0.17;
+      baseMesh.castShadow = true;
+      baseMesh.receiveShadow = true;
+      group.add(baseMesh);
+
+      // Star Tier Trim Ring
+      if (starLevel >= 2) {
+        const ringGeo = new THREE.TorusGeometry(1.15, 0.09, 8, 20);
+        const ringMat = new THREE.MeshStandardMaterial({
+          color: starLevel >= 4 ? 0xf59e0b : 0x38bdf8,
+          emissive: starLevel >= 4 ? 0xd97706 : 0x0284c7,
+          emissiveIntensity: 0.6
+        });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh.rotation.x = Math.PI / 2;
+        ringMesh.position.y = 0.35;
+        group.add(ringMesh);
+      }
+
+      // Archetype-Specific Low-Poly Mesh Hierarchy
+      const modelContainer = new THREE.Group();
+      modelContainer.name = 'animatedBody';
+
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.3,
+        metalness: 0.4,
+        flatShading: true
+      });
+      const darkMat = new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.6,
+        flatShading: true
+      });
+      const metalMat = new THREE.MeshStandardMaterial({
+        color: 0x94a3b8,
+        metalness: 0.8,
+        roughness: 0.2,
+        flatShading: true
+      });
+      const goldMat = new THREE.MeshStandardMaterial({
+        color: 0xf59e0b,
+        emissive: 0x78350f,
+        emissiveIntensity: 0.4,
+        metalness: 0.7,
+        flatShading: true
+      });
+
+      const archetype = characterDef.archetype || 'humanoid_warrior';
+
+      if (archetype === 'humanoid_warrior' || archetype === 'humanoid_archer') {
+        // Torso
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.9, 0.5), bodyMat);
+        torso.position.y = 0.9;
+        torso.castShadow = true;
+        modelContainer.add(torso);
+
+        // Head / Helmet
+        const head = new THREE.Mesh(new THREE.DodecahedronGeometry(0.38, 0), metalMat);
+        head.position.set(0, 1.6, 0);
+        head.castShadow = true;
+        modelContainer.add(head);
+
+        // Shoulders
+        const leftShoulder = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.4, 4), goldMat);
+        leftShoulder.position.set(-0.55, 1.25, 0);
+        leftShoulder.rotation.z = Math.PI / 4;
+        modelContainer.add(leftShoulder);
+
+        const rightShoulder = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.4, 4), goldMat);
+        rightShoulder.position.set(0.55, 1.25, 0);
+        rightShoulder.rotation.z = -Math.PI / 4;
+        modelContainer.add(rightShoulder);
+
+        // Weapon
+        if (archetype === 'humanoid_archer') {
+          const bow = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.05, 4, 12, Math.PI), goldMat);
+          bow.position.set(0.6, 1.0, 0.3);
+          bow.rotation.y = Math.PI / 2;
+          modelContainer.add(bow);
+        } else {
+          const swordBlade = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.2, 0.04), metalMat);
+          swordBlade.position.set(0.6, 1.2, 0.2);
+          swordBlade.rotation.x = -Math.PI / 8;
+          modelContainer.add(swordBlade);
+        }
+      } else if (archetype === 'humanoid_mage' || archetype === 'winged_mystic') {
+        // Robe Conical Body
+        const robe = new THREE.Mesh(new THREE.ConeGeometry(0.65, 1.3, 7), bodyMat);
+        robe.position.y = 0.85;
+        robe.castShadow = true;
+        modelContainer.add(robe);
+
+        // Floating Mystical Head / Mask
+        const head = new THREE.Mesh(new THREE.OctahedronGeometry(0.35, 0), goldMat);
+        head.position.set(0, 1.65, 0);
+        modelContainer.add(head);
+
+        // Wizard Hat or Halo
+        const hat = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.7, 5), darkMat);
+        hat.position.set(0, 2.1, 0);
+        hat.rotation.x = -0.15;
+        modelContainer.add(hat);
+
+        // Orbiting Spell Orbs
+        for (let i = 0; i < 3; i++) {
+          const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(0.14, 0), goldMat);
+          const angle = (i / 3) * Math.PI * 2;
+          orb.position.set(Math.cos(angle) * 0.75, 1.4 + (i % 2) * 0.2, Math.sin(angle) * 0.75);
+          orb.name = `spellOrb_${i}`;
+          modelContainer.add(orb);
+        }
+
+        // Wings for winged mystic
+        if (archetype === 'winged_mystic') {
+          const wingGeo = new THREE.BoxGeometry(0.08, 0.7, 1.0);
+          const leftWing = new THREE.Mesh(wingGeo, metalMat);
+          leftWing.position.set(-0.4, 1.3, -0.4);
+          leftWing.rotation.set(0.3, -0.4, 0.3);
+          modelContainer.add(leftWing);
+
+          const rightWing = new THREE.Mesh(wingGeo, metalMat);
+          rightWing.position.set(0.4, 1.3, -0.4);
+          rightWing.rotation.set(0.3, 0.4, -0.3);
+          modelContainer.add(rightWing);
+        }
+      } else if (archetype === 'winged_dragon') {
+        // Dragon Body
+        const body = new THREE.Mesh(new THREE.DodecahedronGeometry(0.7, 0), bodyMat);
+        body.position.set(0, 1.1, 0);
+        body.scale.set(1.1, 0.9, 1.4);
+        body.castShadow = true;
+        modelContainer.add(body);
+
+        // Neck & Head
+        const neck = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.8, 5), bodyMat);
+        neck.position.set(0, 1.6, 0.5);
+        neck.rotation.x = Math.PI / 4;
+        modelContainer.add(neck);
+
+        const head = new THREE.Mesh(new THREE.DodecahedronGeometry(0.4, 0), goldMat);
+        head.position.set(0, 1.9, 0.8);
+        modelContainer.add(head);
+
+        // Dragon Horns
+        const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.4, 4), darkMat);
+        hornL.position.set(-0.25, 2.2, 0.65);
+        hornL.rotation.z = -0.4;
+        modelContainer.add(hornL);
+
+        const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.4, 4), darkMat);
+        hornR.position.set(0.25, 2.2, 0.65);
+        hornR.rotation.z = 0.4;
+        modelContainer.add(hornR);
+
+        // Dragon Wings
+        const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.9, 1.3), bodyMat);
+        wingL.position.set(-0.8, 1.5, -0.2);
+        wingL.rotation.set(0.4, -0.5, 0.4);
+        modelContainer.add(wingL);
+
+        const wingR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.9, 1.3), bodyMat);
+        wingR.position.set(0.8, 1.5, -0.2);
+        wingR.rotation.set(0.4, 0.5, -0.4);
+        modelContainer.add(wingR);
+      } else if (archetype === 'golem_titan') {
+        // Heavy Titan Block Body
+        const torso = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8, 0), bodyMat);
+        torso.position.y = 1.1;
+        torso.castShadow = true;
+        modelContainer.add(torso);
+
+        // Massive Boulder Shoulders
+        const sL = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45, 0), darkMat);
+        sL.position.set(-0.85, 1.35, 0);
+        modelContainer.add(sL);
+
+        const sR = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45, 0), darkMat);
+        sR.position.set(0.85, 1.35, 0);
+        modelContainer.add(sR);
+
+        // Glowing Core Eye
+        const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.25, 0), goldMat);
+        core.position.set(0, 1.3, 0.6);
+        modelContainer.add(core);
+      } else {
+        // Beasts / Serpents / Horned / Tusks
+        const body = new THREE.Mesh(new THREE.DodecahedronGeometry(0.65, 0), bodyMat);
+        body.position.set(0, 0.9, 0);
+        body.scale.set(1.0, 0.8, 1.3);
+        body.castShadow = true;
+        modelContainer.add(body);
+
+        const head = new THREE.Mesh(new THREE.OctahedronGeometry(0.42, 0), bodyMat);
+        head.position.set(0, 1.25, 0.6);
+        modelContainer.add(head);
+
+        // Horns / Tusks
+        const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.45, 4), goldMat);
+        hornL.position.set(-0.25, 1.5, 0.6);
+        hornL.rotation.set(-0.3, 0, -0.3);
+        modelContainer.add(hornL);
+
+        const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.45, 4), goldMat);
+        hornR.position.set(0.25, 1.5, 0.6);
+        hornR.rotation.set(-0.3, 0, 0.3);
+        modelContainer.add(hornR);
+      }
+
+      // Rotate enemy models to face player
+      if (isEnemy) {
+        modelContainer.rotation.y = Math.PI;
+      }
+      group.add(modelContainer);
+
+      // Floating Stylized Emoji & Star Billboard Banner
+      const bannerCanvas = document.createElement('canvas');
+      bannerCanvas.width = 192;
+      bannerCanvas.height = 80;
+      const bCtx = bannerCanvas.getContext('2d');
+
+      // Draw Emoji Banner
+      bCtx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      bCtx.roundRect ? bCtx.roundRect(16, 8, 160, 64, 16) : bCtx.fillRect(16, 8, 160, 64);
+      bCtx.fill();
+      bCtx.strokeStyle = isEnemy ? '#ef4444' : '#38bdf8';
+      bCtx.lineWidth = 4;
+      bCtx.stroke();
+
+      bCtx.font = '34px system-ui';
+      bCtx.textAlign = 'center';
+      bCtx.textBaseline = 'middle';
+      bCtx.fillText(characterDef.emoji, 96, 32);
+
+      bCtx.font = 'bold 18px system-ui';
+      bCtx.fillStyle = '#fbbf24';
+      bCtx.fillText('★'.repeat(starLevel), 96, 56);
+
+      const bannerTex = new THREE.CanvasTexture(bannerCanvas);
+      const bannerSpriteMat = new THREE.SpriteMaterial({ map: bannerTex, transparent: true });
+      const bannerSprite = new THREE.Sprite(bannerSpriteMat);
+      bannerSprite.scale.set(2.2, 0.9, 1);
+      bannerSprite.position.y = 2.7 + starLevel * 0.12;
+      group.add(bannerSprite);
+
+      // HP & Mana Bar Sprite
+      const hpCanvas = document.createElement('canvas');
+      hpCanvas.width = 128;
+      hpCanvas.height = 28;
+      const hpTexture = new THREE.CanvasTexture(hpCanvas);
+      const hpSpriteMat = new THREE.SpriteMaterial({ map: hpTexture, transparent: true });
+      const hpSprite = new THREE.Sprite(hpSpriteMat);
+      hpSprite.scale.set(1.9, 0.42, 1);
+      hpSprite.position.y = 3.3 + starLevel * 0.12;
+      group.add(hpSprite);
+
+      return {
+        group,
+        modelContainer,
+        bannerSprite,
+        hpSprite,
+        hpCanvas,
+        hpTexture
+      };
+    }
+
+    // =========================================================================
+    // 3D UNIT CREATION & RIGGING
+    // =========================================================================
+    let unitIdCounter = 1;
+
+    function create3DUnit(characterDef, starLevel = 1, isEnemy = false, row = 8, col = 0) {
+      const starMultiplier = Math.pow(1.85, starLevel - 1);
+      const starBonusHp = Math.round(characterDef.baseHp * starMultiplier);
+      const starBonusAtk = Math.round(characterDef.baseAtk * starMultiplier);
+      const starBonusAbility = Math.round(characterDef.ability.power * starMultiplier);
+
+      const {
+        group,
+        modelContainer,
+        bannerSprite,
+        hpSprite,
+        hpCanvas,
+        hpTexture
+      } = buildLowPolyCharacterModel(characterDef, starLevel, isEnemy);
+
+      const targetPos = getTileWorldPosition(row, col);
+      group.position.copy(targetPos);
+      scene.add(group);
+
+      const unitObj = {
+        id: `unit_${unitIdCounter++}`,
+        charId: characterDef.id,
+        name: characterDef.name,
+        emoji: characterDef.emoji,
+        tier: characterDef.tier,
+        cost: characterDef.cost,
+        starLevel: starLevel,
+        isEnemy: isEnemy,
+        row: row,
+        col: col,
+        maxHp: starBonusHp,
+        currentHp: starBonusHp,
+        attackDamage: starBonusAtk,
+        attackSpeed: characterDef.attackSpeed,
+        attackRange: characterDef.range,
+        defense: characterDef.defense,
+        ability: {
+          name: characterDef.ability.name,
+          desc: characterDef.ability.desc,
+          power: starBonusAbility,
+          type: characterDef.ability.type
+        },
+        mana: 0,
+        maxMana: 100,
+        mesh: group,
+        modelContainer: modelContainer,
+        hpSprite: hpSprite,
+        hpCanvas: hpCanvas,
+        hpTexture: hpTexture,
+        bannerSprite: bannerSprite,
+        lastAttackTime: 0,
+        isDead: false,
+        targetUnit: null,
+        animState: {
+          attackLunge: 0,
+          spellCastGlow: 0,
+          idleOffset: Math.random() * 10
+        }
+      };
+
+      updateUnitHpBar(unitObj);
+      return unitObj;
+    }
+
+    function getTileWorldPosition(row, col) {
+      const wx = GRID_OFFSET_X + col * TILE_SIZE;
+      const wz = GRID_OFFSET_Z + row * TILE_SIZE;
+      return new THREE.Vector3(wx, 0.25, wz);
+    }
+
+    function updateUnitHpBar(unit) {
+      if (!unit || !unit.hpCanvas) return;
+      const ctx = unit.hpCanvas.getContext('2d');
+      ctx.clearRect(0, 0, 128, 28);
+
+      // Dark background container
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 2, 128, 16);
+
+      // HP Fill
+      const hpPct = Math.max(0, Math.min(1, unit.currentHp / unit.maxHp));
+      ctx.fillStyle = unit.isEnemy ? '#ef4444' : '#10b981';
+      ctx.fillRect(2, 4, Math.floor(124 * hpPct), 12);
+
+      // Mana Fill Bar (Cyan)
+      const manaPct = Math.max(0, Math.min(1, unit.mana / unit.maxMana));
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(0, 19, 128, 6);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(2, 20, Math.floor(124 * manaPct), 4);
+
+      // Border
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0, 2, 128, 16);
+
+      unit.hpTexture.needsUpdate = true;
+    }
+
+    // =========================================================================
+    // MATCH-3 UPGRADE LOGIC (UP TO 5 STARS)
+    // =========================================================================
+    function checkAndApplyMatch3Upgrades(isEnemy = false) {
+      const unitList = isEnemy ? gameState.enemyUnits : gameState.playerUnits;
+
+      const groups = {};
+      unitList.forEach(u => {
+        if (u.isDead) return;
+        const key = `${u.charId}_star${u.starLevel}`;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(u);
+      });
+
+      let upgradedAny = false;
+
+      for (const key in groups) {
+        const matchingUnits = groups[key];
+        if (matchingUnits.length >= 3 && matchingUnits[0].starLevel < 5) {
+          const u1 = matchingUnits[0];
+          const u2 = matchingUnits[1];
+          const u3 = matchingUnits[2];
+
+          const newStarLevel = u1.starLevel + 1;
+          const charDef = CHARACTERS_DATABASE.find(c => c.id === u1.charId);
+
+          // Remove the 3 sacrifice units
+          [u1, u2, u3].forEach(u => {
+            scene.remove(u.mesh);
+            const idx = unitList.indexOf(u);
+            if (idx !== -1) unitList.splice(idx, 1);
+          });
+
+          // Create new upgraded unit on board at u1's spot
+          const upgradedUnit = create3DUnit(charDef, newStarLevel, isEnemy, u1.row, u1.col);
+          unitList.push(upgradedUnit);
+
+          upgradedAny = true;
+          playAudio('upgrade');
+
+          // Trigger Particle Fusion FX
+          spawnFusionParticles(upgradedUnit.mesh.position);
+
+          if (!isEnemy) {
+            showToast(`⭐ MATCH 3! ${charDef.name} UPGRADED TO ★${newStarLevel}! ⭐`);
+          }
+          break;
+        }
+      }
+
+      if (upgradedAny) {
+        checkAndApplyMatch3Upgrades(isEnemy);
+      }
+    }
+
+    // =========================================================================
+    // VISUAL EFFECTS & 3D DAMAGE NUMBERS
+    // =========================================================================
+    function spawnDamageText(worldPos, text, color = '#f87171') {
+      const dmgContainer = document.getElementById('damage-container');
+      const el = document.createElement('div');
+      el.className = 'dmg-number';
+      el.innerText = text;
+      el.style.color = color;
+      dmgContainer.appendChild(el);
+
+      const screenPos = worldToScreen(worldPos);
+      el.style.left = `${screenPos.x}px`;
+      el.style.top = `${screenPos.y}px`;
+
+      setTimeout(() => {
+        el.style.transform = 'translate(-50%, -120%) scale(1.3)';
+        el.style.opacity = '0';
+      }, 50);
+
+      setTimeout(() => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, 650);
+    }
+
+    function worldToScreen(worldPos) {
+      const vec = worldPos.clone();
+      vec.project(camera);
+      const x = (vec.x * 0.5 + 0.5) * window.innerWidth;
+      const y = (-(vec.y * 0.5) + 0.5) * window.innerHeight;
+      return { x, y };
+    }
+
+    function spawnFusionParticles(centerPos) {
+      for (let i = 0; i < 24; i++) {
+        const geo = new THREE.SphereGeometry(0.15, 6, 6);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+        const p = new THREE.Mesh(geo, mat);
+        p.position.copy(centerPos);
+        scene.add(p);
+
+        const velocity = new THREE.Vector3(
+          (Math.random() - 0.5) * 6,
+          Math.random() * 6 + 2,
+          (Math.random() - 0.5) * 6
+        );
+
+        gameState.visualEffects.push({
+          mesh: p,
+          velocity: velocity,
+          lifetime: 0.8,
+          age: 0
+        });
+      }
+    }
+
+    function spawnSpellParticleWave(originPos, targetPos, colorHex) {
+      const pCount = 16;
+      for (let i = 0; i < pCount; i++) {
+        const geo = new THREE.OctahedronGeometry(0.2, 0);
+        const mat = new THREE.MeshBasicMaterial({ color: colorHex });
+        const p = new THREE.Mesh(geo, mat);
+        p.position.copy(originPos);
+        scene.add(p);
+
+        const dir = new THREE.Vector3().subVectors(targetPos, originPos).normalize();
+        dir.x += (Math.random() - 0.5) * 0.5;
+        dir.y += Math.random() * 0.6;
+        dir.z += (Math.random() - 0.5) * 0.5;
+
+        gameState.visualEffects.push({
+          mesh: p,
+          velocity: dir.multiplyScalar(10 + Math.random() * 6),
+          lifetime: 0.6,
+          age: 0
+        });
+      }
+    }
+
+    // =========================================================================
+    // DRAFTING SHOP LOGIC (START AT 4 GOLD)
+    // =========================================================================
+    function generateDraftPool() {
+      const pool = [];
+      const tierChances = [
+        [0.70, 0.30, 0.00, 0.00, 0.00], // Round 1-2
+        [0.50, 0.35, 0.15, 0.00, 0.00], // Round 3-4
+        [0.30, 0.40, 0.20, 0.10, 0.00], // Round 5-6
+        [0.15, 0.30, 0.30, 0.20, 0.05], // Round 7+
+      ];
+
+      const roundTierIdx = Math.min(tierChances.length - 1, Math.floor((gameState.round - 1) / 2));
+      const weights = tierChances[roundTierIdx];
+
+      for (let i = 0; i < 4; i++) {
+        const rand = Math.random();
+        let cumulative = 0;
+        let selectedTier = 1;
+
+        for (let t = 0; t < weights.length; t++) {
+          cumulative += weights[t];
+          if (rand <= cumulative) {
+            selectedTier = t + 1;
+            break;
+          }
+        }
+
+        const tierChars = CHARACTERS_DATABASE.filter(c => c.tier === selectedTier);
+        const chosen = tierChars[Math.floor(Math.random() * tierChars.length)];
+        pool.push(chosen);
+      }
+
+      gameState.draftPool = pool;
+      renderShopUI();
+    }
+
+    function renderShopUI() {
+      const container = document.getElementById('shop-cards-row');
+      if (!container) return;
+      container.innerHTML = '';
+
+      gameState.draftPool.forEach((charDef, idx) => {
+        const card = document.createElement('div');
+        const canAfford = gameState.playerGold >= charDef.cost;
+        card.className = `shop-card tier-${charDef.tier} ${canAfford ? '' : 'disabled'}`;
+        card.onclick = () => buyCharacterFromShop(idx);
+
+        card.innerHTML = `
+          <div class="shop-card-emoji">${charDef.emoji}</div>
+          <div class="shop-card-name">${charDef.name}</div>
+          <div class="shop-card-stats">❤️${charDef.baseHp} ⚔️${charDef.baseAtk}</div>
+          <div class="shop-card-cost"><span>🪙</span><span>${charDef.cost} Gold</span></div>
+        `;
+        container.appendChild(card);
+      });
+
+      const countEl = document.getElementById('minimized-card-count');
+      if (countEl) countEl.innerText = gameState.draftPool.length;
+    }
+
+    function buyCharacterFromShop(cardIndex) {
+      if (gameState.phase === 'combat') return;
+      const charDef = gameState.draftPool[cardIndex];
+      if (!charDef) return;
+
+      if (gameState.playerGold < charDef.cost) {
+        showToast('Not enough Gold! 🪙');
+        return;
+      }
+
+      // Check for free slot on player bench (row 8, cols 0..7)
+      const occupiedBenchCols = gameState.playerUnits
+        .filter(u => u.row === 8 && !u.isDead)
+        .map(u => u.col);
+
+      let targetCol = -1;
+      for (let c = 0; c < GRID_COLS; c++) {
+        if (!occupiedBenchCols.includes(c)) {
+          targetCol = c;
+          break;
+        }
+      }
+
+      if (targetCol === -1) {
+        showToast('Bench Full! Deploy units onto attack rows.');
+        return;
+      }
+
+      gameState.playerGold -= charDef.cost;
+      playAudio('buy');
+
+      // Create new unit onto bench
+      const unit = create3DUnit(charDef, 1, false, 8, targetCol);
+      gameState.playerUnits.push(unit);
+
+      // Remove card from draft pool
+      gameState.draftPool.splice(cardIndex, 1);
+      updateHUD();
+      renderShopUI();
+
+      // Check Match-3 auto combine
+      checkAndApplyMatch3Upgrades(false);
+    }
+
+    function rerollShop() {
+      if (gameState.playerGold < 2) {
+        showToast('Reroll costs 2 Gold!');
+        return;
+      }
+      gameState.playerGold -= 2;
+      playAudio('click');
+      generateDraftPool();
+      updateHUD();
+    }
+
+    function enemyAiDraftAndDeploy() {
+      // AI buys suitable units with its gold
+      while (gameState.enemyGold >= 1) {
+        const affordable = CHARACTERS_DATABASE.filter(c => c.cost <= gameState.enemyGold);
+        if (affordable.length === 0) break;
+        const charDef = affordable[Math.floor(Math.random() * affordable.length)];
+
+        // Place on enemy board rows 1-3
+        const occupied = gameState.enemyUnits.filter(u => !u.isDead).map(u => `${u.row},${u.col}`);
+        let placed = false;
+
+        for (let r = 1; r <= 3; r++) {
+          for (let c = 0; c < GRID_COLS; c++) {
+            if (!occupied.includes(`${r},${c}`)) {
+              const u = create3DUnit(charDef, 1, true, r, c);
+              gameState.enemyUnits.push(u);
+              gameState.enemyGold -= charDef.cost;
+              placed = true;
+              break;
+            }
+          }
+          if (placed) break;
+        }
+        if (!placed) break;
+      }
+
+      checkAndApplyMatch3Upgrades(true);
+    }
+
+    // =========================================================================
+    // COMBAT SIMULATION ENGINE
+    // =========================================================================
+    function startCombatPhase() {
+      if (gameState.phase === 'combat') return;
+
+      // Auto-deploy at least 1 unit if player forgot
+      const activePlayerUnits = gameState.playerUnits.filter(u => !u.isDead && u.row >= 4 && u.row <= 7);
+      if (activePlayerUnits.length === 0) {
+        const benchUnits = gameState.playerUnits.filter(u => !u.isDead && u.row === 8);
+        if (benchUnits.length > 0) {
+          benchUnits[0].row = 7;
+          benchUnits[0].mesh.position.copy(getTileWorldPosition(7, benchUnits[0].col));
+        }
+      }
+
+      gameState.phase = 'combat';
+      updateHUD();
+      showToast('⚔️ BATTLE COMMENCED! ⚔️');
+
+      // Minimize shop during combat for full view
+      toggleDraftShop(false);
+    }
+
+    function updateCombatSimulation(dt, time) {
+      if (gameState.phase !== 'combat') return;
+
+      const livingPlayer = gameState.playerUnits.filter(u => !u.isDead);
+      const livingEnemy = gameState.enemyUnits.filter(u => !u.isDead);
+
+      // Check Victory / Defeat condition
+      if (livingEnemy.length === 0 || livingPlayer.length === 0) {
+        resolveCombatOutcome(livingEnemy.length === 0 && livingPlayer.length > 0);
+        return;
+      }
+
+      // Simulate Player Units
+      livingPlayer.forEach(unit => {
+        simulateUnitCombat(unit, livingEnemy, dt, time);
+      });
+
+      // Simulate Enemy Units
+      livingEnemy.forEach(unit => {
+        simulateUnitCombat(unit, livingPlayer, dt, time);
+      });
+    }
+
+    function simulateUnitCombat(unit, opponentList, dt, time) {
+      if (unit.isDead) return;
+
+      // Find nearest living enemy using THREE.Vector3.distanceTo()
+      let nearestFoe = null;
+      let minDistance = Infinity;
+
+      opponentList.forEach(foe => {
+        if (foe.isDead) return;
+        const dist = unit.mesh.position.distanceTo(foe.mesh.position);
+        if (dist < minDistance) {
+          minDistance = dist;
+          nearestFoe = foe;
+        }
+      });
+
+      if (!nearestFoe) return;
+      unit.targetUnit = nearestFoe;
+
+      const attackRangeWorld = unit.attackRange * TILE_SIZE;
+
+      if (minDistance > attackRangeWorld) {
+        // Move toward enemy
+        const moveDir = new THREE.Vector3()
+          .subVectors(nearestFoe.mesh.position, unit.mesh.position)
+          .normalize();
+
+        const moveSpeed = 3.5;
+        unit.mesh.position.addScaledVector(moveDir, moveSpeed * dt);
+        unit.mesh.position.y = 0.25;
+
+        // Face movement direction
+        unit.modelContainer.lookAt(nearestFoe.mesh.position.x, unit.modelContainer.position.y, nearestFoe.mesh.position.z);
+      } else {
+        // In attack range: auto-attack or cast power ability
+        if (time - unit.lastAttackTime >= unit.attackSpeed) {
+          unit.lastAttackTime = time;
+
+          if (unit.mana >= unit.maxMana) {
+            // CAST POWER ABILITY!
+            castUnitPowerAbility(unit, opponentList);
+          } else {
+            // AUTO ATTACK
+            performUnitAutoAttack(unit, nearestFoe);
+          }
+        }
+      }
+    }
+
+    function performUnitAutoAttack(unit, target) {
+      playAudio('attack');
+      unit.animState.attackLunge = 1.0;
+
+      // Damage calculation with defense mitigation
+      const defFactor = 1 - (target.defense / 100);
+      const damage = Math.round(unit.attackDamage * defFactor);
+      target.currentHp = Math.max(0, target.currentHp - damage);
+
+      // Charge Mana
+      unit.mana = Math.min(unit.maxMana, unit.mana + 35);
+      target.mana = Math.min(target.maxMana, target.mana + 20);
+
+      updateUnitHpBar(unit);
+      updateUnitHpBar(target);
+
+      // Spawn 3D hit spark & damage text
+      spawnDamageText(target.mesh.position, `-${damage}`, unit.isEnemy ? '#ef4444' : '#38bdf8');
+      spawnSpellParticleWave(unit.mesh.position, target.mesh.position, unit.isEnemy ? 0xef4444 : 0x38bdf8);
+
+      if (target.currentHp <= 0) {
+        target.isDead = true;
+        scene.remove(target.mesh);
+      }
+    }
+
+    function castUnitPowerAbility(unit, opponentList) {
+      unit.mana = 0;
+      unit.animState.spellCastGlow = 1.0;
+      playAudio('ability');
+
+      const ability = unit.ability;
+      showToast(`✨ ${unit.name} cast ${ability.name}! ✨`);
+
+      if (ability.type === 'heal') {
+        const allyList = unit.isEnemy ? gameState.enemyUnits : gameState.playerUnits;
+        const lowestAlly = allyList
+          .filter(a => !a.isDead)
+          .sort((a, b) => (a.currentHp / a.maxHp) - (b.currentHp / b.maxHp))[0];
+
+        if (lowestAlly) {
+          lowestAlly.currentHp = Math.min(lowestAlly.maxHp, lowestAlly.currentHp + ability.power);
+          updateUnitHpBar(lowestAlly);
+          spawnDamageText(lowestAlly.mesh.position, `+${ability.power} HP`, '#10b981');
+          spawnSpellParticleWave(unit.mesh.position, lowestAlly.mesh.position, 0x10b981);
+        }
+      } else {
+        // AoE / Target Damage Spell
+        const targets = opponentList.filter(o => !o.isDead).slice(0, 3);
+        targets.forEach(t => {
+          const dmg = ability.power;
+          t.currentHp = Math.max(0, t.currentHp - dmg);
+          updateUnitHpBar(t);
+          spawnDamageText(t.mesh.position, `💥 ${dmg}!`, '#fbbf24');
+          spawnSpellParticleWave(unit.mesh.position, t.mesh.position, 0xf59e0b);
+
+          if (t.currentHp <= 0) {
+            t.isDead = true;
+            scene.remove(t.mesh);
+          }
+        });
+      }
+
+      updateUnitHpBar(unit);
+    }
+
+    function resolveCombatOutcome(playerWon) {
+      gameState.phase = 'round_end';
+
+      if (playerWon) {
+        gameState.wins++;
+        gameState.enemyHp = Math.max(0, gameState.enemyHp - 1);
+        gameState.playerGold += 6; // WIN: 6 GOLD
+        gameState.enemyGold += 2;
+        playAudio('victory');
+        showToast('🎉 VICTORY! +6 GOLD ACCUMULATED 🎉');
+      } else {
+        gameState.losses++;
+        gameState.playerHp = Math.max(0, gameState.playerHp - 1);
+        gameState.playerGold += 2; // LOSS: 2 GOLD
+        gameState.enemyGold += 6;
+        playAudio('defeat');
+        showToast('💀 DEFEAT! +2 GOLD EARNED 💀');
+      }
+
+      // PERSIST WINS AS HIGH SCORE TO DATABASE IMMEDIATELY
+      saveWinsToDatabase();
+
+      updateHUD();
+
+      // Check Game Over Match Finale
+      if (gameState.playerHp <= 0 || gameState.enemyHp <= 0) {
+        setTimeout(showGameOverModal, 1500);
+        return;
+      }
+
+      // Transition to next round prep after short victory parade
+      setTimeout(() => {
+        prepareNextRound();
+      }, 2500);
+    }
+
+    function prepareNextRound() {
+      gameState.round++;
+      gameState.phase = 'draft';
+      gameState.prepTimeLeft = 25;
+
+      // Reset all surviving units back to their original row placement & restore HP
+      gameState.playerUnits.forEach(u => {
+        u.isDead = false;
+        u.currentHp = u.maxHp;
+        u.mana = 0;
+        if (!scene.children.includes(u.mesh)) scene.add(u.mesh);
+        u.mesh.position.copy(getTileWorldPosition(u.row, u.col));
+        updateUnitHpBar(u);
+      });
+
+      gameState.enemyUnits.forEach(u => {
+        u.isDead = false;
+        u.currentHp = u.maxHp;
+        u.mana = 0;
+        if (!scene.children.includes(u.mesh)) scene.add(u.mesh);
+        u.mesh.position.copy(getTileWorldPosition(u.row, u.col));
+        updateUnitHpBar(u);
+      });
+
+      // Draft fresh pool
+      generateDraftPool();
+      enemyAiDraftAndDeploy();
+      toggleDraftShop(true); // Open draft shop
+      updateHUD();
+    }
+
+    // =========================================================================
+    // DATABASE HIGH SCORE SYNC (WINS AS HIGH SCORE)
+    // =========================================================================
+    function saveWinsToDatabase() {
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({
+            type: 'FIRESTORM_SAVE_SCORE',
+            gameId: 'emoji-tactics',
+            score: gameState.wins,
+            details: `${gameState.wins} Victories (Round ${gameState.round})`
+          }, '*');
+        }
+      } catch (e) {
+        console.warn('Parent save error:', e);
+      }
+    }
+
+    // =========================================================================
+    // 3D CAMERA ORBIT & POINTER CONTROLS
+    // =========================================================================
+    function updateCameraOrbit() {
+      cameraOrbit.phi = Math.max(0.15, Math.min(Math.PI / 2.05, cameraOrbit.phi));
+      cameraOrbit.radius = Math.max(16, Math.min(75, cameraOrbit.radius));
+
+      const x = cameraOrbit.radius * Math.sin(cameraOrbit.phi) * Math.cos(cameraOrbit.theta);
+      const y = cameraOrbit.radius * Math.cos(cameraOrbit.phi);
+      const z = cameraOrbit.radius * Math.sin(cameraOrbit.phi) * Math.sin(cameraOrbit.theta);
+
+      camera.position.set(x, y, z);
+      camera.lookAt(cameraOrbit.target);
+    }
+
+    window.rotateCamera = function(dTheta) {
+      cameraOrbit.theta += dTheta;
+      updateCameraOrbit();
+    };
+
+    window.pitchCamera = function(dPhi) {
+      cameraOrbit.phi += dPhi;
+      updateCameraOrbit();
+    };
+
+    window.zoomCamera = function(dRadius) {
+      cameraOrbit.radius += dRadius;
+      updateCameraOrbit();
+    };
+
+    window.resetCameraView = function() {
+      cameraOrbit.radius = 38;
+      cameraOrbit.theta = Math.PI / 2;
+      cameraOrbit.phi = Math.PI / 3.2;
+      updateCameraOrbit();
+    };
+
+    // Mouse & Touch Orbit Drag Listeners
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    container.addEventListener('mousedown', (e) => {
+      cameraOrbit.isDragging = true;
+      cameraOrbit.prevMouseX = e.clientX;
+      cameraOrbit.prevMouseY = e.clientY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (cameraOrbit.isDragging) {
+        const dx = e.clientX - cameraOrbit.prevMouseX;
+        const dy = e.clientY - cameraOrbit.prevMouseY;
+
+        cameraOrbit.theta -= dx * 0.006;
+        cameraOrbit.phi -= dy * 0.006;
+        updateCameraOrbit();
+
+        cameraOrbit.prevMouseX = e.clientX;
+        cameraOrbit.prevMouseY = e.clientY;
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (cameraOrbit.isDragging) {
+        cameraOrbit.isDragging = false;
+      }
+    });
+
+    // Touch orbit drag
+    container.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        cameraOrbit.isDragging = true;
+        cameraOrbit.prevMouseX = e.touches[0].clientX;
+        cameraOrbit.prevMouseY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    container.addEventListener('touchmove', (e) => {
+      if (cameraOrbit.isDragging && e.touches.length === 1) {
+        const dx = e.touches[0].clientX - cameraOrbit.prevMouseX;
+        const dy = e.touches[0].clientY - cameraOrbit.prevMouseY;
+
+        cameraOrbit.theta -= dx * 0.008;
+        cameraOrbit.phi -= dy * 0.008;
+        updateCameraOrbit();
+
+        cameraOrbit.prevMouseX = e.touches[0].clientX;
+        cameraOrbit.prevMouseY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    container.addEventListener('touchend', () => {
+      cameraOrbit.isDragging = false;
+    });
+
+    // Wheel Zoom
+    container.addEventListener('wheel', (e) => {
+      cameraOrbit.radius += e.deltaY * 0.025;
+      updateCameraOrbit();
+    }, { passive: true });
+
+    // =========================================================================
+    // RAYCASTER UNIT INSPECTION & CLICK TO OPEN CLOSABLE INFO WINDOW
+    // =========================================================================
+    container.addEventListener('click', (e) => {
+      const rect = container.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+
+      // Check unit meshes first
+      const allUnits = [...gameState.playerUnits, ...gameState.enemyUnits].filter(u => !u.isDead);
+      const unitMeshes = allUnits.map(u => u.mesh);
+
+      const intersects = raycaster.intersectObjects(unitMeshes, true);
+      if (intersects.length > 0) {
+        let clickedObj = intersects[0].object;
+        while (clickedObj.parent && !unitMeshes.includes(clickedObj)) {
+          clickedObj = clickedObj.parent;
+        }
+
+        const foundUnit = allUnits.find(u => u.mesh === clickedObj);
+        if (foundUnit) {
+          openUnitInspector(foundUnit);
+          return;
+        }
+      }
+
+      // Check InstancedMesh Board tile clicks
+      const boardIntersects = raycaster.intersectObject(instancedBoardMesh);
+      if (boardIntersects.length > 0) {
+        const instanceId = boardIntersects[0].instanceId;
+        const tileMeta = tileMetadata[instanceId];
+        if (tileMeta && gameState.selectedUnit) {
+          moveSelectedUnitToTile(tileMeta.row, tileMeta.col);
+        }
+      }
+    });
+
+    function openUnitInspector(unit) {
+      gameState.inspectedUnit = unit;
+      const card = document.getElementById('unit-info-card');
+      if (!card) return;
+
+      document.getElementById('inspector-avatar').innerText = unit.emoji;
+      document.getElementById('inspector-name').innerText = unit.name;
+      document.getElementById('inspector-stars').innerText = `${'★'.repeat(unit.starLevel)}${'☆'.repeat(5 - unit.starLevel)} (Tier ${unit.tier})`;
+      document.getElementById('inspector-hp').innerText = `${unit.currentHp}/${unit.maxHp}`;
+      document.getElementById('inspector-atk').innerText = `${unit.attackDamage}`;
+      document.getElementById('inspector-spd').innerText = `${unit.attackSpeed}s`;
+      document.getElementById('inspector-rng').innerText = `${unit.attackRange} Tiles`;
+      document.getElementById('inspector-def').innerText = `${unit.defense}%`;
+      document.getElementById('inspector-pwr').innerText = `Level ${unit.starLevel}`;
+
+      document.getElementById('inspector-ability-name').innerText = unit.ability.name;
+      document.getElementById('inspector-ability-desc').innerText = unit.ability.desc;
+
+      const sellBtn = document.getElementById('inspector-sell-btn');
+      const sellGoldSpan = document.getElementById('inspector-sell-gold');
+      if (sellBtn && sellGoldSpan) {
+        if (!unit.isEnemy && gameState.phase !== 'combat') {
+          sellBtn.style.display = 'block';
+          sellGoldSpan.innerText = unit.cost * unit.starLevel;
+        } else {
+          sellBtn.style.display = 'none';
+        }
+      }
+
+      card.style.display = 'block';
+      playAudio('click');
+    }
+
+    window.closeUnitInspector = function() {
+      const card = document.getElementById('unit-info-card');
+      if (card) card.style.display = 'none';
+      gameState.inspectedUnit = null;
+    };
+
+    window.sellInspectedUnit = function() {
+      const unit = gameState.inspectedUnit;
+      if (!unit || unit.isEnemy || gameState.phase === 'combat') return;
+
+      const sellValue = unit.cost * unit.starLevel;
+      gameState.playerGold += sellValue;
+      scene.remove(unit.mesh);
+
+      const idx = gameState.playerUnits.indexOf(unit);
+      if (idx !== -1) gameState.playerUnits.splice(idx, 1);
+
+      playAudio('buy');
+      showToast(`Sold ${unit.name} for +${sellValue} Gold!`);
+      closeUnitInspector();
+      updateHUD();
+    };
+
+    function moveSelectedUnitToTile(targetRow, targetCol) {
+      const unit = gameState.selectedUnit;
+      if (!unit || unit.isEnemy || gameState.phase === 'combat') return;
+
+      // Restrict player placement to attack rows (5-7) or bench (8)
+      if (targetRow < 4) {
+        showToast('Cannot deploy onto enemy territory!');
+        return;
+      }
+
+      // Check tile occupancy
+      const occupied = gameState.playerUnits.find(u => u !== unit && u.row === targetRow && u.col === targetCol && !u.isDead);
+      if (occupied) {
+        // Swap positions
+        occupied.row = unit.row;
+        occupied.col = unit.col;
+        occupied.mesh.position.copy(getTileWorldPosition(occupied.row, occupied.col));
+      }
+
+      unit.row = targetRow;
+      unit.col = targetCol;
+      unit.mesh.position.copy(getTileWorldPosition(targetRow, targetCol));
+      gameState.selectedUnit = null;
+      playAudio('click');
+    }
+
+    // =========================================================================
+    // UI MINIMIZE / EXPAND TOGGLE & HUD HELPERS
+    // =========================================================================
+    window.toggleDraftShop = function(expand) {
+      const container = document.getElementById('draft-shop-container');
+      const minBar = document.getElementById('minimized-shop-bar');
+      if (!container || !minBar) return;
+
+      gameState.isShopMinimized = !expand;
+      if (expand) {
+        container.classList.remove('minimized');
+        minBar.style.display = 'none';
+      } else {
+        container.classList.add('minimized');
+        minBar.style.display = 'flex';
+      }
+    };
+
+    window.rerollShop = rerollShop;
+    window.triggerCombatPhase = startCombatPhase;
+
+    function updateHUD() {
+      // Player HP & Gold & Wins
+      const pBar = document.getElementById('player-hp-bar');
+      const pText = document.getElementById('player-hp-text');
+      const pGold = document.getElementById('player-gold-text');
+      const pWins = document.getElementById('player-wins-text');
+
+      if (pBar) pBar.style.width = `${Math.max(0, (gameState.playerHp / 10) * 100)}%`;
+      if (pText) pText.innerText = `${gameState.playerHp}/10`;
+      if (pGold) pGold.innerText = `${gameState.playerGold} Gold`;
+      if (pWins) pWins.innerText = `${gameState.wins} Wins`;
+
+      // Enemy HP & Gold
+      const eBar = document.getElementById('enemy-hp-bar');
+      const eText = document.getElementById('enemy-hp-text');
+      const eGold = document.getElementById('enemy-gold-text');
+
+      if (eBar) eBar.style.width = `${Math.max(0, (gameState.enemyHp / 10) * 100)}%`;
+      if (eText) eText.innerText = `${gameState.enemyHp}/10`;
+      if (eGold) eGold.innerText = `${gameState.enemyGold}`;
+
+      // Round & Phase
+      const rText = document.getElementById('round-text');
+      const phaseBadge = document.getElementById('phase-badge');
+      if (rText) rText.innerText = `ROUND ${gameState.round}`;
+      if (phaseBadge) {
+        if (gameState.phase === 'combat') {
+          phaseBadge.className = 'phase-badge phase-combat';
+          phaseBadge.innerText = '⚔️ COMBAT IN PROGRESS';
+        } else {
+          phaseBadge.className = 'phase-badge phase-draft';
+          phaseBadge.innerText = 'DRAFT & PREP';
+        }
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('upgrade-toast');
+      if (!toast) return;
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2200);
+    }
+
+    window.toggleHelpModal = function() {
+      const modal = document.getElementById('help-modal');
+      if (modal) {
+        modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+      }
+    };
+
+    function showGameOverModal() {
+      const modal = document.getElementById('game-over-modal');
+      const title = document.getElementById('game-over-title');
+      const desc = document.getElementById('game-over-desc');
+      const stats = document.getElementById('game-over-stats');
+      if (!modal) return;
+
+      const isWin = gameState.playerHp > 0;
+      title.innerText = isWin ? '🏆 VICTORY CHAMPION! 🏆' : '💀 MATCH DEFEAT 💀';
+      title.style.color = isWin ? '#fbbf24' : '#ef4444';
+      desc.innerText = isWin
+        ? `You triumphed over the Rival AI Commander with ${gameState.wins} total victories!`
+        : `The Rival AI broke your defenses on Round ${gameState.round}. Train your squad and strike again!`;
+
+      stats.innerHTML = `
+        <div>🏆 <strong>Total Victories:</strong> ${gameState.wins} Wins</div>
+        <div>💀 <strong>Defeats:</strong> ${gameState.losses}</div>
+        <div>🪙 <strong>Final Gold Accumulated:</strong> ${gameState.playerGold}</div>
+        <div>⭐ <strong>Highest Star Units:</strong> ★${Math.max(...gameState.playerUnits.map(u => u.starLevel), 1)}</div>
+      `;
+
+      modal.style.display = 'flex';
+    }
+
+    window.resetGame = function() {
+      window.location.reload();
+    };
+
+    // =========================================================================
+    // GAME LOOP & ANIMATION
+    // =========================================================================
+    let lastTimestamp = performance.now();
+
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const dt = Math.min((now - lastTimestamp) / 1000, 0.1);
+      lastTimestamp = now;
+      const time = now / 1000;
+
+      // Update Combat Simulator
+      updateCombatSimulation(dt, time);
+
+      // Animate Unit 3D Low-Poly Models (Breathing bobbing, spell orbs, lunges)
+      const allUnits = [...gameState.playerUnits, ...gameState.enemyUnits];
+      allUnits.forEach(u => {
+        if (u.isDead || !u.modelContainer) return;
+
+        // Idle floating / bobbing
+        const idleSin = Math.sin(time * 3 + u.animState.idleOffset) * 0.08;
+        u.modelContainer.position.y = idleSin;
+
+        // Animate orbiting spell orbs for mages
+        for (let i = 0; i < 3; i++) {
+          const orb = u.modelContainer.getObjectByName(`spellOrb_${i}`);
+          if (orb) {
+            const angle = time * 2.5 + (i / 3) * Math.PI * 2;
+            orb.position.x = Math.cos(angle) * 0.75;
+            orb.position.z = Math.sin(angle) * 0.75;
+          }
+        }
+
+        // Attack Lunge recovery
+        if (u.animState.attackLunge > 0) {
+          u.animState.attackLunge = Math.max(0, u.animState.attackLunge - dt * 4);
+          u.modelContainer.position.z = Math.sin(u.animState.attackLunge * Math.PI) * 0.4 * (u.isEnemy ? -1 : 1);
+        }
+      });
+
+      // Update visual particle effects
+      for (let i = gameState.visualEffects.length - 1; i >= 0; i--) {
+        const p = gameState.visualEffects[i];
+        p.age += dt;
+        p.mesh.position.addScaledVector(p.velocity, dt);
+        p.mesh.scale.setScalar(Math.max(0.01, 1 - p.age / p.lifetime));
+
+        if (p.age >= p.lifetime) {
+          scene.remove(p.mesh);
+          gameState.visualEffects.splice(i, 1);
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // Window Resize Handler
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // =========================================================================
+    // INITIALIZATION
+    // =========================================================================
+    function initGame() {
+      // Create starting unit on player bench
+      const starterChar = CHARACTERS_DATABASE[0]; // Berserk Boar
+      const starterUnit = create3DUnit(starterChar, 1, false, 8, 3);
+      gameState.playerUnits.push(starterUnit);
+
+      // Create starting enemy unit on enemy bench
+      const enemyStarter = CHARACTERS_DATABASE[1]; // Flora Fairy
+      const enemyUnit = create3DUnit(enemyStarter, 1, true, 0, 4);
+      gameState.enemyUnits.push(enemyUnit);
+
+      generateDraftPool();
+      updateHUD();
+      requestAnimationFrame(animate);
+
+      // Save initial score
+      saveWinsToDatabase();
+    }
+
+    initGame();
+  </script>
+</body>
+</html>

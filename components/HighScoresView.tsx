@@ -28,7 +28,7 @@ interface HighScoresViewProps {
   playTacticalSound: (type: 'click' | 'menu' | 'launch' | 'switch' | 'success' | 'alert') => void;
 }
 
-type GameFilter = 'all' | 'rpg-game' | 'block-drop' | 'code-pressed' | 'slots-up';
+type GameFilter = 'all' | 'emoji-tactics' | 'rpg-game' | 'block-drop' | 'code-pressed' | 'slots-up';
 
 export default function HighScoresView({
   currentUser,
@@ -43,11 +43,11 @@ export default function HighScoresView({
     }
     return [];
   });
-  const [personalBests, setPersonalBests] = useState<{ codePressed: number; slotsUp: number; blockDrop: number; rpgGame: number }>(() => {
+  const [personalBests, setPersonalBests] = useState<{ codePressed: number; slotsUp: number; blockDrop: number; rpgGame: number; emojiTactics: number }>(() => {
     if (typeof window !== 'undefined' && currentUser) {
       return getUserPersonalBests(currentUser.id);
     }
-    return { codePressed: 0, slotsUp: 0, blockDrop: 0, rpgGame: 0 };
+    return { codePressed: 0, slotsUp: 0, blockDrop: 0, rpgGame: 0, emojiTactics: 0 };
   });
 
   const loadData = React.useCallback(() => {
@@ -68,6 +68,7 @@ export default function HighScoresView({
   const filteredScores = useMemo(() => {
     const list = scores
       .filter((s) => {
+        if (selectedFilter === 'emoji-tactics' && s.gameId !== 'emoji-tactics') return false;
         if (selectedFilter === 'rpg-game' && s.gameId !== 'rpg-game') return false;
         if (selectedFilter === 'block-drop' && s.gameId !== 'block-drop') return false;
         if (selectedFilter === 'code-pressed' && s.gameId !== 'code-pressed') return false;
@@ -148,6 +149,10 @@ export default function HighScoresView({
             <div>
               <div className="text-xs font-bold uppercase text-slate-400">Personal Bests</div>
               <div className="flex flex-wrap items-center gap-2.5 mt-1 text-xs font-semibold">
+                <span className="text-violet-400 flex items-center gap-1">
+                  <Crown className="w-3.5 h-3.5" /> {personalBests.emojiTactics || 0} Wins
+                </span>
+                <span className="text-slate-600">&bull;</span>
                 <span className="text-amber-400 flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5" /> {personalBests.rpgGame} pts
                 </span>
@@ -208,7 +213,7 @@ export default function HighScoresView({
                     <span className="text-xs font-bold uppercase tracking-wider">{medalText}</span>
                   </div>
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-900/80 border border-slate-700 text-slate-300">
-                    {item.gameId === 'rpg-game' ? '3D Action RPG' : item.gameId === 'block-drop' ? 'Block Drop' : item.gameId === 'code-pressed' ? 'Reaction' : 'Supply'}
+                    {item.gameId === 'emoji-tactics' ? 'Emoji Tactics' : item.gameId === 'rpg-game' ? '3D Action RPG' : item.gameId === 'block-drop' ? 'Block Drop' : item.gameId === 'code-pressed' ? 'Reaction' : 'Supply'}
                   </span>
                 </div>
 
@@ -268,6 +273,23 @@ export default function HighScoresView({
             }`}
           >
             All Games
+          </button>
+
+          <button
+            id="filter-emoji-tactics-btn"
+            type="button"
+            onClick={() => {
+              setSelectedFilter('emoji-tactics');
+              playTacticalSound('switch');
+            }}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              selectedFilter === 'emoji-tactics'
+                ? 'bg-violet-600 text-white shadow-md'
+                : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-750'
+            }`}
+          >
+            <Crown className="w-3.5 h-3.5 text-violet-400" />
+            <span>Emoji Tactics 3D</span>
           </button>
 
           <button
@@ -428,7 +450,9 @@ export default function HighScoresView({
                       {/* Game Name */}
                       <td className="py-3.5 px-4">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 border border-slate-700 text-slate-200">
-                          {item.gameId === 'rpg-game' ? (
+                          {item.gameId === 'emoji-tactics' ? (
+                            <Crown className="w-3.5 h-3.5 text-violet-400" />
+                          ) : item.gameId === 'rpg-game' ? (
                             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                           ) : item.gameId === 'block-drop' ? (
                             <Boxes className="w-3.5 h-3.5 text-cyan-400" />
@@ -443,7 +467,9 @@ export default function HighScoresView({
 
                       {/* Score */}
                       <td className="py-3.5 px-4 font-bold text-white text-sm">
-                        <span className="text-blue-400">{item.score.toLocaleString()}</span>
+                        <span className={item.gameId === 'emoji-tactics' ? 'text-violet-400' : 'text-blue-400'}>
+                          {item.score.toLocaleString()} {item.gameId === 'emoji-tactics' ? 'Wins' : ''}
+                        </span>
                       </td>
 
                       {/* Details */}
