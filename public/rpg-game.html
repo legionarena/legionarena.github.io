@@ -548,6 +548,155 @@
     .text-emerald { color: #34d399; }
     .text-amber { color: #f59e0b; }
     .text-red { color: #ef4444; }
+    .text-cyan { color: #38bdf8; }
+    .text-purple { color: #c084fc; }
+
+    /* PERFORMANCE & THREE.INSTANCEDMESH METRICS HUD */
+    .perf-metrics-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 7px 9px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      width: 100%;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .perf-metrics-card:hover {
+      border-color: rgba(56, 189, 248, 0.6);
+    }
+    .perf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .perf-header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .perf-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+    }
+    .perf-title {
+      font-size: 10px;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 0.3px;
+    }
+    .perf-fps-badge {
+      font-family: monospace;
+      font-size: 10px;
+      font-weight: 800;
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    .perf-toggle-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 9px;
+      cursor: pointer;
+      padding: 1px 3px;
+    }
+    .perf-body {
+      margin-top: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .perf-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+    }
+    .perf-stat-item {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
+      padding: 3px 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      text-align: left;
+    }
+    .perf-stat-label {
+      font-size: 8.5px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+    .perf-stat-val {
+      font-family: monospace;
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+    .perf-colorizer-section {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 5px;
+      padding: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      text-align: left;
+    }
+    .perf-colorizer-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 8.5px;
+      color: #94a3b8;
+    }
+    .perf-colorizer-status {
+      color: #38bdf8;
+      font-weight: 700;
+      font-family: monospace;
+    }
+    .perf-color-palette {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+    .perf-color-btn {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: transform 0.12s;
+    }
+    .perf-color-btn:hover {
+      transform: scale(1.25);
+      border-color: #fff;
+    }
+    .perf-action-btn {
+      font-size: 8.5px;
+      font-weight: 700;
+      background: rgba(37, 99, 235, 0.3);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #93c5fd;
+      border-radius: 3px;
+      padding: 1px 5px;
+      cursor: pointer;
+    }
+    .perf-action-btn:hover {
+      background: #2563eb;
+      color: #fff;
+    }
 
     /* TARGET CARD */
     .target-card {
@@ -974,6 +1123,56 @@
           </div>
           <div class="slain-loot-list" id="slain-loot-list">
             <div class="slain-empty-hint">Defeat enemies to log combat drops</div>
+          </div>
+        </div>
+
+        <!-- Performance & THREE.InstancedMesh Metrics HUD (Small Area) -->
+        <div class="perf-metrics-card hud-interactive" id="perf-metrics-card">
+          <div class="perf-header" onclick="togglePerfDetails()">
+            <div class="perf-header-left">
+              <span class="perf-dot"></span>
+              <span class="perf-title">GPU &amp; Instancing Stats</span>
+              <span class="perf-fps-badge" id="perf-fps-badge">60 FPS</span>
+            </div>
+            <div class="perf-header-right">
+              <button class="perf-toggle-btn" id="perf-toggle-btn" title="Toggle detailed stats [P]">▲</button>
+            </div>
+          </div>
+          <div class="perf-body" id="perf-body">
+            <div class="perf-grid">
+              <div class="perf-stat-item">
+                <span class="perf-stat-label">Draw Calls</span>
+                <span class="perf-stat-val text-emerald" id="perf-draw-calls">--</span>
+              </div>
+              <div class="perf-stat-item">
+                <span class="perf-stat-label">Polygons (Triangles)</span>
+                <span class="perf-stat-val text-cyan" id="perf-poly-count">--</span>
+              </div>
+              <div class="perf-stat-item">
+                <span class="perf-stat-label">Frame Time (ms)</span>
+                <span class="perf-stat-val text-amber" id="perf-fps-ms">--</span>
+              </div>
+              <div class="perf-stat-item">
+                <span class="perf-stat-label">Instanced Meshes</span>
+                <span class="perf-stat-val text-purple" id="perf-instanced-count">--</span>
+              </div>
+            </div>
+            <div class="perf-colorizer-section">
+              <div class="perf-colorizer-title">
+                <span>🎨 <code>instanceColor</code> Target:</span>
+                <span class="perf-colorizer-status" id="perf-colorizer-target">Click object</span>
+              </div>
+              <div class="perf-color-palette">
+                <button class="perf-color-btn" style="background:#ef4444" onclick="applyColorToSelectedInstance('#ef4444')" title="Flame Red"></button>
+                <button class="perf-color-btn" style="background:#f59e0b" onclick="applyColorToSelectedInstance('#f59e0b')" title="Sun Amber"></button>
+                <button class="perf-color-btn" style="background:#10b981" onclick="applyColorToSelectedInstance('#10b981')" title="Emerald Green"></button>
+                <button class="perf-color-btn" style="background:#06b6d4" onclick="applyColorToSelectedInstance('#06b6d4')" title="Frost Cyan"></button>
+                <button class="perf-color-btn" style="background:#8b5cf6" onclick="applyColorToSelectedInstance('#8b5cf6')" title="Arcane Violet"></button>
+                <button class="perf-color-btn" style="background:#ec4899" onclick="applyColorToSelectedInstance('#ec4899')" title="Prismatic Pink"></button>
+                <button class="perf-action-btn" onclick="cycleSelectedInstanceColor()" title="Cycle Selected Instance Color [C]">Cycle [C]</button>
+                <button class="perf-action-btn" onclick="pulseInstancedMeshWave()" title="Pulse Instanced Wave across nearby objects [V]">Wave [V]</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2261,79 +2460,175 @@ const _vScreen = new THREE.Vector3();
     return new THREE.LineSegments(gridGeo, gridMat);
   }
 
-  function createTree(x, z, scale = 1, treeType = 'pine') {
-    const treeGroup = new THREE.Group();
-    treeGroup.position.set(x, 0, z);
+  // =========================================================================
+  // THREE.INSTANCEDMESH REGISTRY & DYNAMIC INSTANCECOLOR MANAGER
+  // =========================================================================
+  const instancedMeshRegistry = []; // Array of { id, name, mesh, count, category }
+  let selectedInstancedTarget = null; // { mesh, instanceId, name, position }
+  let perfDetailedOpen = true;
+  let lastFpsTime = performance.now();
+  let frameCount = 0;
+  let currentFps = 60;
+  let currentFrameTimeMs = 16.6;
 
-    // Tree Trunk
-    const trunkGeo = new THREE.CylinderGeometry(0.35 * scale, 0.65 * scale, 4.2 * scale, 7);
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x452a16, roughness: 0.95 });
-    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-    trunk.position.y = 2.1 * scale;
-    trunk.castShadow = true;
-    trunk.receiveShadow = true;
-    trunk.userData = { obstacleName: `${treeType === 'pine' ? 'Pine' : 'Oak'} Tree`, obstacleType: 'tree' };
-    treeGroup.add(trunk);
+  function registerInstancedMesh(id, name, mesh, category = 'environment') {
+    mesh.name = name;
+    mesh.userData = { id, name, category, isInstanced: true };
+    instancedMeshRegistry.push({ id, name, mesh, count: mesh.count, category });
+    raycastObstacleMeshes.push(mesh);
+  }
 
-    if (treeType === 'pine') {
-      // 3-Tiered Evergreen Pine Cones
-      const pineColors = [0x143d2b, 0x1e563d, 0x2d7a56, 0x3d9e70];
-      for (let t = 0; t < 3; t++) {
-        const coneGeo = new THREE.ConeGeometry((2.7 - t * 0.65) * scale, (3.2 - t * 0.4) * scale, 7);
-        const coneMat = new THREE.MeshStandardMaterial({
-          color: pineColors[t % pineColors.length],
-          roughness: 0.82
-        });
-        const cone = new THREE.Mesh(coneGeo, coneMat);
-        cone.position.y = (3.4 + t * 1.9) * scale;
-        cone.castShadow = true;
-        cone.receiveShadow = true;
-        treeGroup.add(cone);
+  function setInstancedMeshColor(mesh, instanceId, hexOrColor) {
+    if (!mesh || instanceId === undefined || instanceId === null || instanceId < 0 || instanceId >= mesh.count) return;
+    const col = (hexOrColor instanceof THREE.Color) ? hexOrColor : new THREE.Color(hexOrColor);
+    mesh.setColorAt(instanceId, col);
+    if (mesh.instanceColor) {
+      mesh.instanceColor.needsUpdate = true;
+    }
+  }
+
+  function getInstancedMeshColor(mesh, instanceId) {
+    if (!mesh || !mesh.instanceColor || instanceId === undefined || instanceId === null || instanceId < 0 || instanceId >= mesh.count) {
+      return new THREE.Color(0xffffff);
+    }
+    const col = new THREE.Color();
+    mesh.getColorAt(instanceId, col);
+    return col;
+  }
+
+  function getInstancedMeshWorldPosition(mesh, instanceId) {
+    if (!mesh || instanceId === undefined || instanceId < 0 || instanceId >= mesh.count) return null;
+    const mat = new THREE.Matrix4();
+    mesh.getMatrixAt(instanceId, mat);
+    const pos = new THREE.Vector3();
+    const rot = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+    mat.decompose(pos, rot, scale);
+    if (mesh.parent) {
+      pos.applyMatrix4(mesh.parent.matrixWorld);
+    }
+    return pos;
+  }
+
+  function togglePerfDetails() {
+    perfDetailedOpen = !perfDetailedOpen;
+    const bodyEl = document.getElementById('perf-body');
+    const btnEl = document.getElementById('perf-toggle-btn');
+    if (bodyEl) {
+      bodyEl.style.display = perfDetailedOpen ? 'block' : 'none';
+    }
+    if (btnEl) {
+      btnEl.innerText = perfDetailedOpen ? '▲' : '▼';
+    }
+  }
+  window.togglePerfDetails = togglePerfDetails;
+
+  const INSTANCE_COLOR_PALETTE = [
+    '#ef4444', // Flame Red
+    '#f59e0b', // Solar Amber
+    '#10b981', // Emerald Jade
+    '#06b6d4', // Glacial Cyan
+    '#8b5cf6', // Arcane Violet
+    '#ec4899', // Prismatic Rose
+    '#e2e8f0', // Celestial White
+    '#38bdf8'  // Radiant Sky
+  ];
+  let currentPaletteIndex = 0;
+
+  function findNearestInstancedObject() {
+    if (!playerMesh || instancedMeshRegistry.length === 0) return null;
+    let closest = null;
+    let minDist = 9999;
+    const mat = new THREE.Matrix4();
+    const pos = new THREE.Vector3();
+    const rot = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+
+    for (const reg of instancedMeshRegistry) {
+      const mesh = reg.mesh;
+      for (let i = 0; i < mesh.count; i++) {
+        mesh.getMatrixAt(i, mat);
+        mat.decompose(pos, rot, scale);
+        const dist = playerMesh.position.distanceTo(pos);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = { mesh, instanceId: i, name: reg.name, distance: dist, position: pos.clone() };
+        }
       }
-    } else {
-      // Broadleaf Forest Foliage
-      const leafMat1 = new THREE.MeshStandardMaterial({ color: 0x1e563d, roughness: 0.85 });
-      const leafMat2 = new THREE.MeshStandardMaterial({ color: 0x2d7a56, roughness: 0.85 });
-      
-      const b1 = new THREE.Mesh(new THREE.DodecahedronGeometry(2.3 * scale, 1), leafMat1);
-      b1.position.y = 4.8 * scale;
-      b1.castShadow = true;
-      b1.receiveShadow = true;
-      treeGroup.add(b1);
+    }
+    return closest;
+  }
 
-      const b2 = new THREE.Mesh(new THREE.DodecahedronGeometry(1.6 * scale, 1), leafMat2);
-      b2.position.set(0.4 * scale, 6.2 * scale, -0.3 * scale);
-      b2.castShadow = true;
-      treeGroup.add(b2);
+  function applyColorToSelectedInstance(hexColor) {
+    if (!selectedInstancedTarget) {
+      // If no instance currently clicked, apply to nearest instanced object to player
+      const nearest = findNearestInstancedObject();
+      if (nearest) {
+        selectedInstancedTarget = {
+          mesh: nearest.mesh,
+          instanceId: nearest.instanceId,
+          name: nearest.name,
+          position: nearest.position
+        };
+      }
     }
 
-    treeGroup.rotation.y = Math.random() * Math.PI * 2;
-    treeGroup.userData = { obstacleName: `${treeType === 'pine' ? 'Pine Tree' : 'Oak Tree'}`, obstacleType: 'tree', radius: 1.6 * scale };
-    return treeGroup;
+    if (selectedInstancedTarget && selectedInstancedTarget.mesh) {
+      const { mesh, instanceId, name } = selectedInstancedTarget;
+      setInstancedMeshColor(mesh, instanceId, hexColor);
+      playSound('spell');
+
+      const targetLabel = document.getElementById('perf-colorizer-target');
+      if (targetLabel) {
+        targetLabel.innerText = `${name} #${instanceId} (${hexColor})`;
+        targetLabel.style.color = hexColor;
+      }
+
+      const worldPos = getInstancedMeshWorldPosition(mesh, instanceId) || playerMesh.position;
+      showDamageNumber(worldPos.x, worldPos.y + 2.5, worldPos.z, `🎨 ${name} #${instanceId}`, hexColor);
+    }
   }
+  window.applyColorToSelectedInstance = applyColorToSelectedInstance;
 
-  function createRock(x, z, scale = 1) {
-    const rockGroup = new THREE.Group();
-    rockGroup.position.set(x, 0, z);
-
-    const rockMat = new THREE.MeshStandardMaterial({
-      color: 0x475569,
-      roughness: 0.9,
-      metalness: 0.1
-    });
-
-    const rockMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5 * scale, 1), rockMat);
-    rockMesh.position.y = 0.8 * scale;
-    rockMesh.scale.set(1.2, 0.85, 1.0);
-    rockMesh.rotation.set(Math.random() * 0.4, Math.random() * Math.PI, Math.random() * 0.4);
-    rockMesh.castShadow = true;
-    rockMesh.receiveShadow = true;
-    rockMesh.userData = { obstacleName: 'Granite Rock', obstacleType: 'rock' };
-    rockGroup.add(rockMesh);
-
-    rockGroup.userData = { obstacleName: 'Granite Rock', obstacleType: 'rock', radius: 1.5 * scale };
-    return rockGroup;
+  function cycleSelectedInstanceColor() {
+    currentPaletteIndex = (currentPaletteIndex + 1) % INSTANCE_COLOR_PALETTE.length;
+    const nextColor = INSTANCE_COLOR_PALETTE[currentPaletteIndex];
+    applyColorToSelectedInstance(nextColor);
   }
+  window.cycleSelectedInstanceColor = cycleSelectedInstanceColor;
+
+  function pulseInstancedMeshWave() {
+    if (!playerMesh || instancedMeshRegistry.length === 0) return;
+    playSound('launch');
+    const pPos = playerMesh.position;
+    const mat = new THREE.Matrix4();
+    const pos = new THREE.Vector3();
+    const rot = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+
+    let affectedCount = 0;
+    const waveColorHexes = ['#38bdf8', '#818cf8', '#c084fc', '#f472b6', '#fb7185', '#fbbf24', '#34d399'];
+
+    for (const reg of instancedMeshRegistry) {
+      const mesh = reg.mesh;
+      for (let i = 0; i < mesh.count; i++) {
+        mesh.getMatrixAt(i, mat);
+        mat.decompose(pos, rot, scale);
+        const dist = pPos.distanceTo(pos);
+        if (dist < 65) {
+          affectedCount++;
+          const colIdx = Math.floor(dist / 9) % waveColorHexes.length;
+          const chosenCol = waveColorHexes[colIdx];
+          setTimeout(() => {
+            setInstancedMeshColor(mesh, i, chosenCol);
+          }, dist * 12);
+        }
+      }
+    }
+
+    showDamageNumber(pPos.x, pPos.y + 3.2, pPos.z, `✨ INSTANCED WAVE (${affectedCount} MESHES)`, '#38bdf8');
+  }
+  window.pulseInstancedMeshWave = pulseInstancedMeshWave;
 
   // --- STYLIZED CHARACTER GENERATION WITH LIMB RIGGING ---
   function createStylizedPlayerMesh(classType) {
@@ -2874,30 +3169,42 @@ const _vScreen = new THREE.Vector3();
     springPool.position.set(springCenterX, -0.65, RIVER_NORTH_LIMIT);
     scene.add(springPool);
 
-    // Riverbed Rocks (Characters can freely walk through these in the river area)
-    const rockMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
-    for (let r = 0; r < 20; r++) {
-      const rz = riverZStart + (r / 20) * (riverZEnd - riverZStart);
+    // Riverbed Rocks (InstancedMesh - Characters can freely walk through these in the river area)
+    const riverRockCount = 24;
+    const riverRockMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
+    const riverRockGeo = new THREE.DodecahedronGeometry(1.2, 0);
+    const riverRockMesh = new THREE.InstancedMesh(riverRockGeo, riverRockMat, riverRockCount);
+    riverRockMesh.castShadow = true;
+    riverRockMesh.receiveShadow = true;
+    const dummy = new THREE.Object3D();
+
+    for (let r = 0; r < riverRockCount; r++) {
+      const rz = riverZStart + (r / riverRockCount) * (riverZEnd - riverZStart);
       const rx = getRiverCenterX(rz) + (Math.random() - 0.5) * 22;
       const rockScale = 0.8 + Math.random() * 1.4;
-      const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(rockScale, 0), rockMat);
       const ry = getTerrainHeight(rx, rz) + 0.3;
-      rock.position.set(rx, ry, rz);
-      rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
-      rock.castShadow = true;
-      rock.receiveShadow = true;
-      scene.add(rock);
+      dummy.position.set(rx, ry, rz);
+      dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+      dummy.scale.set(rockScale, rockScale, rockScale);
+      dummy.updateMatrix();
+      riverRockMesh.setMatrixAt(r, dummy.matrix);
+      riverRockMesh.setColorAt(r, new THREE.Color(0x475569));
 
       // Register river rock with inRiver: true so characters can walk through it in the river area everywhere
       worldObstacles.push({
-        name: 'River Stone',
+        name: `River Stone #${r}`,
         type: 'rock',
         inRiver: true,
         position: new THREE.Vector3(rx, ry, rz),
-        mesh: rock,
+        instanceId: r,
+        mesh: riverRockMesh,
         radius: rockScale
       });
     }
+    riverRockMesh.instanceMatrix.needsUpdate = true;
+    if (riverRockMesh.instanceColor) riverRockMesh.instanceColor.needsUpdate = true;
+    scene.add(riverRockMesh);
+    registerInstancedMesh('river_rocks', 'River Stone', riverRockMesh, 'river');
 
     // =========================================================================
     // DEDICATED START ZONE: ELEVATED ROUND TEMPLE (SAFE ZONE NO ENEMIES)
@@ -2942,36 +3249,61 @@ const _vScreen = new THREE.Vector3();
     cyanRing.position.y = 1.36;
     templeGroup.add(cyanRing);
 
-    // Classical Temple Circular Colonnade
+    // Classical Temple Circular Colonnade (InstancedMesh)
     const pillarCount = 10;
     const colonnadeRadius = 12.8;
     const pillarHeight = 7.0;
+
+    const templePillarGeo = new THREE.CylinderGeometry(0.48, 0.52, pillarHeight, 16);
+    const templePillarsMesh = new THREE.InstancedMesh(templePillarGeo, marbleMat, pillarCount);
+    templePillarsMesh.castShadow = true;
+    templePillarsMesh.receiveShadow = true;
+
+    const templeCapitalGeo = new THREE.BoxGeometry(1.3, 0.6, 1.3);
+    const templeCapitalsMesh = new THREE.InstancedMesh(templeCapitalGeo, goldMat, pillarCount);
+    templeCapitalsMesh.castShadow = true;
+
+    const templePlinthGeo = new THREE.BoxGeometry(1.2, 0.5, 1.2);
+    const templePlinthsMesh = new THREE.InstancedMesh(templePlinthGeo, darkStoneMat, pillarCount);
+    templePlinthsMesh.castShadow = true;
 
     for (let i = 0; i < pillarCount; i++) {
       const ang = (i / pillarCount) * Math.PI * 2;
       const px = Math.cos(ang) * colonnadeRadius;
       const pz = Math.sin(ang) * colonnadeRadius;
 
-      const pGroup = new THREE.Group();
-      pGroup.position.set(px, 1.35, pz);
+      // Plinth
+      dummy.position.set(px, 1.35 + 0.25, pz);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      templePlinthsMesh.setMatrixAt(i, dummy.matrix);
+      templePlinthsMesh.setColorAt(i, new THREE.Color(0x334155));
 
-      const plinth = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.5, 1.2), darkStoneMat);
-      plinth.position.y = 0.25;
-      plinth.castShadow = true;
-      pGroup.add(plinth);
+      // Shaft
+      dummy.position.set(px, 1.35 + 0.5 + pillarHeight / 2, pz);
+      dummy.updateMatrix();
+      templePillarsMesh.setMatrixAt(i, dummy.matrix);
+      templePillarsMesh.setColorAt(i, new THREE.Color(0xe2e8f0));
 
-      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.52, pillarHeight, 16), marbleMat);
-      shaft.position.y = 0.5 + pillarHeight / 2;
-      shaft.castShadow = true;
-      pGroup.add(shaft);
-
-      const capital = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.6, 1.3), goldMat);
-      capital.position.y = 0.5 + pillarHeight + 0.3;
-      capital.castShadow = true;
-      pGroup.add(capital);
-
-      templeGroup.add(pGroup);
+      // Capital
+      dummy.position.set(px, 1.35 + 0.5 + pillarHeight + 0.3, pz);
+      dummy.updateMatrix();
+      templeCapitalsMesh.setMatrixAt(i, dummy.matrix);
+      templeCapitalsMesh.setColorAt(i, new THREE.Color(0xf59e0b));
     }
+    templePlinthsMesh.instanceMatrix.needsUpdate = true;
+    templePillarsMesh.instanceMatrix.needsUpdate = true;
+    templeCapitalsMesh.instanceMatrix.needsUpdate = true;
+    if (templePlinthsMesh.instanceColor) templePlinthsMesh.instanceColor.needsUpdate = true;
+    if (templePillarsMesh.instanceColor) templePillarsMesh.instanceColor.needsUpdate = true;
+    if (templeCapitalsMesh.instanceColor) templeCapitalsMesh.instanceColor.needsUpdate = true;
+
+    scene.add(templePlinthsMesh);
+    scene.add(templePillarsMesh);
+    scene.add(templeCapitalsMesh);
+    registerInstancedMesh('temple_pillars', 'Temple Pillar', templePillarsMesh, 'temple');
+    registerInstancedMesh('temple_capitals', 'Temple Capital', templeCapitalsMesh, 'temple');
 
     const entablature = new THREE.Mesh(new THREE.TorusGeometry(colonnadeRadius, 0.65, 12, 48), darkStoneMat);
     entablature.rotation.x = Math.PI / 2;
@@ -3055,7 +3387,7 @@ const _vScreen = new THREE.Vector3();
       roughness: 0.9
     });
 
-    // 1. Fort Floor (64x64 single grand hall)
+    // 1. Fort Floor (62x62 single grand hall)
     const fortFloor = new THREE.Mesh(new THREE.BoxGeometry(62, 0.6, 62), fortFloorMat);
     fortFloor.position.y = 0.3;
     fortFloor.receiveShadow = true;
@@ -3107,7 +3439,7 @@ const _vScreen = new THREE.Vector3();
     fSouthRight.castShadow = true;
     fortGroup.add(fSouthRight);
 
-    // Entrance Arch Lintela atop gateway
+    // Entrance Arch Lintel atop gateway
     const fArchLintel = new THREE.Mesh(new THREE.BoxGeometry(18, 5, fWallThick + 0.6), fortWallMat);
     fArchLintel.position.set(0, fWallHeight - 2.5, fHalf);
     fArchLintel.castShadow = true;
@@ -3153,22 +3485,31 @@ const _vScreen = new THREE.Vector3();
       fortGroup.add(bRoof);
     });
 
-    // 5. Grand Hall Colonnades (6 Carved Stone Pillars with Iron Fire Braziers)
-    const pillarPositions = [
+    // 5. Grand Hall Colonnades (InstancedMesh Pillars & Braziers)
+    const fortPillarPositions = [
       [-12, -18], [12, -18],
       [-12, -4], [12, -4],
       [-12, 10], [12, 10]
     ];
-    pillarPositions.forEach(([px, pz]) => {
-      const pil = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 14, 12), fortWallMat);
-      pil.position.set(px, 7, pz);
-      pil.castShadow = true;
-      fortGroup.add(pil);
+    const fortPillarsMesh = new THREE.InstancedMesh(new THREE.CylinderGeometry(1.2, 1.4, 14, 12), fortWallMat, fortPillarPositions.length);
+    fortPillarsMesh.castShadow = true;
+    fortPillarsMesh.receiveShadow = true;
 
-      // Iron Brazier atop pillar
-      const brazier = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 0.8, 1.2, 8), fortTrimMat);
-      brazier.position.set(px, 14.5, pz);
-      fortGroup.add(brazier);
+    const fortBraziersMesh = new THREE.InstancedMesh(new THREE.CylinderGeometry(1.5, 0.8, 1.2, 8), fortTrimMat, fortPillarPositions.length);
+    fortBraziersMesh.castShadow = true;
+
+    fortPillarPositions.forEach(([px, pz], idx) => {
+      dummy.position.set(px, 7, pz);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      fortPillarsMesh.setMatrixAt(idx, dummy.matrix);
+      fortPillarsMesh.setColorAt(idx, new THREE.Color(0x94a3b8));
+
+      dummy.position.set(px, 14.5, pz);
+      dummy.updateMatrix();
+      fortBraziersMesh.setMatrixAt(idx, dummy.matrix);
+      fortBraziersMesh.setColorAt(idx, new THREE.Color(0xd97706));
 
       const flame = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 8), new THREE.MeshBasicMaterial({ color: 0xf59e0b }));
       flame.position.set(px, 15.6, pz);
@@ -3178,6 +3519,15 @@ const _vScreen = new THREE.Vector3();
       bLight.position.set(px, 16.0, pz);
       fortGroup.add(bLight);
     });
+    fortPillarsMesh.instanceMatrix.needsUpdate = true;
+    fortBraziersMesh.instanceMatrix.needsUpdate = true;
+    if (fortPillarsMesh.instanceColor) fortPillarsMesh.instanceColor.needsUpdate = true;
+    if (fortBraziersMesh.instanceColor) fortBraziersMesh.instanceColor.needsUpdate = true;
+
+    fortGroup.add(fortPillarsMesh);
+    fortGroup.add(fortBraziersMesh);
+    registerInstancedMesh('fort_pillars', 'Fortress Pillar', fortPillarsMesh, 'fort');
+    registerInstancedMesh('fort_braziers', 'Fortress Brazier', fortBraziersMesh, 'fort');
 
     // 6. Boss Throne Dais at North end
     const dais = new THREE.Mesh(new THREE.CylinderGeometry(9, 10, 1.2, 16), fortTrimMat);
@@ -3249,25 +3599,33 @@ const _vScreen = new THREE.Vector3();
     westWall.receiveShadow = true;
     scene.add(westWall);
 
-    // Castle Battlement Crenellations
-    const crenMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    // Castle Battlement Crenellations (InstancedMesh)
+    const crenPositions = [];
     for (let pos = -halfSpan + 6; pos <= halfSpan - 6; pos += 12) {
-      const cN = new THREE.Mesh(new THREE.BoxGeometry(6, 2.5, wallThickness + 0.4), crenMat);
-      cN.position.set(pos, wallHeight + 1.2, -halfSpan);
-      scene.add(cN);
-
-      const cS = new THREE.Mesh(new THREE.BoxGeometry(6, 2.5, wallThickness + 0.4), crenMat);
-      cS.position.set(pos, wallHeight + 1.2, halfSpan);
-      scene.add(cS);
-
-      const cE = new THREE.Mesh(new THREE.BoxGeometry(wallThickness + 0.4, 2.5, 6), crenMat);
-      cE.position.set(halfSpan, wallHeight + 1.2, pos);
-      scene.add(cE);
-
-      const cW = new THREE.Mesh(new THREE.BoxGeometry(wallThickness + 0.4, 2.5, 6), crenMat);
-      cW.position.set(-halfSpan, wallHeight + 1.2, pos);
-      scene.add(cW);
+      crenPositions.push({ x: pos, y: wallHeight + 1.2, z: -halfSpan, sx: 6, sy: 2.5, sz: wallThickness + 0.4 });
+      crenPositions.push({ x: pos, y: wallHeight + 1.2, z: halfSpan, sx: 6, sy: 2.5, sz: wallThickness + 0.4 });
+      crenPositions.push({ x: halfSpan, y: wallHeight + 1.2, z: pos, sx: wallThickness + 0.4, sy: 2.5, sz: 6 });
+      crenPositions.push({ x: -halfSpan, y: wallHeight + 1.2, z: pos, sx: wallThickness + 0.4, sy: 2.5, sz: 6 });
     }
+
+    const crenMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const crenGeo = new THREE.BoxGeometry(1, 1, 1);
+    const crenMesh = new THREE.InstancedMesh(crenGeo, crenMat, crenPositions.length);
+    crenMesh.castShadow = true;
+    crenMesh.receiveShadow = true;
+
+    crenPositions.forEach((c, idx) => {
+      dummy.position.set(c.x, c.y, c.z);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(c.sx, c.sy, c.sz);
+      dummy.updateMatrix();
+      crenMesh.setMatrixAt(idx, dummy.matrix);
+      crenMesh.setColorAt(idx, new THREE.Color(0x334155));
+    });
+    crenMesh.instanceMatrix.needsUpdate = true;
+    if (crenMesh.instanceColor) crenMesh.instanceColor.needsUpdate = true;
+    scene.add(crenMesh);
+    registerInstancedMesh('castle_crenellations', 'Wall Crenellation', crenMesh, 'castle');
 
     // 4 Corner Fortress Watchtowers
     const cornerPositions = [
@@ -3294,10 +3652,7 @@ const _vScreen = new THREE.Vector3();
     });
 
     // =========================================================================
-    // 3D TREES SCATTERED ACROSS 512x512 FOREST PLAINS (CONFORMING TO TERRAIN HEIGHT)
-    // =========================================================================
-    // =========================================================================
-    // 3D TREES & ROCKS SCATTERED ACROSS 512x512 FOREST PLAINS (CONFORMING TO TERRAIN HEIGHT)
+    // 3D TREES & ROCKS SCATTERED ACROSS 512x512 FOREST PLAINS (THREE.INSTANCEDMESH)
     // =========================================================================
     worldObstacles.length = 0;
     raycastObstacleMeshes.length = 0;
@@ -3321,13 +3676,28 @@ const _vScreen = new THREE.Vector3();
       raycastObstacleMeshes.push(fortGroup);
     }
 
-    const treeCount = 135;
-    for (let i = 0; i < treeCount; i++) {
+    // --- INSTANCED EVERGREEN PINE TREES (75 Pines) ---
+    const pineCount = 75;
+    const pineTrunkMat = new THREE.MeshStandardMaterial({ color: 0x452a16, roughness: 0.95 });
+    const pineTrunkGeo = new THREE.CylinderGeometry(0.35, 0.65, 4.2, 7);
+    const pineTrunksMesh = new THREE.InstancedMesh(pineTrunkGeo, pineTrunkMat, pineCount);
+    pineTrunksMesh.castShadow = true;
+    pineTrunksMesh.receiveShadow = true;
+
+    const pineFoliageMat = new THREE.MeshStandardMaterial({ color: 0x1e563d, roughness: 0.82 });
+    const pineConeGeo = new THREE.ConeGeometry(2.8, 6.2, 7);
+    const pineFoliageMesh = new THREE.InstancedMesh(pineConeGeo, pineFoliageMat, pineCount);
+    pineFoliageMesh.castShadow = true;
+    pineFoliageMesh.receiveShadow = true;
+
+    const pineColors = [0x143d2b, 0x1e563d, 0x2d7a56, 0x3d9e70];
+
+    for (let i = 0; i < pineCount; i++) {
       let tx, tz, distSanctuary, distFort, distRiver;
       let attempts = 0;
       do {
-        tx = (Math.random() - 0.5) * (ARENA_SIZE - 40);
-        tz = (Math.random() - 0.5) * (ARENA_SIZE - 40);
+        tx = (Math.random() - 0.5) * (ARENA_SIZE - 44);
+        tz = (Math.random() - 0.5) * (ARENA_SIZE - 44);
         distSanctuary = Math.hypot(tx, tz);
         distFort = Math.hypot(tx - FORT_X, tz - FORT_Z);
         distRiver = (tz > RIVER_NORTH_LIMIT && tz < (HALF_ARENA - 4)) ? Math.abs(tx - getRiverCenterX(tz)) : 999;
@@ -3335,25 +3705,114 @@ const _vScreen = new THREE.Vector3();
       } while ((distSanctuary < (SANCTUARY_RADIUS + 8) || distFort < (FORT_SIZE / 2 + 10) || distRiver < (RIVER_HALF_WIDTH + 6)) && attempts < 30);
 
       const scale = 0.85 + Math.random() * 0.65;
-      const type = Math.random() > 0.45 ? 'pine' : 'oak';
-      const tree = createTree(tx, tz, scale, type);
       const ty = getTerrainHeight(tx, tz);
-      tree.position.y = ty;
-      scene.add(tree);
+      const rotY = Math.random() * Math.PI * 2;
 
-      const treePos = new THREE.Vector3(tx, ty, tz);
+      // Trunk
+      dummy.position.set(tx, ty + 2.1 * scale, tz);
+      dummy.rotation.set(0, rotY, 0);
+      dummy.scale.set(scale, scale, scale);
+      dummy.updateMatrix();
+      pineTrunksMesh.setMatrixAt(i, dummy.matrix);
+      pineTrunksMesh.setColorAt(i, new THREE.Color(0x452a16));
+
+      // Foliage Cone
+      dummy.position.set(tx, ty + 5.2 * scale, tz);
+      dummy.updateMatrix();
+      pineFoliageMesh.setMatrixAt(i, dummy.matrix);
+      pineFoliageMesh.setColorAt(i, new THREE.Color(pineColors[i % pineColors.length]));
+
       worldObstacles.push({
-        name: `${type === 'pine' ? 'Pine' : 'Oak'} Tree`,
+        name: `Pine Tree #${i}`,
         type: 'tree',
-        position: treePos,
-        mesh: tree,
+        position: new THREE.Vector3(tx, ty, tz),
+        instanceId: i,
+        mesh: pineFoliageMesh,
         radius: 1.6 * scale
       });
-      raycastObstacleMeshes.push(tree);
     }
+    pineTrunksMesh.instanceMatrix.needsUpdate = true;
+    pineFoliageMesh.instanceMatrix.needsUpdate = true;
+    if (pineTrunksMesh.instanceColor) pineTrunksMesh.instanceColor.needsUpdate = true;
+    if (pineFoliageMesh.instanceColor) pineFoliageMesh.instanceColor.needsUpdate = true;
 
-    // 40 Granite Rock Formations / Boulders
-    const rockCount = 40;
+    scene.add(pineTrunksMesh);
+    scene.add(pineFoliageMesh);
+    registerInstancedMesh('pine_trees', 'Pine Tree Foliage', pineFoliageMesh, 'foliage');
+    registerInstancedMesh('pine_trunks', 'Pine Trunk', pineTrunksMesh, 'wood');
+
+    // --- INSTANCED BROADLEAF OAK TREES (60 Oaks) ---
+    const oakCount = 60;
+    const oakTrunkGeo = new THREE.CylinderGeometry(0.45, 0.75, 4.0, 7);
+    const oakTrunksMesh = new THREE.InstancedMesh(oakTrunkGeo, pineTrunkMat, oakCount);
+    oakTrunksMesh.castShadow = true;
+    oakTrunksMesh.receiveShadow = true;
+
+    const oakFoliageMat = new THREE.MeshStandardMaterial({ color: 0x2d7a56, roughness: 0.85 });
+    const oakFoliageGeo = new THREE.DodecahedronGeometry(2.4, 1);
+    const oakFoliageMesh = new THREE.InstancedMesh(oakFoliageGeo, oakFoliageMat, oakCount);
+    oakFoliageMesh.castShadow = true;
+    oakFoliageMesh.receiveShadow = true;
+
+    const oakColors = [0x1e563d, 0x286948, 0x2d7a56, 0x3b9b6e];
+
+    for (let i = 0; i < oakCount; i++) {
+      let tx, tz, distSanctuary, distFort, distRiver;
+      let attempts = 0;
+      do {
+        tx = (Math.random() - 0.5) * (ARENA_SIZE - 44);
+        tz = (Math.random() - 0.5) * (ARENA_SIZE - 44);
+        distSanctuary = Math.hypot(tx, tz);
+        distFort = Math.hypot(tx - FORT_X, tz - FORT_Z);
+        distRiver = (tz > RIVER_NORTH_LIMIT && tz < (HALF_ARENA - 4)) ? Math.abs(tx - getRiverCenterX(tz)) : 999;
+        attempts++;
+      } while ((distSanctuary < (SANCTUARY_RADIUS + 8) || distFort < (FORT_SIZE / 2 + 10) || distRiver < (RIVER_HALF_WIDTH + 6)) && attempts < 30);
+
+      const scale = 0.85 + Math.random() * 0.65;
+      const ty = getTerrainHeight(tx, tz);
+      const rotY = Math.random() * Math.PI * 2;
+
+      // Trunk
+      dummy.position.set(tx, ty + 2.0 * scale, tz);
+      dummy.rotation.set(0, rotY, 0);
+      dummy.scale.set(scale, scale, scale);
+      dummy.updateMatrix();
+      oakTrunksMesh.setMatrixAt(i, dummy.matrix);
+      oakTrunksMesh.setColorAt(i, new THREE.Color(0x452a16));
+
+      // Foliage Dodecahedron
+      dummy.position.set(tx, ty + 5.0 * scale, tz);
+      dummy.updateMatrix();
+      oakFoliageMesh.setMatrixAt(i, dummy.matrix);
+      oakFoliageMesh.setColorAt(i, new THREE.Color(oakColors[i % oakColors.length]));
+
+      worldObstacles.push({
+        name: `Oak Tree #${i}`,
+        type: 'tree',
+        position: new THREE.Vector3(tx, ty, tz),
+        instanceId: i,
+        mesh: oakFoliageMesh,
+        radius: 1.6 * scale
+      });
+    }
+    oakTrunksMesh.instanceMatrix.needsUpdate = true;
+    oakFoliageMesh.instanceMatrix.needsUpdate = true;
+    if (oakTrunksMesh.instanceColor) oakTrunksMesh.instanceColor.needsUpdate = true;
+    if (oakFoliageMesh.instanceColor) oakFoliageMesh.instanceColor.needsUpdate = true;
+
+    scene.add(oakTrunksMesh);
+    scene.add(oakFoliageMesh);
+    registerInstancedMesh('oak_trees', 'Oak Tree Foliage', oakFoliageMesh, 'foliage');
+    registerInstancedMesh('oak_trunks', 'Oak Trunk', oakTrunksMesh, 'wood');
+
+    // --- INSTANCED GRANITE BOULDERS (45 Rocks) ---
+    const rockCount = 45;
+    const landRockMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9, metalness: 0.1 });
+    const landRockGeo = new THREE.DodecahedronGeometry(1.5, 1);
+    const landRocksMesh = new THREE.InstancedMesh(landRockGeo, landRockMat, rockCount);
+    landRocksMesh.castShadow = true;
+    landRocksMesh.receiveShadow = true;
+
     for (let i = 0; i < rockCount; i++) {
       let rx, rz, distSanctuary, distFort, distRiver;
       let attempts = 0;
@@ -3367,25 +3826,61 @@ const _vScreen = new THREE.Vector3();
       } while ((distSanctuary < (SANCTUARY_RADIUS + 8) || distFort < (FORT_SIZE / 2 + 10) || distRiver < (RIVER_HALF_WIDTH + 6)) && attempts < 30);
 
       const scale = 0.9 + Math.random() * 0.8;
-      const rock = createRock(rx, rz, scale);
       const ry = getTerrainHeight(rx, rz);
-      rock.position.y = ry;
-      scene.add(rock);
-
-      const rockPos = new THREE.Vector3(rx, ry, rz);
       const inRiver = isPointInRiverArea(rx, rz);
+
+      dummy.position.set(rx, ry + 0.8 * scale, rz);
+      dummy.rotation.set(Math.random() * 0.4, Math.random() * Math.PI, Math.random() * 0.4);
+      dummy.scale.set(1.2 * scale, 0.85 * scale, 1.0 * scale);
+      dummy.updateMatrix();
+      landRocksMesh.setMatrixAt(i, dummy.matrix);
+      landRocksMesh.setColorAt(i, new THREE.Color(0x475569));
+
       worldObstacles.push({
-        name: 'Granite Rock',
+        name: `Granite Rock #${i}`,
         type: 'rock',
         inRiver: inRiver,
-        position: rockPos,
-        mesh: rock,
+        position: new THREE.Vector3(rx, ry, rz),
+        instanceId: i,
+        mesh: landRocksMesh,
         radius: 1.5 * scale
       });
-      if (!inRiver) {
-        raycastObstacleMeshes.push(rock);
-      }
     }
+    landRocksMesh.instanceMatrix.needsUpdate = true;
+    if (landRocksMesh.instanceColor) landRocksMesh.instanceColor.needsUpdate = true;
+    scene.add(landRocksMesh);
+    registerInstancedMesh('land_rocks', 'Granite Rock', landRocksMesh, 'rock');
+
+    // --- INSTANCED ARCANE MANA CRYSTALS (16 Crystals) ---
+    const crystalGeoCluster = new THREE.OctahedronGeometry(1.4, 0);
+    const manaCrystalMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.6,
+      roughness: 0.1,
+      metalness: 0.9
+    });
+    const manaCrystalsMesh = new THREE.InstancedMesh(crystalGeoCluster, manaCrystalMat, 16);
+    manaCrystalsMesh.castShadow = true;
+
+    for (let i = 0; i < 16; i++) {
+      const ang = (i / 16) * Math.PI * 2;
+      const rad = 45 + Math.random() * 160;
+      const cx = Math.cos(ang) * rad;
+      const cz = Math.sin(ang) * rad;
+      const cy = getTerrainHeight(cx, cz) + 1.2;
+
+      dummy.position.set(cx, cy, cz);
+      dummy.rotation.set(0.3, ang, 0.2);
+      dummy.scale.set(1, 1.5, 1);
+      dummy.updateMatrix();
+      manaCrystalsMesh.setMatrixAt(i, dummy.matrix);
+      manaCrystalsMesh.setColorAt(i, new THREE.Color(0x38bdf8));
+    }
+    manaCrystalsMesh.instanceMatrix.needsUpdate = true;
+    if (manaCrystalsMesh.instanceColor) manaCrystalsMesh.instanceColor.needsUpdate = true;
+    scene.add(manaCrystalsMesh);
+    registerInstancedMesh('mana_crystals', 'Mana Crystal', manaCrystalsMesh, 'crystal');
 
     // =========================================================================
     // STYLIZED PLAYER CHARACTER MESH
@@ -4266,7 +4761,7 @@ const _vScreen = new THREE.Vector3();
   }
 
   function onCanvasClick(e) {
-    // Raycasting for target selection
+    // Raycasting for target selection & InstancedMesh picking
     const mouse = new THREE.Vector2(
       (e.clientX / window.innerWidth) * 2 - 1,
       -(e.clientY / window.innerHeight) * 2 + 1
@@ -4274,6 +4769,7 @@ const _vScreen = new THREE.Vector3();
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
 
+    // 1. Target selection: Enemies
     const enemyMeshes = enemies.map(e => e.mesh.children[0]).filter(Boolean);
     const intersects = raycaster.intersectObjects(enemyMeshes);
 
@@ -4283,6 +4779,38 @@ const _vScreen = new THREE.Vector3();
       if (found) {
         targetEnemy = found;
         updateTargetCard();
+        return;
+      }
+    }
+
+    // 2. InstancedMesh selection & instanceColor inspection
+    const instMeshes = instancedMeshRegistry.map(r => r.mesh);
+    const instIntersects = raycaster.intersectObjects(instMeshes);
+
+    if (instIntersects.length > 0) {
+      const hit = instIntersects[0];
+      const hitMesh = hit.object;
+      const instanceId = hit.instanceId;
+      if (instanceId !== undefined && instanceId !== null && instanceId >= 0) {
+        const reg = instancedMeshRegistry.find(r => r.mesh === hitMesh);
+        const name = reg ? reg.name : 'Instanced Mesh';
+        const worldPos = hit.point || getInstancedMeshWorldPosition(hitMesh, instanceId);
+
+        selectedInstancedTarget = {
+          mesh: hitMesh,
+          instanceId: instanceId,
+          name: name,
+          position: worldPos
+        };
+
+        const targetLabel = document.getElementById('perf-colorizer-target');
+        if (targetLabel) {
+          targetLabel.innerText = `${name} #${instanceId}`;
+          targetLabel.style.color = '#38bdf8';
+        }
+
+        // Floating indicator
+        showDamageNumber(worldPos.x, worldPos.y + 2.0, worldPos.z, `🎯 Selected ${name} #${instanceId}`, '#38bdf8');
       }
     }
   }
@@ -4758,6 +5286,40 @@ const _vScreen = new THREE.Vector3();
     }
 
     renderer.render(scene, camera);
+
+    // =========================================================================
+    // PERFORMANCE & INSTANCEDMESH METRICS TELEMETRY
+    // =========================================================================
+    frameCount++;
+    const perfCurrentTime = performance.now();
+    if (perfCurrentTime - lastFpsTime >= 500) {
+      currentFps = Math.round((frameCount * 1000) / (perfCurrentTime - lastFpsTime));
+      currentFrameTimeMs = ((perfCurrentTime - lastFpsTime) / frameCount).toFixed(1);
+      frameCount = 0;
+      lastFpsTime = perfCurrentTime;
+
+      const drawCalls = (renderer.info && renderer.info.render) ? renderer.info.render.calls : 0;
+      const triangles = (renderer.info && renderer.info.render) ? renderer.info.render.triangles : 0;
+
+      let totalInstances = 0;
+      for (const reg of instancedMeshRegistry) {
+        totalInstances += reg.count;
+      }
+
+      const fpsEl = document.getElementById('perf-fps-val');
+      const msEl = document.getElementById('perf-ms-val');
+      const callsEl = document.getElementById('perf-calls-val');
+      const trisEl = document.getElementById('perf-tris-val');
+      const instMeshCountEl = document.getElementById('perf-inst-mesh-count');
+      const instTotalEl = document.getElementById('perf-inst-total');
+
+      if (fpsEl) fpsEl.innerText = currentFps;
+      if (msEl) msEl.innerText = `${currentFrameTimeMs} ms`;
+      if (callsEl) callsEl.innerText = drawCalls;
+      if (trisEl) trisEl.innerText = triangles.toLocaleString();
+      if (instMeshCountEl) instMeshCountEl.innerText = `${instancedMeshRegistry.length} Meshes`;
+      if (instTotalEl) instTotalEl.innerText = `${totalInstances} Blocks`;
+    }
   }
 
   // --- 3D RAYCASTER & PROXIMITY TELEMETRY RADAR ---
@@ -4968,22 +5530,32 @@ const _vScreen = new THREE.Vector3();
       const modalEl = document.getElementById('modal-class-select');
       if (modalEl) modalEl.style.display = 'none';
 
-      // Start with basic Level 1 gear for some slots
+      // Start with guaranteed Level 1 starter gear across all slots with non-zero stats
       gameState.equipped.rightHand = generateGearItem('rightHand', 1, 'common');
       gameState.equipped.leftHand = generateGearItem('leftHand', 1, 'common');
       gameState.equipped.head = generateGearItem('head', 1, 'common');
       gameState.equipped.shoulders = generateGearItem('shoulders', 1, 'common');
       gameState.equipped.chest = generateGearItem('chest', 1, 'common');
+      gameState.equipped.belt = generateGearItem('belt', 1, 'common');
+      gameState.equipped.pants = generateGearItem('pants', 1, 'common');
       gameState.equipped.boots = generateGearItem('boots', 1, 'common');
 
-      // Add extra items to inventory
-      gameState.inventory.push(generateGearItem('belt', 1, 'common'));
-      gameState.inventory.push(generateGearItem('pants', 1, 'common'));
+      // Add extra starter loot into inventory
+      gameState.inventory.push(generateGearItem('rightHand', 1, 'magic'));
+      gameState.inventory.push(generateGearItem('chest', 1, 'magic'));
 
       init3DWorld();
       recalculateStats();
+      renderGearUI();
       updateNearbyEnemiesList();
       animate();
+
+      // Periodic auto-save to ensure game data persists to database
+      setInterval(() => {
+        if (gameState.level > 0) {
+          saveProgressToParent();
+        }
+      }, 10000);
 
       // Request persistent data from Firestorm Parent frame
       try {

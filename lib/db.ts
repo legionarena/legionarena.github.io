@@ -458,7 +458,7 @@ export function saveDatabase(state: DbState): void {
 // ==========================================
 
 export function saveGameHighScore(
-  gameId: 'code-pressed' | 'slots-up' | 'block-drop',
+  gameId: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game',
   score: number,
   details: string,
   userOverride?: User | null
@@ -473,6 +473,7 @@ export function saveGameHighScore(
   let gameName = 'Block Drop Matrix';
   if (gameId === 'code-pressed') gameName = 'Reaction Challenge';
   if (gameId === 'slots-up') gameName = 'Supply Grid';
+  if (gameId === 'rpg-game') gameName = 'Realm of Champions 3D';
 
   let isNewPersonalBest = false;
   let savedEntry: GameHighScore;

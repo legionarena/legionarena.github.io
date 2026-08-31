@@ -1323,6 +1323,47 @@
               details: `${lines} lines cleared • Level ${level}`
             }, '*');
           }
+
+          // Direct localStorage write for standalone window support
+          const DB_KEY = 'firestorm_tournaments_db_v2';
+          const raw = localStorage.getItem(DB_KEY);
+          if (raw) {
+            const db = JSON.parse(raw);
+            const currentUser = db.currentUserId ? db.users.find(u => u.id === db.currentUserId) : null;
+            const userId = currentUser ? currentUser.id : 'FS-OPERATIVE';
+            const userCallsign = currentUser ? currentUser.callsign : 'Operative';
+
+            if (!db.highScores) db.highScores = [];
+            const existingIdx = db.highScores.findIndex(s => s.userId === userId && s.gameId === 'block-drop');
+            if (existingIdx !== -1) {
+              if (score >= db.highScores[existingIdx].score) {
+                db.highScores[existingIdx].score = score;
+                db.highScores[existingIdx].details = `${lines} lines cleared • Level ${level}`;
+                db.highScores[existingIdx].createdAt = new Date().toISOString();
+              }
+            } else {
+              db.highScores.push({
+                id: `hs-${Date.now()}`,
+                gameId: 'block-drop',
+                gameName: 'Block Drop Matrix',
+                userId: userId,
+                userCallsign: userCallsign,
+                userUid: userId,
+                score: score,
+                details: `${lines} lines cleared • Level ${level}`,
+                createdAt: new Date().toISOString()
+              });
+            }
+
+            if (currentUser) {
+              if (!currentUser.highScores) currentUser.highScores = {};
+              if (score > (currentUser.highScores.blockDrop || 0)) {
+                currentUser.highScores.blockDrop = score;
+                currentUser.rating = (currentUser.rating || 1000) + Math.min(100, Math.floor(score / 5));
+              }
+            }
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+          }
         } catch (e) {}
 
         // Show Game Over overlay

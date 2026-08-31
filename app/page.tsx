@@ -275,8 +275,16 @@ export default function Home() {
         }
       } else if (event.data.type === 'FIRESTORM_SAVE_RPG_DATA') {
         const { saveData } = event.data;
-        if (saveData && saveData.userId) {
-          saveRpgGameData(saveData);
+        if (saveData) {
+          const activeUser = currentUser || getCurrentUser();
+          const validUserId = saveData.userId || (activeUser ? activeUser.id : 'FS-GUEST-0000');
+          const validCallsign = saveData.userCallsign || (activeUser ? activeUser.callsign : 'TacticalOperative');
+          const completeSaveData = {
+            ...saveData,
+            userId: validUserId,
+            userCallsign: validCallsign
+          };
+          saveRpgGameData(completeSaveData);
         }
       } else if (event.data.type === 'FIRESTORM_REQUEST_INIT') {
         const activeUser = currentUser || getCurrentUser();
