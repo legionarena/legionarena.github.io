@@ -73,7 +73,7 @@ const STATIONS: StationInfo[] = [
     accentBg: 'bg-violet-500/10',
     borderAccent: 'border-violet-500/30',
     badgeClass: 'bg-violet-900/60 text-violet-200 border-violet-500/40',
-    description: '3D Auto-battler with 24 emoji characters, Match-3 fusing up to 5 stars, 8x8 tactical grid with benches, drafting pool, and gold economy.',
+    description: '3D Auto-battler with 96 emoji battlers, elemental combo overload system, Match-3 fusing up to 5 stars, separate diminishing draft pools, and win-scaling AI IQ.',
     status: 'ONLINE'
   },
   {

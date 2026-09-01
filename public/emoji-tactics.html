@@ -103,6 +103,22 @@
       color: #c084fc;
       font-size: 13px;
     }
+    .score-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      color: #38bdf8;
+      font-size: 13px;
+    }
+    .pool-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+      color: #94a3b8;
+      font-size: 11px;
+    }
     .round-badge {
       font-weight: 800;
       color: #38bdf8;
@@ -180,84 +196,65 @@
       border-color: #f59e0b;
     }
 
-    /* 3D Camera Floating Toolbar (Top Right) */
-    .camera-hud {
+    /* Decaying Announcements Stream Underneath Round Info Window */
+    .announcements-decay-container {
       position: absolute;
-      top: 64px;
-      right: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      padding: 6px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    }
-    .cam-btn {
-      width: 32px;
-      height: 32px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #f8fafc;
-      border-radius: 6px;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .cam-btn:hover {
-      background: #3b82f6;
-      border-color: #60a5fa;
-    }
-
-    /* Floating Center Notification */
-    #center-announcement {
-      position: absolute;
-      top: 15%;
+      top: calc(100% + 8px);
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.92);
-      border: 2px solid #38bdf8;
-      border-radius: 16px;
-      padding: 10px 22px;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 320px;
       pointer-events: none;
+      z-index: 55;
+    }
+    .announcement-item {
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid #38bdf8;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: #f8fafc;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideDownFade 0.25s ease-out forwards;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      text-align: left;
+    }
+    .announcement-item.combo-crit {
+      border-color: #f59e0b;
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.95), rgba(88, 28, 135, 0.95));
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.45);
+    }
+    .announcement-item.upgrade {
+      border-color: #fbbf24;
+      background: rgba(30, 41, 59, 0.95);
+    }
+    .announcement-item.decaying {
       opacity: 0;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-      z-index: 50;
+      transform: translateY(-8px) scale(0.95);
     }
-    #center-announcement.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    #announcement-title {
-      font-size: 18px;
-      font-weight: 900;
-      color: #38bdf8;
-    }
-    #announcement-sub {
-      font-size: 12px;
-      color: #94a3b8;
-      margin-top: 3px;
+    @keyframes slideDownFade {
+      from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* Closable Unit Inspector Window */
+    /* Closable Unit Inspector Window (Positioned on the Right) */
     #unit-info-card {
       position: absolute;
       bottom: 24px;
-      left: 16px;
-      background: rgba(15, 23, 42, 0.95);
+      right: 16px;
+      background: rgba(15, 23, 42, 0.96);
       backdrop-filter: blur(14px);
       border: 2px solid #38bdf8;
       border-radius: 14px;
       padding: 14px;
-      width: 320px;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.8);
+      width: 360px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.85);
       display: none;
       z-index: 40;
       animation: popIn 0.2s ease-out;
@@ -269,32 +266,37 @@
     .unit-info-header {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 10px;
       position: relative;
     }
     .unit-avatar {
-      font-size: 30px;
-      width: 48px;
-      height: 48px;
+      font-size: 28px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
       background: #1e293b;
       border-radius: 10px;
       border: 1px solid #334155;
+      flex-shrink: 0;
     }
     .unit-title-box {
       flex: 1;
+      min-width: 0;
     }
     .unit-name {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       color: #f8fafc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .unit-stars {
       color: #fbbf24;
-      font-size: 13px;
+      font-size: 12px;
       letter-spacing: 1px;
     }
     .unit-close-btn {
@@ -313,12 +315,92 @@
       cursor: pointer;
       font-size: 12px;
       font-weight: 800;
+      z-index: 5;
     }
     .unit-close-btn:hover {
       background: #ef4444;
       border-color: #f87171;
       color: #fff;
     }
+
+    /* Unit Deployment & Positioning Controls in Header */
+    .deploy-controls-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+      flex-shrink: 0;
+      margin-right: 18px;
+    }
+    .deploy-bench-btn {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #cbd5e1;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .deploy-bench-btn:hover {
+      background: #334155;
+      border-color: #10b981;
+      color: #a7f3d0;
+    }
+    .deploy-bench-btn.active {
+      background: linear-gradient(135deg, #065f46, #047857);
+      border-color: #10b981;
+      color: #ecfdf5;
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.45);
+    }
+    .deploy-field-group {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background: #0b1329;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 2px 4px;
+    }
+    .deploy-group-title {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0 2px;
+    }
+    .deploy-sub-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .deploy-sub-btn:hover {
+      background: #334155;
+      color: #38bdf8;
+      border-color: #38bdf8;
+    }
+    .deploy-sub-btn.active {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      border-color: #38bdf8;
+      color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.45);
+    }
+
     .unit-stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -328,7 +410,7 @@
       background: #0b1329;
       padding: 10px;
       border-radius: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .unit-ability-box {
@@ -338,7 +420,7 @@
       padding: 8px 10px;
       border-radius: 8px;
       color: #c7d2fe;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .unit-ability-title {
       font-weight: 800;
@@ -348,119 +430,319 @@
       justify-content: space-between;
     }
 
-    /* Bottom Dock: Draft Shop & Minimized Banner */
+    /* Lane 1-8 Selection Control Box at Bottom of Inspector */
+    .lane-selection-box {
+      background: #0b1329;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .lane-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lane-title {
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .lane-current-pos {
+      font-size: 10px;
+      color: #38bdf8;
+      font-weight: 700;
+    }
+    .lane-buttons-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+    }
+    .lane-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 0;
+      text-align: center;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .lane-btn:hover {
+      background: #334155;
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+    .lane-btn.active {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border-color: #38bdf8;
+      color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+    }
+
+    /* Synergy & Combos Analyzer Window */
+    #synergy-analyzer-panel {
+      position: absolute;
+      top: 64px;
+      left: 12px;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(14px);
+      border: 2px solid #8b5cf6;
+      border-radius: 14px;
+      padding: 12px;
+      width: 320px;
+      max-height: 75vh;
+      overflow-y: auto;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85);
+      z-index: 45;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      animation: popIn 0.2s ease-out;
+    }
+    .synergy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #c084fc;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+      padding-bottom: 6px;
+    }
+    .synergy-section-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .combo-card {
+      background: #1e1b4b;
+      border: 1px solid #4338ca;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+    }
+    .combo-card.upgrade-ready {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.35));
+      border: 1px solid #f59e0b;
+    }
+    .combo-title {
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .combo-desc {
+      color: #cbd5e1;
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
+    .synergy-chip-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .synergy-chip {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 6px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+    .synergy-chip.active {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+    }
+    .synergy-count {
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 9999px;
+      background: #1e293b;
+      color: #38bdf8;
+      font-size: 10px;
+    }
+
+    /* Side Draft Panel Under Rival AI */
+    .side-draft-panel {
+      position: absolute;
+      top: 68px;
+      right: 12px;
+      width: 250px;
+      max-height: calc(100vh - 145px);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(14px);
+      border: 2px solid rgba(245, 158, 11, 0.7);
+      border-radius: 12px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      z-index: 38;
+      transition: all 0.2s ease-in-out;
+    }
+    .side-draft-panel.collapsed .side-draft-list {
+      display: none;
+    }
+    .side-draft-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .side-draft-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      max-height: calc(100vh - 195px);
+      padding-right: 2px;
+    }
+    .side-draft-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    .side-draft-list::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+    .side-draft-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .side-draft-card:hover {
+      background: #334155;
+      border-color: #38bdf8;
+      transform: translateX(-2px);
+    }
+    .side-draft-card.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .side-draft-card.tier-1 { border-left: 3px solid #94a3b8; }
+    .side-draft-card.tier-2 { border-left: 3px solid #10b981; }
+    .side-draft-card.tier-3 { border-left: 3px solid #3b82f6; }
+    .side-draft-card.tier-4 { border-left: 3px solid #a855f7; }
+    .side-draft-card.tier-5 { border-left: 3px solid #f59e0b; }
+
+    .side-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .side-card-identity {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .side-card-emoji {
+      font-size: 18px;
+      line-height: 1;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+    .side-card-name {
+      font-size: 11px;
+      font-weight: 800;
+      color: #f8fafc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .side-card-badges {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .element-badge {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      text-transform: capitalize;
+    }
+    .element-badge.fire { background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid #ef4444; }
+    .element-badge.water { background: rgba(14, 165, 233, 0.25); color: #38bdf8; border: 1px solid #0ea5e9; }
+    .element-badge.lightning { background: rgba(234, 179, 8, 0.25); color: #facc15; border: 1px solid #eab308; }
+    .element-badge.nature { background: rgba(34, 197, 94, 0.25); color: #4ade80; border: 1px solid #22c55e; }
+    .element-badge.shadow { background: rgba(147, 51, 234, 0.25); color: #c084fc; border: 1px solid #9333ea; }
+    .element-badge.holy { background: rgba(251, 191, 36, 0.25); color: #fef08a; border: 1px solid #fbbf24; }
+
+    .resist-badge {
+      font-size: 8.5px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #94a3b8;
+    }
+    .side-card-stats {
+      font-size: 9.5px;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .side-card-cost-btn {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      border: 1px solid #f59e0b;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* Bottom Dock */
     .bottom-hud {
       display: flex;
       flex-direction: column;
       gap: 8px;
       align-items: center;
       position: relative;
-    }
-    
-    #draft-shop-container {
-      background: rgba(15, 23, 42, 0.94);
-      backdrop-filter: blur(12px);
-      border: 2px solid rgba(245, 158, 11, 0.6);
-      border-radius: 16px;
-      padding: 10px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100%;
-      max-width: 860px;
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
-      transition: all 0.25s ease-in-out;
-    }
-    #draft-shop-container.minimized {
-      display: none;
-    }
-    
-    /* Minimized Shop Bar */
-    #minimized-shop-bar {
-      display: none;
-      background: rgba(15, 23, 42, 0.9);
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(245, 158, 11, 0.6);
-      border-radius: 30px;
-      padding: 6px 18px;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    }
-    #minimized-shop-bar:hover {
-      background: rgba(30, 41, 59, 0.95);
-      border-color: #fbbf24;
-    }
-    
-    .shop-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      font-weight: 800;
-      color: #fbbf24;
-    }
-    .shop-cards-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
-    .shop-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 8px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.15s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    .shop-card:hover {
-      background: #334155;
-      border-color: #38bdf8;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(56, 189, 248, 0.25);
-    }
-    .shop-card.tier-1 { border-left: 3px solid #94a3b8; }
-    .shop-card.tier-2 { border-left: 3px solid #10b981; }
-    .shop-card.tier-3 { border-left: 3px solid #3b82f6; }
-    .shop-card.tier-4 { border-left: 3px solid #a855f7; }
-    .shop-card.tier-5 { border-left: 3px solid #f59e0b; }
-    .shop-card-emoji {
-      font-size: 26px;
-      line-height: 1;
-    }
-    .shop-card-name {
-      font-size: 11px;
-      font-weight: 800;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-    }
-    .shop-card-stats {
-      font-size: 10px;
-      color: #94a3b8;
-    }
-    .shop-card-cost {
-      font-size: 11px;
-      font-weight: 800;
-      color: #fbbf24;
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      margin-top: 2px;
-    }
-    .shop-card.disabled {
-      opacity: 0.45;
-      pointer-events: none;
-      filter: grayscale(0.7);
     }
 
     /* Modal Dialogs */
@@ -546,32 +828,6 @@
       transition: opacity 0.6s ease-out, transform 0.6s ease-out;
       transform: translate(-50%, -50%);
     }
-
-    /* Grid Row Indicators */
-    .grid-legend {
-      position: absolute;
-      left: 12px;
-      top: 64px;
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      color: #94a3b8;
-    }
-    .legend-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .legend-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
-    }
   </style>
   <script type="importmap">
     {
@@ -611,46 +867,52 @@
         </div>
       </div>
 
-      <!-- Center Round & Phase Indicator -->
-      <div class="hud-card interactive" style="flex-direction: column; gap: 4px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
+      <!-- Center Round, Match Score & Main Pool Indicator -->
+      <div id="round-info-card" class="hud-card interactive" style="flex-direction: column; gap: 4px; min-width: 260px; text-align: center; position: relative;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
           <span class="round-badge" id="round-text">ROUND 1</span>
           <span id="phase-badge" class="phase-badge phase-draft">DRAFT & PREP</span>
         </div>
-        <span id="timer-text" style="font-size: 11px; color: #94a3b8;">Prep Time: 25s</span>
-      </div>
-
-      <!-- Enemy Commander Health -->
-      <div class="hud-card interactive">
-        <div class="hp-badge">
-          <span>👑 Rival AI</span>
-          <div class="hp-bar-container">
-            <div id="enemy-hp-bar" class="hp-bar-fill hp-enemy-fill" style="width: 100%;"></div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 11.5px;">
+          <div class="score-badge">
+            <span>⚔️ Match:</span>
+            <span id="match-score-text" style="color: #fbbf24; font-weight: 900;">0W - 0L</span>
           </div>
-          <span id="enemy-hp-text" style="color: #ef4444;">10/10</span>
+          <div class="pool-badge">
+            <span>📦 Main Pool:</span>
+            <span id="main-pool-count" style="color: #38bdf8; font-weight: 800;">96/96</span>
+          </div>
+          <div class="field-limit-badge" style="background: #1e293b; padding: 2px 7px; border-radius: 6px; border: 1px solid #334155; font-size: 11px;">
+            <span>🛡️ Field:</span>
+            <span id="player-fielded-count" style="color: #10b981; font-weight: 800;">0/8</span>
+          </div>
         </div>
-        <div class="gold-badge" style="color: #94a3b8;">
-          <span>🪙</span>
-          <span id="enemy-gold-text">4</span>
+
+        <!-- Decaying list of the last three ability announcements underneath round info window -->
+        <div id="announcements-decay-list" class="announcements-decay-container"></div>
+      </div>
+
+      <!-- Enemy Commander Health & AI Tactical IQ -->
+      <div class="hud-card interactive" style="flex-direction: column; align-items: flex-end; gap: 4px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="gold-badge" style="color: #94a3b8;">
+            <span>🪙</span>
+            <span id="enemy-gold-text">4</span>
+          </div>
+          <div class="hp-badge">
+            <span>👑 Rival AI</span>
+            <div class="hp-bar-container">
+              <div id="enemy-hp-bar" class="hp-bar-fill hp-enemy-fill" style="width: 100%;"></div>
+            </div>
+            <span id="enemy-hp-text" style="color: #ef4444;">10/10</span>
+          </div>
+        </div>
+        <div style="font-size: 10px; color: #c084fc; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+          <span>🤖 AI Tactical IQ:</span>
+          <span id="ai-iq-text" style="color: #f43f5e;">0.0%</span>
+          <span style="color: #64748b; font-weight: 500;">(Scales with Wins)</span>
         </div>
       </div>
-    </div>
-
-    <!-- 3D Camera Controls Floating HUD (Top Right) -->
-    <div class="camera-hud interactive">
-      <button class="cam-btn" title="Rotate Left" onclick="rotateCamera(-0.35)">↺</button>
-      <button class="cam-btn" title="Rotate Right" onclick="rotateCamera(0.35)">↻</button>
-      <button class="cam-btn" title="Pitch Up" onclick="pitchCamera(0.15)">⬆</button>
-      <button class="cam-btn" title="Pitch Down" onclick="pitchCamera(-0.15)">⬇</button>
-      <button class="cam-btn" title="Zoom In" onclick="zoomCamera(-4)">🔍</button>
-      <button class="cam-btn" title="Zoom Out" onclick="zoomCamera(4)">🔎</button>
-      <button class="cam-btn" title="Reset View" onclick="resetCameraView()">🎯</button>
-    </div>
-
-    <!-- Center Floating Announcement Banner -->
-    <div id="center-announcement">
-      <div id="announcement-title">ROUND 1 PREPARATION</div>
-      <div id="announcement-sub">Pick characters from draft pool! Drag or use 3D camera controls to inspect.</div>
     </div>
 
     <!-- Match 3 Upgrade Star Banner -->
@@ -658,16 +920,63 @@
       ⭐ MATCH 3! UNIT UPGRADED TO ★2! ⭐
     </div>
 
-    <!-- Left Floating Grid Legend -->
-    <div class="grid-legend interactive">
-      <div class="legend-row"><span class="legend-dot" style="background: #ef4444;"></span><span>Row 0: Enemy Bench (8 slots)</span></div>
-      <div class="legend-row"><span class="legend-dot" style="background: #dc2626;"></span><span>Row 1-3: Enemy Attack (3 rows)</span></div>
-      <div class="legend-row"><span class="legend-dot" style="background: #38bdf8;"></span><span>Row 4: Free Range Move Row (1 row)</span></div>
-      <div class="legend-row"><span class="legend-dot" style="background: #2563eb;"></span><span>Row 5-7: Player Attack (3 rows)</span></div>
-      <div class="legend-row"><span class="legend-dot" style="background: #10b981;"></span><span>Row 8: Player Bench (8 slots)</span></div>
+    <!-- Vertical Scrollable Draft Pool Side List (Under Rival AI HUD) -->
+    <div id="side-draft-panel" class="side-draft-panel interactive">
+      <div class="side-draft-header">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 14px;">🛒</span>
+          <span style="font-weight: 800; color: #fbbf24; font-size: 11.5px;">Draft Pool (<span id="draft-count-label">4</span> Units)</span>
+        </div>
+        <div style="display: flex; gap: 4px;">
+          <button id="reroll-btn" class="btn btn-gold" style="font-size: 10px; padding: 2px 7px;" onclick="rerollShop()" title="Reroll draft pool for 2 Gold">
+            <span>🔄 2🪙</span>
+          </button>
+          <button id="toggle-draft-btn" class="btn" style="font-size: 10px; padding: 2px 6px;" onclick="toggleSideDraft()" title="Collapse / Expand Draft Pool">
+            <span>−</span>
+          </button>
+        </div>
+      </div>
+      <div id="side-draft-list" class="side-draft-list">
+        <!-- Draft cards populated dynamically -->
+      </div>
     </div>
 
-    <!-- Closable Unit Inspector Window -->
+    <!-- Synergy & Combos Analyzer Window -->
+    <div id="synergy-analyzer-panel" class="interactive">
+      <div class="synergy-header">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span>🧬</span>
+          <span>Tactical Synergy & Combos</span>
+        </div>
+        <button class="unit-close-btn" style="position: static;" onclick="toggleSynergyPanel(false)">✕</button>
+      </div>
+
+      <!-- Match-3 Star Evolution Upgrades -->
+      <div>
+        <div class="synergy-section-title">⭐ Star Evolution Opportunities</div>
+        <div id="combo-upgrades-list" style="display: flex; flex-direction: column; gap: 6px;">
+          <!-- Dynamically generated -->
+        </div>
+      </div>
+
+      <!-- Active Archetype Synergies -->
+      <div>
+        <div class="synergy-section-title">🛡️ Archetype Synergies</div>
+        <div id="combo-synergies-list" class="synergy-chip-row">
+          <!-- Dynamically generated -->
+        </div>
+      </div>
+
+      <!-- Tactical Advisor Tips -->
+      <div>
+        <div class="synergy-section-title">💡 Strategic Recommendation</div>
+        <div id="combo-advice-text" class="combo-card" style="background: #0f172a; border-color: #38bdf8; color: #94a3b8;">
+          Deploy tanky frontline units onto Row 7 and ranged mages/archers onto Rows 5-6! Remember: 3x same-element hits trigger a 200% Critical Overload!
+        </div>
+      </div>
+    </div>
+
+    <!-- Closable Unit Inspector Window (Positioned on the Right) -->
     <div id="unit-info-card" class="interactive">
       <button class="unit-close-btn" onclick="closeUnitInspector()">✕</button>
       <div class="unit-info-header">
@@ -675,28 +984,76 @@
         <div class="unit-title-box">
           <div id="inspector-name" class="unit-name">Dragon Pyromancer</div>
           <div id="inspector-stars" class="unit-stars">★★☆☆☆ (Tier 5)</div>
+          <div id="inspector-element-row" style="display: flex; gap: 4px; margin-top: 2px;">
+            <span id="inspector-element-badge" class="element-badge fire">🔥 Fire</span>
+            <span id="inspector-resist-badge" class="resist-badge">🛡️ Resist: Lightning</span>
+          </div>
+        </div>
+
+        <!-- Bench & Field (3 Selections) Deployment Group -->
+        <div id="inspector-deploy-controls" class="deploy-controls-box">
+          <button id="deploy-bench-btn" class="deploy-bench-btn" onclick="moveInspectedUnitToZone('bench')" title="Move to Reserve Bench (Row 8)">
+            <span>🪑 Bench</span>
+          </button>
+          <div class="deploy-field-group">
+            <span class="deploy-group-title">Field</span>
+            <button id="deploy-field-r1" class="deploy-sub-btn" onclick="moveInspectedUnitToZone('row1')" title="Field Row 1 (Backline - Grid Row 5)">Row 1</button>
+            <button id="deploy-field-r2" class="deploy-sub-btn" onclick="moveInspectedUnitToZone('row2')" title="Field Row 2 (Midline - Grid Row 6)">Row 2</button>
+            <button id="deploy-field-r3" class="deploy-sub-btn" onclick="moveInspectedUnitToZone('row3')" title="Field Row 3 (Frontline - Grid Row 7)">Row 3</button>
+          </div>
         </div>
       </div>
+
       <div class="unit-stats-grid">
-        <div>❤️ HP: <span id="inspector-hp" style="font-weight:700; color:#10b981;">680/680</span></div>
-        <div>⚔️ ATK: <span id="inspector-atk" style="font-weight:700; color:#f87171;">95</span></div>
+        <div>❤️ HP: <span id="inspector-hp" style="font-weight:700; color:#10b981;">68/68</span></div>
+        <div>⚔️ ATK: <span id="inspector-atk" style="font-weight:700; color:#f87171;">14</span></div>
         <div>⚡ SPD: <span id="inspector-spd" style="font-weight:700; color:#38bdf8;">0.85s</span></div>
         <div>🎯 RNG: <span id="inspector-rng" style="font-weight:700; color:#fbbf24;">3 Tiles</span></div>
-        <div>🛡️ DEF: <span id="inspector-def" style="font-weight:700; color:#94a3b8;">25%</span></div>
-        <div>✨ PWR: <span id="inspector-pwr" style="font-weight:700; color:#c084fc;">Level 1</span></div>
+        <div>🛡️ DEF: <span id="inspector-def" style="font-weight:700; color:#94a3b8;">15%</span></div>
+        <div>✨ PWR: <span id="inspector-pwr" style="font-weight:700; color:#c084fc;">★1 (100%)</span></div>
       </div>
+
+      <!-- Primary Ultimate Ability -->
       <div class="unit-ability-box">
         <div class="unit-ability-title">
           <span id="inspector-ability-name">Inferno Cataclysm</span>
           <span id="inspector-mana" style="color: #38bdf8; font-size: 10px;">100 Mana</span>
         </div>
-        <div id="inspector-ability-desc">Rains hellfire upon enemy board dealing 450 AoE damage.</div>
+        <div id="inspector-ability-desc">Rains hellfire upon enemy board dealing AoE damage.</div>
       </div>
-      <div style="display: flex; gap: 8px; justify-content: space-between;">
-        <button id="inspector-sell-btn" class="btn" style="background: #7f1d1d; border-color: #ef4444; color: #fecaca; font-size: 11px; padding: 6px 12px;" onclick="sellInspectedUnit()">
+
+      <!-- 3rd Elemental Ability -->
+      <div id="inspector-elem-ability-box" class="unit-ability-box" style="background: #172554; border-color: #2563eb; color: #bfdbfe; margin-bottom: 8px;">
+        <div class="unit-ability-title" style="color: #93c5fd;">
+          <span id="inspector-elem-ability-name">⚡ 3rd Elemental Ability: Flame Surge</span>
+          <span id="inspector-elem-ability-tag" style="color: #facc15; font-size: 9.5px; font-weight: 800;">Passive / Cast</span>
+        </div>
+        <div id="inspector-elem-ability-desc">Channels elemental power on strike, building combo stacks toward 200% Overload.</div>
+      </div>
+
+      <!-- Lane 1-8 Selection Controls at Bottom of Window -->
+      <div id="inspector-lane-section" class="lane-selection-box">
+        <div class="lane-header-row">
+          <span class="lane-title">📍 Lane:</span>
+          <span id="inspector-current-pos" class="lane-current-pos">Field Row 3, Lane 4</span>
+        </div>
+        <div class="lane-buttons-row">
+          <button class="lane-btn" data-lane="1" onclick="moveInspectedUnitToLane(1)" title="Move to Lane 1">1</button>
+          <button class="lane-btn" data-lane="2" onclick="moveInspectedUnitToLane(2)" title="Move to Lane 2">2</button>
+          <button class="lane-btn" data-lane="3" onclick="moveInspectedUnitToLane(3)" title="Move to Lane 3">3</button>
+          <button class="lane-btn" data-lane="4" onclick="moveInspectedUnitToLane(4)" title="Move to Lane 4">4</button>
+          <button class="lane-btn" data-lane="5" onclick="moveInspectedUnitToLane(5)" title="Move to Lane 5">5</button>
+          <button class="lane-btn" data-lane="6" onclick="moveInspectedUnitToLane(6)" title="Move to Lane 6">6</button>
+          <button class="lane-btn" data-lane="7" onclick="moveInspectedUnitToLane(7)" title="Move to Lane 7">7</button>
+          <button class="lane-btn" data-lane="8" onclick="moveInspectedUnitToLane(8)" title="Move to Lane 8">8</button>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: space-between; align-items: center;">
+        <button id="inspector-sell-btn" class="btn" style="background: #7f1d1d; border-color: #ef4444; color: #fecaca; font-size: 11px; padding: 5px 12px;" onclick="sellInspectedUnit()">
           <span>💰 Sell (+<span id="inspector-sell-gold">1</span>🪙)</span>
         </button>
-        <button class="btn btn-primary" style="font-size: 11px; padding: 6px 14px;" onclick="closeUnitInspector()">
+        <button class="btn btn-primary" style="font-size: 11px; padding: 5px 14px; margin-left: auto;" onclick="closeUnitInspector()">
           <span>Close Window</span>
         </button>
       </div>
@@ -704,49 +1061,23 @@
 
     <!-- Bottom HUD Dock -->
     <div class="bottom-hud">
-      <!-- Minimized Draft Shop Bar -->
-      <div id="minimized-shop-bar" class="interactive" onclick="toggleDraftShop(true)">
-        <span style="font-size: 16px;">🛒</span>
-        <span style="font-size: 13px; font-weight: 800; color: #fbbf24;">Draft Pool Available (<span id="minimized-card-count">4</span> Units)</span>
-        <span class="btn btn-gold" style="font-size: 11px; padding: 4px 10px; border-radius: 20px;">🔼 Expand Shop</span>
-      </div>
-
-      <!-- Full Draft Marketplace / Shop Container -->
-      <div id="draft-shop-container" class="interactive">
-        <div class="shop-header">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span>🛒 DRAFT POOL (FREE RANGE ROW)</span>
-            <span style="font-size: 11px; color: #94a3b8;">Click unit to buy to bench (Match 3 to Star Up!)</span>
-          </div>
-          <div class="controls-panel">
-            <button id="minimize-shop-btn" class="btn" style="background: #334155; border-color: #64748b;" onclick="toggleDraftShop(false)" title="Minimize draft window to see battlefield">
-              <span>🔽 Minimize</span>
-            </button>
-            <button id="reroll-btn" class="btn btn-gold" onclick="rerollShop()">
-              <span>🔄 Reroll (2🪙)</span>
-            </button>
-            <button id="start-battle-btn" class="btn btn-battle" onclick="triggerCombatPhase()">
-              <span>⚔️ START BATTLE</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 4 Character Draft Cards -->
-        <div class="shop-cards-row" id="shop-cards-row">
-          <!-- Populated dynamically via JS -->
-        </div>
-      </div>
-
-      <!-- Quick Action Toolbar -->
-      <div class="controls-panel interactive">
+      <!-- Main Action Toolbar (START COMBAT IS PROMINENTLY OUTSIDE SHOP) -->
+      <div class="controls-panel interactive" style="gap: 8px; flex-wrap: wrap; justify-content: center;">
+        <button id="start-battle-btn" class="btn btn-battle" style="font-size: 14px; font-weight: 900; padding: 9px 24px; box-shadow: 0 0 18px rgba(239, 68, 68, 0.45);" onclick="triggerCombatPhase()">
+          <span>⚔️ START BATTLE</span>
+        </button>
+        <button id="synergy-toggle-btn" class="btn" style="background: linear-gradient(135deg, #6b21a8, #581c87); border-color: #a855f7; color: #f3e8ff;" onclick="toggleSynergyPanel()">
+          <span>🧬 Combos & Synergies</span>
+          <span id="combo-alert-badge" style="background: #ef4444; color: #fff; border-radius: 9999px; padding: 1px 6px; font-size: 10px; font-weight: 800; display: none;">0</span>
+        </button>
         <button class="btn" onclick="toggleHelpModal()">
-          <span>📖 Game Rules</span>
+          <span>📖 Rules</span>
         </button>
         <button class="btn" onclick="rotateCamera(Math.PI / 4)">
           <span>🔄 Rotate 45°</span>
         </button>
         <button class="btn" onclick="resetCameraView()">
-          <span>🎯 Center Camera</span>
+          <span>🎯 Center View</span>
         </button>
       </div>
     </div>
@@ -761,21 +1092,25 @@
       </div>
       <div class="modal-body">
         <div class="rule-item">
-          <strong>🎭 24 Low-Poly 3D Characters:</strong> From Tier 1 (1🪙) to Tier 5 (5🪙) with custom 3D low-poly models, distinct power levels, auto-attacks, and animated ultimate power abilities!
+          <strong>🎭 96 Unique 3D Battlers:</strong> Across 5 Tiers with custom 3D low-poly models, ultimate abilities, 3rd elemental abilities, and distinct elemental resistances (Fire, Water, Lightning, Nature, Shadow, Holy).
         </div>
         <div class="rule-item">
-          <strong>⭐ Match-3 Evolution (Up to 5 Stars):</strong> Whenever you collect 3 units of the exact same character and star level, they fuse into a higher star unit (★1 ➔ ★2 ➔ ★3 ➔ ★4 ➔ ★5) multiplying stats, size, and abilities!
+          <strong>💥 3-Hit Elemental Combo System:</strong> Hitting a target with the same element 3 times in a row that does not match their resistance triggers a <strong>200% Critical Overload</strong> based on the last elemental damage taken!
         </div>
         <div class="rule-item">
-          <strong>📐 The 8x8 Tactical Grid & Benches:</strong>
-          <br>• Row 0: Enemy Bench (8 slots)
-          <br>• Rows 1-3: Enemy Attack Rows (Deploy up to 24 units)
-          <br>• Row 4: Neutral Free Range Row (Drafting pool & open movement)
-          <br>• Rows 5-7: Player Attack Rows (Deploy your army)
-          <br>• Row 8: Player Bench (Store up to 8 reserve units)
+          <strong>⭐ Match-3 Star Evolution:</strong> Collecting 3 identical battlers fuses them into a higher star rank with +120%, +145%, +175%, and +210% stat multipliers (★1 ➔ ★2 ➔ ★3 ➔ ★4 ➔ ★5)!
         </div>
         <div class="rule-item">
-          <strong>🎥 3D Camera Controls:</strong> Left-click and drag on empty ground to rotate 360° around the arena! Use the top-right camera HUD to zoom, pitch, and reset.
+          <strong>📐 8-Unit Max Field Limit & Attack Lanes:</strong>
+          <br>• Max 8 units can be fielded into battle at once.
+          <br>• Benches (Row 0 for AI, Row 8 for Player) are reserve holding zones and cannot be used as a battlefield.
+          <br>• Player Attack Lanes: Rows 5, 6, and 7 across Lanes 1-8.
+        </div>
+        <div class="rule-item">
+          <strong>🤖 Win-Scaling AI Difficulty:</strong> As you rack up wins (up to 256 wins), the Rival AI's Tactical IQ scales via <code>(Wins / 512) * 100%</code> chance to deploy advanced Match-3 drafting, frontline/backline positioning, and synergy strategies.
+        </div>
+        <div class="rule-item">
+          <strong>🎥 3D Camera Controls:</strong> Left-click and drag on the arena ground to smoothly orbit and rotate in 3D! Use the bottom toolbar to <strong>Rotate 45°</strong> or <strong>Center View</strong> anytime.
         </div>
         <div class="rule-item">
           <strong>🪙 Economy & High Scores:</strong> Start at <strong>4 Gold</strong>. Win a battle to earn <strong>6 Gold</strong>, or earn <strong>2 Gold</strong> on defeat. Total Wins are saved as your persistent High Score!
@@ -815,499 +1150,146 @@
     import * as THREE from 'three';
 
     // =========================================================================
-    // 24 UNIQUE EMOJI CHARACTERS DATABASE (TIERS 1 TO 5)
+    // 96 UNIQUE EMOJI CHARACTERS DATABASE (TIERS 1 TO 5)
     // =========================================================================
-    const CHARACTERS_DATABASE = [
-      // --- TIER 1 (Cost: 1 Gold) ---
-      {
-        id: 'boar_berserk',
-        emoji: '🐗💥',
-        name: 'Berserk Boar',
-        tier: 1,
-        cost: 1,
-        archetype: 'beast_tusks',
-        baseHp: 380,
-        baseAtk: 32,
-        attackSpeed: 1.0,
-        range: 1,
-        defense: 10,
-        colorHex: '#b45309',
-        ability: {
-          name: 'Wild Stampede',
-          desc: 'Rushes enemy for 90 physical damage and stuns.',
-          power: 90,
-          type: 'physical_rush'
-        }
-      },
-      {
-        id: 'fairy_flora',
-        emoji: '🧚‍♀️🌸',
-        name: 'Flora Fairy',
-        tier: 1,
-        cost: 1,
-        archetype: 'winged_mystic',
-        baseHp: 260,
-        baseAtk: 24,
-        attackSpeed: 0.9,
-        range: 3,
-        defense: 5,
-        colorHex: '#ec4899',
-        ability: {
-          name: 'Nature Healing',
-          desc: 'Heals the lowest-health ally for 140 HP.',
-          power: 140,
-          type: 'heal'
-        }
-      },
-      {
-        id: 'viper_venom',
-        emoji: '🐍🧪',
-        name: 'Venom Viper',
-        tier: 1,
-        cost: 1,
-        archetype: 'serpent',
-        baseHp: 310,
-        baseAtk: 28,
-        attackSpeed: 1.1,
-        range: 2,
-        defense: 8,
-        colorHex: '#10b981',
-        ability: {
-          name: 'Toxic Spit',
-          desc: 'Poisons target for 110 damage over 3 seconds.',
-          power: 110,
-          type: 'poison'
-        }
-      },
-      {
-        id: 'owl_sage',
-        emoji: '🦉📖',
-        name: 'Sage Owl',
-        tier: 1,
-        cost: 1,
-        archetype: 'winged_mystic',
-        baseHp: 280,
-        baseAtk: 26,
-        attackSpeed: 1.0,
-        range: 3,
-        defense: 6,
-        colorHex: '#64748b',
-        ability: {
-          name: 'Mystic Sight',
-          desc: 'Blasts foe with arcane light for 100 magic damage.',
-          power: 100,
-          type: 'arcane_beam'
-        }
-      },
-      {
-        id: 'rhino_titan',
-        emoji: '🛡️🦏',
-        name: 'Titan Rhino',
-        tier: 1,
-        cost: 1,
-        archetype: 'beast_horn',
-        baseHp: 440,
-        baseAtk: 25,
-        attackSpeed: 1.2,
-        range: 1,
-        defense: 20,
-        colorHex: '#475569',
-        ability: {
-          name: 'Iron Guard',
-          desc: 'Gains a 160 HP protective shield for 4s.',
-          power: 160,
-          type: 'shield'
-        }
-      },
+    const RAW_UNITS_DATA = [
+      // --- TIER 1 (Cost: 1 Gold) [24 Units] ---
+      { id: 'boar_berserk', emoji: '🐗💥', name: 'Berserk Boar', tier: 1, cost: 1, archetype: 'beast_tusks', baseHp: 38, baseAtk: 6, spd: 1.0, rng: 1, def: 8, hex: '#b45309', elem: 'fire', res: 'water', abName: 'Wild Stampede', abPower: 16, abType: 'rush', elName: 'Flame Charge', elPower: 12 },
+      { id: 'fairy_flora', emoji: '🧚‍♀️🌸', name: 'Flora Fairy', tier: 1, cost: 1, archetype: 'winged_mystic', baseHp: 30, baseAtk: 5, spd: 0.9, rng: 3, def: 4, hex: '#ec4899', elem: 'nature', res: 'lightning', abName: 'Nature Mend', abPower: 18, abType: 'heal', elName: 'Spore Bloom', elPower: 10 },
+      { id: 'viper_venom', emoji: '🐍🧪', name: 'Venom Viper', tier: 1, cost: 1, archetype: 'serpent', baseHp: 32, baseAtk: 6, spd: 1.1, rng: 2, def: 6, hex: '#10b981', elem: 'nature', res: 'shadow', abName: 'Toxic Fang', abPower: 15, abType: 'poison', elName: 'Acid Surge', elPower: 11 },
+      { id: 'owl_sage', emoji: '🦉📖', name: 'Sage Owl', tier: 1, cost: 1, archetype: 'winged_mystic', baseHp: 31, baseAtk: 5, spd: 1.0, rng: 3, def: 5, hex: '#64748b', elem: 'holy', res: 'shadow', abName: 'Mystic Ray', abPower: 16, abType: 'beam', elName: 'Star Shard', elPower: 12 },
+      { id: 'rhino_titan', emoji: '🛡️🦏', name: 'Titan Rhino', tier: 1, cost: 1, archetype: 'beast_horn', baseHp: 44, baseAtk: 5, spd: 1.2, rng: 1, def: 18, hex: '#475569', elem: 'lightning', res: 'fire', abName: 'Iron Guard', abPower: 18, abType: 'shield', elName: 'Static Pulse', elPower: 10 },
+      { id: 'goblin_scout', emoji: '👺🗡️', name: 'Forest Goblin', tier: 1, cost: 1, archetype: 'humanoid_warrior', baseHp: 33, baseAtk: 7, spd: 0.85, rng: 1, def: 5, hex: '#16a34a', elem: 'nature', res: 'fire', abName: 'Quick Stab', abPower: 17, abType: 'rush', elName: 'Bramble Jab', elPower: 11 },
+      { id: 'sprite_sun', emoji: '☀️✨', name: 'Sun Sprite', tier: 1, cost: 1, archetype: 'winged_mystic', baseHp: 30, baseAtk: 5, spd: 0.95, rng: 3, def: 5, hex: '#eab308', elem: 'holy', res: 'nature', abName: 'Solar Glow', abPower: 16, abType: 'heal', elName: 'Sunburst Spark', elPower: 12 },
+      { id: 'imp_flame', emoji: '👿🔥', name: 'Flame Imp', tier: 1, cost: 1, archetype: 'humanoid_mage', baseHp: 31, baseAtk: 6, spd: 0.95, rng: 2, def: 4, hex: '#ef4444', elem: 'fire', res: 'holy', abName: 'Fireball', abPower: 18, abType: 'fireball', elName: 'Cinder Arc', elPower: 13 },
+      { id: 'bat_shadow', emoji: '🦇🌑', name: 'Shadow Bat', tier: 1, cost: 1, archetype: 'winged_mystic', baseHp: 32, baseAtk: 7, spd: 0.8, rng: 1, def: 4, hex: '#7c3aed', elem: 'shadow', res: 'holy', abName: 'Vampiric Bite', abPower: 16, abType: 'drain', elName: 'Void Echo', elPower: 12 },
+      { id: 'crab_iron', emoji: '🦀🛡️', name: 'Iron Crab', tier: 1, cost: 1, archetype: 'golem_titan', baseHp: 42, baseAtk: 5, spd: 1.15, rng: 1, def: 16, hex: '#0ea5e9', elem: 'water', res: 'lightning', abName: 'Tidal Shell', abPower: 18, abType: 'shield', elName: 'Frost Pinch', elPower: 10 },
+      { id: 'frog_toxic', emoji: '🐸⚡', name: 'Shock Frog', tier: 1, cost: 1, archetype: 'beast_tusks', baseHp: 34, baseAtk: 6, spd: 1.0, rng: 2, def: 6, hex: '#84cc16', elem: 'lightning', res: 'water', abName: 'Zap Tongue', abPower: 17, abType: 'zap', elName: 'Volt Spit', elPower: 11 },
+      { id: 'skeleton_guard', emoji: '💀⚔️', name: 'Bone Militia', tier: 1, cost: 1, archetype: 'humanoid_warrior', baseHp: 35, baseAtk: 6, spd: 1.05, rng: 1, def: 10, hex: '#94a3b8', elem: 'shadow', res: 'nature', abName: 'Shield Bash', abPower: 15, abType: 'rush', elName: 'Grim Strike', elPower: 11 },
+      { id: 'rat_plague', emoji: '🐀☣️', name: 'Plague Rat', tier: 1, cost: 1, archetype: 'beast_tusks', baseHp: 32, baseAtk: 6, spd: 0.85, rng: 1, def: 4, hex: '#65a30d', elem: 'shadow', res: 'fire', abName: 'Fever Bite', abPower: 16, abType: 'poison', elName: 'Miasma Siphon', elPower: 11 },
+      { id: 'penguin_frost', emoji: '🐧❄️', name: 'Frost Penguin', tier: 1, cost: 1, archetype: 'winged_mystic', baseHp: 34, baseAtk: 5, spd: 1.0, rng: 2, def: 8, hex: '#38bdf8', elem: 'water', res: 'nature', abName: 'Icicle Toss', abPower: 16, abType: 'ice', elName: 'Glacial Slide', elPower: 12 },
+      { id: 'bee_scout', emoji: '🐝🍯', name: 'Stinger Bee', tier: 1, cost: 1, archetype: 'winged_mystic', baseHp: 29, baseAtk: 7, spd: 0.8, rng: 1, def: 3, hex: '#f59e0b', elem: 'nature', res: 'shadow', abName: 'Needle Sting', abPower: 18, abType: 'rush', elName: 'Pollen Gust', elPower: 11 },
+      { id: 'jelly_hydro', emoji: '🪼💧', name: 'Hydro Jelly', tier: 1, cost: 1, archetype: 'winged_mystic', baseHp: 36, baseAtk: 5, spd: 1.1, rng: 2, def: 10, hex: '#0284c7', elem: 'water', res: 'fire', abName: 'Aqua Bubble', abPower: 17, abType: 'shield', elName: 'Splash Surge', elPower: 10 },
+      { id: 'hedgehog_quill', emoji: '🦔📌', name: 'Quill Hedgehog', tier: 1, cost: 1, archetype: 'beast_horn', baseHp: 37, baseAtk: 5, spd: 1.05, rng: 1, def: 12, hex: '#78350f', elem: 'nature', res: 'lightning', abName: 'Thorn Barrage', abPower: 16, abType: 'aoe', elName: 'Brier Poke', elPower: 11 },
+      { id: 'novice_monk', emoji: '🧘‍♂️✨', name: 'Sun Monk', tier: 1, cost: 1, archetype: 'humanoid_warrior', baseHp: 36, baseAtk: 6, spd: 0.95, rng: 1, def: 8, hex: '#fde047', elem: 'holy', res: 'water', abName: 'Chi Burst', abPower: 17, abType: 'beam', elName: 'Solar Kick', elPower: 12 },
+      { id: 'gnome_alchemist', emoji: '🧙‍♂️🧪', name: 'Spark Gnome', tier: 1, cost: 1, archetype: 'humanoid_mage', baseHp: 31, baseAtk: 6, spd: 1.0, rng: 3, def: 5, hex: '#fb923c', elem: 'lightning', res: 'holy', abName: 'Flask Detonation', abPower: 18, abType: 'aoe', elName: 'Static Fume', elPower: 12 },
+      { id: 'beetle_horn', emoji: '🪲🛡️', name: 'Stag Beetle', tier: 1, cost: 1, archetype: 'beast_horn', baseHp: 40, baseAtk: 5, spd: 1.1, rng: 1, def: 15, hex: '#065f46', elem: 'nature', res: 'water', abName: 'Mandible Clamp', abPower: 16, abType: 'rush', elName: 'Carapace Guard', elPower: 10 },
+      { id: 'spark_wisp', emoji: '✨⚡', name: 'Spark Wisp', tier: 1, cost: 1, archetype: 'winged_mystic', baseHp: 28, baseAtk: 7, spd: 0.8, rng: 3, def: 3, hex: '#facc15', elem: 'lightning', res: 'shadow', abName: 'Chain Spark', abPower: 19, abType: 'zap', elName: 'Plasma Dart', elPower: 13 },
+      { id: 'mud_golem_mini', emoji: '🧱💧', name: 'Clay Sprite', tier: 1, cost: 1, archetype: 'golem_titan', baseHp: 41, baseAtk: 5, spd: 1.2, rng: 1, def: 14, hex: '#a16207', elem: 'water', res: 'holy', abName: 'Mud Harden', abPower: 18, abType: 'shield', elName: 'Bog Quake', elPower: 10 },
+      { id: 'shadow_shade', emoji: '👤🌑', name: 'Lesser Shade', tier: 1, cost: 1, archetype: 'humanoid_warrior', baseHp: 32, baseAtk: 7, spd: 0.9, rng: 1, def: 5, hex: '#4c1d95', elem: 'shadow', res: 'lightning', abName: 'Shadow Cleave', abPower: 17, abType: 'rush', elName: 'Dusk Siphon', elPower: 12 },
+      { id: 'squire_light', emoji: '🛡️☀️', name: 'Dawn Squire', tier: 1, cost: 1, archetype: 'humanoid_warrior', baseHp: 38, baseAtk: 6, spd: 1.0, rng: 1, def: 12, hex: '#fef08a', elem: 'holy', res: 'fire', abName: 'Radiant Strike', abPower: 16, abType: 'beam', elName: 'Sun Shield', elPower: 11 },
 
-      // --- TIER 2 (Cost: 2 Gold) ---
-      {
-        id: 'ranger_sylvan',
-        emoji: '🏹🌿',
-        name: 'Sylvan Ranger',
-        tier: 2,
-        cost: 2,
-        archetype: 'humanoid_archer',
-        baseHp: 340,
-        baseAtk: 45,
-        attackSpeed: 0.85,
-        range: 4,
-        defense: 8,
-        colorHex: '#15803d',
-        ability: {
-          name: 'Piercing Arrow',
-          desc: 'Fires a sniper shot piercing in a straight line for 150 damage.',
-          power: 150,
-          type: 'projectile'
-        }
-      },
-      {
-        id: 'wolf_thunder',
-        emoji: '⚡🐺',
-        name: 'Thunder Wolf',
-        tier: 2,
-        cost: 2,
-        archetype: 'beast_tusks',
-        baseHp: 390,
-        baseAtk: 42,
-        attackSpeed: 0.9,
-        range: 1,
-        defense: 12,
-        colorHex: '#eab308',
-        ability: {
-          name: 'Static Leap',
-          desc: 'Leaps behind target and shocks for 140 lightning damage.',
-          power: 140,
-          type: 'lightning'
-        }
-      },
-      {
-        id: 'bear_frost',
-        emoji: '🐻❄️',
-        name: 'Frost Bear',
-        tier: 2,
-        cost: 2,
-        archetype: 'beast_tusks',
-        baseHp: 480,
-        baseAtk: 38,
-        attackSpeed: 1.1,
-        range: 1,
-        defense: 18,
-        colorHex: '#38bdf8',
-        ability: {
-          name: 'Glacial Slam',
-          desc: 'Slams ground chilling nearby enemies for 130 damage.',
-          power: 130,
-          type: 'ice_slam'
-        }
-      },
-      {
-        id: 'spider_shadow',
-        emoji: '🕷️🕸️',
-        name: 'Shadow Weaver',
-        tier: 2,
-        cost: 2,
-        archetype: 'serpent',
-        baseHp: 320,
-        baseAtk: 40,
-        attackSpeed: 0.95,
-        range: 2,
-        defense: 10,
-        colorHex: '#581c87',
-        ability: {
-          name: 'Cocoon Web',
-          desc: 'Traps opponent in silk dealing 135 damage.',
-          power: 135,
-          type: 'web'
-        }
-      },
-      {
-        id: 'kitsune_mystic',
-        emoji: '🦊🔥',
-        name: 'Kitsune Mystic',
-        tier: 2,
-        cost: 2,
-        archetype: 'humanoid_mage',
-        baseHp: 350,
-        baseAtk: 44,
-        attackSpeed: 0.95,
-        range: 3,
-        defense: 10,
-        colorHex: '#ea580c',
-        ability: {
-          name: 'Fox Fire Orb',
-          desc: 'Launches 3 homing spirit flames dealing 160 total damage.',
-          power: 160,
-          type: 'fireball'
-        }
-      },
+      // --- TIER 2 (Cost: 2 Gold) [24 Units] ---
+      { id: 'wolf_frost', emoji: '🐺❄️', name: 'Frost Wolf', tier: 2, cost: 2, archetype: 'beast_tusks', baseHp: 48, baseAtk: 9, spd: 0.9, rng: 1, def: 10, hex: '#38bdf8', elem: 'water', res: 'fire', abName: 'Glacial Howl', abPower: 24, abType: 'aoe', elName: 'Permafrost Fang', elPower: 18 },
+      { id: 'archer_wind', emoji: '🏹🍃', name: 'Wind Archer', tier: 2, cost: 2, archetype: 'humanoid_warrior', baseHp: 44, baseAtk: 10, spd: 0.85, rng: 4, def: 6, hex: '#22c55e', elem: 'nature', res: 'water', abName: 'Gale Arrow', abPower: 26, abType: 'beam', elName: 'Zephyr Shot', elPower: 19 },
+      { id: 'pyro_cultist', emoji: '🧙‍♂️🔥', name: 'Pyro Acolyte', tier: 2, cost: 2, archetype: 'humanoid_mage', baseHp: 45, baseAtk: 10, spd: 0.9, rng: 3, def: 7, hex: '#f97316', elem: 'fire', res: 'lightning', abName: 'Flame Vortex', abPower: 28, abType: 'fireball', elName: 'Blaze Cascade', elPower: 20 },
+      { id: 'golem_stone', emoji: '🗿🛡️', name: 'Granite Golem', tier: 2, cost: 2, archetype: 'golem_titan', baseHp: 58, baseAtk: 8, spd: 1.25, rng: 1, def: 22, hex: '#64748b', elem: 'nature', res: 'shadow', abName: 'Earth Slam', abPower: 25, abType: 'aoe', elName: 'Stone Carapace', elPower: 16 },
+      { id: 'falcon_storm', emoji: '🦅⚡', name: 'Storm Falcon', tier: 2, cost: 2, archetype: 'winged_mystic', baseHp: 46, baseAtk: 11, spd: 0.8, rng: 2, def: 6, hex: '#facc15', elem: 'lightning', res: 'nature', abName: 'Thunder Dive', abPower: 27, abType: 'zap', elName: 'Static Bolt', elPower: 20 },
+      { id: 'assassin_shadow', emoji: '🥷🌑', name: 'Nightstalker', tier: 2, cost: 2, archetype: 'humanoid_warrior', baseHp: 46, baseAtk: 12, spd: 0.75, rng: 1, def: 7, hex: '#581c87', elem: 'shadow', res: 'water', abName: 'Shadow Assassination', abPower: 30, abType: 'rush', elName: 'Void Ambush', elPower: 22 },
+      { id: 'paladin_light', emoji: '⚔️✨', name: 'Solar Crusader', tier: 2, cost: 2, archetype: 'humanoid_warrior', baseHp: 54, baseAtk: 9, spd: 1.05, rng: 1, def: 16, hex: '#eab308', elem: 'holy', res: 'fire', abName: 'Holy Smite', abPower: 26, abType: 'beam', elName: 'Aura of Dawn', elPower: 18 },
+      { id: 'siren_tide', emoji: '🧜‍♀️🌊', name: 'Ocean Siren', tier: 2, cost: 2, archetype: 'winged_mystic', baseHp: 47, baseAtk: 9, spd: 0.95, rng: 3, def: 8, hex: '#0284c7', elem: 'water', res: 'shadow', abName: 'Tidal Wave', abPower: 25, abType: 'aoe', elName: 'Aqua Melody', elPower: 19 },
+      { id: 'drake_hatchling', emoji: '🦎🔥', name: 'Fire Drake', tier: 2, cost: 2, archetype: 'winged_dragon', baseHp: 50, baseAtk: 10, spd: 0.9, rng: 2, def: 12, hex: '#dc2626', elem: 'fire', res: 'holy', abName: 'Dragon Breath', abPower: 27, abType: 'fireball', elName: 'Magma Spit', elPower: 20 },
+      { id: 'shaman_voodoo', emoji: '👺🌿', name: 'Witch Doctor', tier: 2, cost: 2, archetype: 'humanoid_mage', baseHp: 46, baseAtk: 9, spd: 1.0, rng: 3, def: 8, hex: '#15803d', elem: 'nature', res: 'holy', abName: 'Ancestral Totem', abPower: 24, abType: 'heal', elName: 'Spirit Hex', elPower: 18 },
+      { id: 'bull_iron', emoji: '🐂⚔️', name: 'Iron Minotaur', tier: 2, cost: 2, archetype: 'beast_horn', baseHp: 56, baseAtk: 10, spd: 1.15, rng: 1, def: 15, hex: '#7c2d12', elem: 'lightning', res: 'water', abName: 'Horn Charge', abPower: 28, abType: 'rush', elName: 'Overcharge Horn', elPower: 19 },
+      { id: 'reaper_mini', emoji: '👻🗡️', name: 'Dusk Reaper', tier: 2, cost: 2, archetype: 'humanoid_warrior', baseHp: 47, baseAtk: 11, spd: 0.85, rng: 1, def: 8, hex: '#6b21a8', elem: 'shadow', res: 'fire', abName: 'Soul Harvest', abPower: 29, abType: 'drain', elName: 'Nether Reaping', elPower: 21 },
+      { id: 'turtle_shell', emoji: '🐢🌊', name: 'Ancient Turtle', tier: 2, cost: 2, archetype: 'golem_titan', baseHp: 59, baseAtk: 8, spd: 1.3, rng: 1, def: 24, hex: '#0f766e', elem: 'water', res: 'holy', abName: 'Fortress Shell', abPower: 26, abType: 'shield', elName: 'Hydro Geyser', elPower: 17 },
+      { id: 'spark_monk', emoji: '⚡🥋', name: 'Tempest Monk', tier: 2, cost: 2, archetype: 'humanoid_warrior', baseHp: 50, baseAtk: 10, spd: 0.85, rng: 1, def: 11, hex: '#eab308', elem: 'lightning', res: 'shadow', abName: 'Lightning Palm', abPower: 27, abType: 'zap', elName: 'Static Fists', elPower: 19 },
+      { id: 'druid_bear', emoji: '🐻🌲', name: 'Grizzly Druid', tier: 2, cost: 2, archetype: 'beast_tusks', baseHp: 55, baseAtk: 10, spd: 1.1, rng: 1, def: 14, hex: '#3f6212', elem: 'nature', res: 'fire', abName: 'Primal Swipe', abPower: 27, abType: 'rush', elName: 'Briar Roar', elPower: 18 },
+      { id: 'alchemist_fire', emoji: '🧪🔥', name: 'Alchemist Gunner', tier: 2, cost: 2, archetype: 'humanoid_mage', baseHp: 45, baseAtk: 11, spd: 0.9, rng: 3, def: 7, hex: '#ea580c', elem: 'fire', res: 'water', abName: 'Infernal Concoction', abPower: 28, abType: 'aoe', elName: 'Pyro Vial', elPower: 20 },
+      { id: 'angel_cherub', emoji: '👼🪽', name: 'Cherub Seraph', tier: 2, cost: 2, archetype: 'winged_mystic', baseHp: 46, baseAtk: 9, spd: 0.9, rng: 3, def: 8, hex: '#fef08a', elem: 'holy', res: 'lightning', abName: 'Divine Shield', abPower: 26, abType: 'shield', elName: 'Glory Rays', elPower: 18 },
+      { id: 'gargoyle_stone', emoji: '🦇🗿', name: 'Gargoyle Sentry', tier: 2, cost: 2, archetype: 'golem_titan', baseHp: 53, baseAtk: 9, spd: 1.0, rng: 1, def: 18, hex: '#334155', elem: 'shadow', res: 'nature', abName: 'Petrify Strike', abPower: 26, abType: 'rush', elName: 'Slate Armor', elPower: 17 },
+      { id: 'cobra_desert', emoji: '🐍🏜️', name: 'Sun Cobra', tier: 2, cost: 2, archetype: 'serpent', baseHp: 48, baseAtk: 10, spd: 0.95, rng: 2, def: 9, hex: '#d97706', elem: 'holy', res: 'shadow', abName: 'Blinding Spit', abPower: 26, abType: 'beam', elName: 'Solar Venom', elPower: 19 },
+      { id: 'hydra_spawn', emoji: '🐉💧', name: 'Hydra Spawn', tier: 2, cost: 2, archetype: 'serpent', baseHp: 52, baseAtk: 10, spd: 0.95, rng: 2, def: 11, hex: '#0284c7', elem: 'water', res: 'lightning', abName: 'Triple Bite', abPower: 28, abType: 'rush', elName: 'Tidal Regeneration', elPower: 18 },
+      { id: 'cyclops_brute', emoji: '👁️🔨', name: 'Cyclops Guard', tier: 2, cost: 2, archetype: 'golem_titan', baseHp: 57, baseAtk: 10, spd: 1.2, rng: 1, def: 15, hex: '#92400e', elem: 'lightning', res: 'holy', abName: 'Thunder Smash', abPower: 28, abType: 'aoe', elName: 'Eye Beam', elPower: 19 },
+      { id: 'treant_sapling', emoji: '🪵🌿', name: 'Treant Warden', tier: 2, cost: 2, archetype: 'golem_titan', baseHp: 58, baseAtk: 8, spd: 1.25, rng: 1, def: 20, hex: '#14532d', elem: 'nature', res: 'shadow', abName: 'Root Entangle', abPower: 25, abType: 'aoe', elName: 'Sap Barrier', elPower: 17 },
+      { id: 'witch_cauldron', emoji: '🧙‍♀️🔮', name: 'Mystic Sorceress', tier: 2, cost: 2, archetype: 'humanoid_mage', baseHp: 44, baseAtk: 11, spd: 0.85, rng: 3, def: 6, hex: '#7e22ce', elem: 'shadow', res: 'water', abName: 'Arcane Hex', abPower: 29, abType: 'fireball', elName: 'Nether Blast', elPower: 21 },
+      { id: 'griffin_cub', emoji: '🦅🦁', name: 'Griffin Scout', tier: 2, cost: 2, archetype: 'winged_mystic', baseHp: 51, baseAtk: 10, spd: 0.85, rng: 2, def: 12, hex: '#b45309', elem: 'holy', res: 'nature', abName: 'Sky Talon', abPower: 27, abType: 'rush', elName: 'Sunfeather Gale', elPower: 19 },
 
-      // --- TIER 3 (Cost: 3 Gold) ---
-      {
-        id: 'samurai_cyber',
-        emoji: '🤖⚔️',
-        name: 'Cyber Samurai',
-        tier: 3,
-        cost: 3,
-        archetype: 'humanoid_warrior',
-        baseHp: 460,
-        baseAtk: 60,
-        attackSpeed: 0.8,
-        range: 1,
-        defense: 16,
-        colorHex: '#06b6d4',
-        ability: {
-          name: 'Plasma Blade Slash',
-          desc: 'Performs a swift dual-strike dealing 220 critical damage.',
-          power: 220,
-          type: 'blade_dance'
-        }
-      },
-      {
-        id: 'slayer_necro',
-        emoji: '💀🗡️',
-        name: 'Necro Slayer',
-        tier: 3,
-        cost: 3,
-        archetype: 'humanoid_warrior',
-        baseHp: 420,
-        baseAtk: 58,
-        attackSpeed: 0.85,
-        range: 2,
-        defense: 14,
-        colorHex: '#475569',
-        ability: {
-          name: 'Soul Reap',
-          desc: 'Drains soul dealing 200 damage and restoring 100 HP.',
-          power: 200,
-          type: 'life_drain'
-        }
-      },
-      {
-        id: 'vampire_blood',
-        emoji: '🧛‍♂️🩸',
-        name: 'Blood Vampire',
-        tier: 3,
-        cost: 3,
-        archetype: 'humanoid_mage',
-        baseHp: 450,
-        baseAtk: 55,
-        attackSpeed: 0.9,
-        range: 1,
-        defense: 15,
-        colorHex: '#be123c',
-        ability: {
-          name: 'Crimson Surge',
-          desc: 'Burst of blood needles hitting 2 foes for 190 damage each.',
-          power: 190,
-          type: 'blood_surge'
-        }
-      },
-      {
-        id: 'gryphon_storm',
-        emoji: '🦅🌪️',
-        name: 'Storm Gryphon',
-        tier: 3,
-        cost: 3,
-        archetype: 'winged_mystic',
-        baseHp: 400,
-        baseAtk: 62,
-        attackSpeed: 0.85,
-        range: 3,
-        defense: 12,
-        colorHex: '#0284c7',
-        ability: {
-          name: 'Thunder Vortex',
-          desc: 'Summons a whirlwind pulling foes for 210 magic damage.',
-          power: 210,
-          type: 'vortex'
-        }
-      },
-      {
-        id: 'shark_abyssal',
-        emoji: '🦈🌊',
-        name: 'Abyssal Shark',
-        tier: 3,
-        cost: 3,
-        archetype: 'beast_tusks',
-        baseHp: 520,
-        baseAtk: 54,
-        attackSpeed: 1.0,
-        range: 1,
-        defense: 22,
-        colorHex: '#0369a1',
-        ability: {
-          name: 'Deep Sea Bite',
-          desc: 'Rips through enemy armor for 230 true damage.',
-          power: 230,
-          type: 'bite'
-        }
-      },
+      // --- TIER 3 (Cost: 3 Gold) [20 Units] ---
+      { id: 'knight_valkyrie', emoji: '⚔️🪽', name: 'Dawn Valkyrie', tier: 3, cost: 3, archetype: 'winged_mystic', baseHp: 64, baseAtk: 13, spd: 0.85, rng: 1, def: 16, hex: '#fbbf24', elem: 'holy', res: 'shadow', abName: 'Heavenly Spear', abPower: 34, abType: 'beam', elName: 'Dawn Cleave', elPower: 25 },
+      { id: 'sorcerer_void', emoji: '🔮🌌', name: 'Void Arcanist', tier: 3, cost: 3, archetype: 'humanoid_mage', baseHp: 60, baseAtk: 14, spd: 0.8, rng: 3, def: 10, hex: '#7c3aed', elem: 'shadow', res: 'holy', abName: 'Cosmic Singularity', abPower: 36, abType: 'aoe', elName: 'Void Flare', elPower: 26 },
+      { id: 'behemoth_magma', emoji: '🌋💥', name: 'Magma Behemoth', tier: 3, cost: 3, archetype: 'golem_titan', baseHp: 72, baseAtk: 12, spd: 1.15, rng: 1, def: 20, hex: '#b91c1c', elem: 'fire', res: 'water', abName: 'Volcanic Eruption', abPower: 35, abType: 'aoe', elName: 'Molten Armor', elPower: 24 },
+      { id: 'wyvern_storm', emoji: '🐉⚡', name: 'Thunder Wyvern', tier: 3, cost: 3, archetype: 'winged_dragon', baseHp: 65, baseAtk: 14, spd: 0.85, rng: 2, def: 14, hex: '#eab308', elem: 'lightning', res: 'nature', abName: 'Lightning Storm', abPower: 36, abType: 'zap', elName: 'Volt Tempest', elPower: 26 },
+      { id: 'dryad_elder', emoji: '🌳✨', name: 'Elder Dryad', tier: 3, cost: 3, archetype: 'winged_mystic', baseHp: 62, baseAtk: 12, spd: 0.9, rng: 3, def: 12, hex: '#16a34a', elem: 'nature', res: 'lightning', abName: 'Bloom Reverence', abPower: 34, abType: 'heal', elName: 'Gaia Pulse', elPower: 24 },
+      { id: 'duelist_blades', emoji: '⚔️🌪️', name: 'Tempest Duelist', tier: 3, cost: 3, archetype: 'humanoid_warrior', baseHp: 63, baseAtk: 15, spd: 0.75, rng: 1, def: 12, hex: '#0284c7', elem: 'water', res: 'lightning', abName: 'Flurry of Blades', abPower: 37, abType: 'rush', elName: 'Tsunami Slashes', elPower: 27 },
+      { id: 'colossus_iron', emoji: '🛡️🗿', name: 'Iron Sentinel', tier: 3, cost: 3, archetype: 'golem_titan', baseHp: 74, baseAtk: 11, spd: 1.2, rng: 1, def: 24, hex: '#475569', elem: 'holy', res: 'fire', abName: 'Unbreakable Bastion', abPower: 35, abType: 'shield', elName: 'Radiant Plating', elPower: 23 },
+      { id: 'necro_lich', emoji: '💀🔮', name: 'Shadow Lich', tier: 3, cost: 3, archetype: 'humanoid_mage', baseHp: 61, baseAtk: 14, spd: 0.85, rng: 3, def: 11, hex: '#9333ea', elem: 'shadow', res: 'holy', abName: 'Death Decay', abPower: 36, abType: 'drain', elName: 'Soul Chill', elPower: 26 },
+      { id: 'tiger_thunder', emoji: '🐅⚡', name: 'Saberfang Spark', tier: 3, cost: 3, archetype: 'beast_tusks', baseHp: 66, baseAtk: 14, spd: 0.8, rng: 1, def: 13, hex: '#d97706', elem: 'lightning', res: 'water', abName: 'Thunderous Pounce', abPower: 36, abType: 'rush', elName: 'Plasma Claws', elPower: 26 },
+      { id: 'leviathan_abyss', emoji: '🐋🌊', name: 'Abyssal Whale', tier: 3, cost: 3, archetype: 'serpent', baseHp: 70, baseAtk: 12, spd: 1.1, rng: 2, def: 18, hex: '#0369a1', elem: 'water', res: 'lightning', abName: 'Tsunami Cataclysm', abPower: 35, abType: 'aoe', elName: 'Permafrost Crest', elPower: 25 },
+      { id: 'phoenix_ember', emoji: '🦅🔥', name: 'Ember Phoenix', tier: 3, cost: 3, archetype: 'winged_mystic', baseHp: 63, baseAtk: 14, spd: 0.85, rng: 3, def: 12, hex: '#dc2626', elem: 'fire', res: 'water', abName: 'Flaming Rebirth', abPower: 36, abType: 'fireball', elName: 'Inferno Feathers', elPower: 26 },
+      { id: 'assassin_venom', emoji: '🥷🧪', name: 'Toxic Shadow', tier: 3, cost: 3, archetype: 'humanoid_warrior', baseHp: 62, baseAtk: 15, spd: 0.75, rng: 1, def: 10, hex: '#047857', elem: 'nature', res: 'holy', abName: 'Venomous Strike', abPower: 37, abType: 'poison', elName: 'Viper Ambush', elPower: 27 },
+      { id: 'archmage_frost', emoji: '🧙‍♂️❄️', name: 'Glacial Sage', tier: 3, cost: 3, archetype: 'humanoid_mage', baseHp: 61, baseAtk: 14, spd: 0.85, rng: 3, def: 11, hex: '#0284c7', elem: 'water', res: 'fire', abName: 'Blizzard Gale', abPower: 36, abType: 'ice', elName: 'Frostbite Lance', elPower: 26 },
+      { id: 'champion_sun', emoji: '👑☀️', name: 'Solar General', tier: 3, cost: 3, archetype: 'humanoid_warrior', baseHp: 67, baseAtk: 13, spd: 0.9, rng: 1, def: 17, hex: '#f59e0b', elem: 'holy', res: 'shadow', abName: 'Dawn Aegis', abPower: 35, abType: 'shield', elName: 'Sunburst Cleave', elPower: 25 },
+      { id: 'drake_onyx', emoji: '🐲🌑', name: 'Onyx Drake', tier: 3, cost: 3, archetype: 'winged_dragon', baseHp: 68, baseAtk: 14, spd: 0.85, rng: 2, def: 15, hex: '#312e81', elem: 'shadow', res: 'lightning', abName: 'Nether Breath', abPower: 36, abType: 'fireball', elName: 'Abyssal Flare', elPower: 26 },
+      { id: 'gorilla_primal', emoji: '🦍🌴', name: 'Primal Kong', tier: 3, cost: 3, archetype: 'beast_tusks', baseHp: 71, baseAtk: 13, spd: 1.05, rng: 1, def: 16, hex: '#166534', elem: 'nature', res: 'fire', abName: 'Jungle Quake', abPower: 35, abType: 'aoe', elName: 'Wild Pound', elPower: 25 },
+      { id: 'seraph_blade', emoji: '🗡️✨', name: 'Seraph Duelist', tier: 3, cost: 3, archetype: 'humanoid_warrior', baseHp: 64, baseAtk: 15, spd: 0.8, rng: 1, def: 13, hex: '#fef08a', elem: 'holy', res: 'water', abName: 'Divine Slashes', abPower: 37, abType: 'beam', elName: 'Radiant Edge', elPower: 27 },
+      { id: 'spark_elemental', emoji: '⚡🌀', name: 'Volt Overlord', tier: 3, cost: 3, archetype: 'golem_titan', baseHp: 66, baseAtk: 14, spd: 0.85, rng: 2, def: 14, hex: '#facc15', elem: 'lightning', res: 'shadow', abName: 'Plasma Storm', abPower: 36, abType: 'zap', elName: 'Chain Overcharge', elPower: 26 },
+      { id: 'kraken_mini', emoji: '🦑🌊', name: 'Abyssal Kraken', tier: 3, cost: 3, archetype: 'serpent', baseHp: 69, baseAtk: 13, spd: 0.95, rng: 2, def: 15, hex: '#0e7490', elem: 'water', res: 'nature', abName: 'Tentacle Crush', abPower: 35, abType: 'rush', elName: 'Ink Blind', elPower: 25 },
+      { id: 'pyro_warlord', emoji: '⚔️🔥', name: 'Inferno Knight', tier: 3, cost: 3, archetype: 'humanoid_warrior', baseHp: 68, baseAtk: 14, spd: 0.9, rng: 1, def: 16, hex: '#b91c1c', elem: 'fire', res: 'holy', abName: 'Flame Cleave', abPower: 36, abType: 'aoe', elName: 'Scorching Aura', elPower: 26 },
 
-      // --- TIER 4 (Cost: 4 Gold) ---
-      {
-        id: 'mage_astral',
-        emoji: '🧙‍♂️✨',
-        name: 'Astral Mage',
-        tier: 4,
-        cost: 4,
-        archetype: 'humanoid_mage',
-        baseHp: 440,
-        baseAtk: 72,
-        attackSpeed: 0.9,
-        range: 4,
-        defense: 12,
-        colorHex: '#8b5cf6',
-        ability: {
-          name: 'Supernova Burst',
-          desc: 'Detonates a mini star dealing 300 AoE magic damage.',
-          power: 300,
-          type: 'supernova'
-        }
-      },
-      {
-        id: 'lion_solar',
-        emoji: '🦁👑',
-        name: 'Solar Lion',
-        tier: 4,
-        cost: 4,
-        archetype: 'golem_titan',
-        baseHp: 580,
-        baseAtk: 68,
-        attackSpeed: 0.95,
-        range: 1,
-        defense: 24,
-        colorHex: '#eab308',
-        ability: {
-          name: 'Sunfire Roar',
-          desc: 'Roars empowering all allies and dealing 260 area damage.',
-          power: 260,
-          type: 'roar'
-        }
-      },
-      {
-        id: 'poseidon_ocean',
-        emoji: '🌊🔱',
-        name: 'Ocean Poseidon',
-        tier: 4,
-        cost: 4,
-        archetype: 'humanoid_warrior',
-        baseHp: 530,
-        baseAtk: 70,
-        attackSpeed: 0.9,
-        range: 2,
-        defense: 20,
-        colorHex: '#0ea5e9',
-        ability: {
-          name: 'Tidal Wave',
-          desc: 'Crashing wave knocks back all enemies in row for 280 damage.',
-          power: 280,
-          type: 'tidal_wave'
-        }
-      },
-      {
-        id: 'monkey_king',
-        emoji: '🐵👑',
-        name: 'Monkey King',
-        tier: 4,
-        cost: 4,
-        archetype: 'humanoid_warrior',
-        baseHp: 500,
-        baseAtk: 75,
-        attackSpeed: 0.8,
-        range: 2,
-        defense: 18,
-        colorHex: '#d97706',
-        ability: {
-          name: 'Golden Staff Crush',
-          desc: 'Giant staff slams 3 tiles forward for 310 physical damage.',
-          power: 310,
-          type: 'staff_slam'
-        }
-      },
-      {
-        id: 'golem_magma',
-        emoji: '🌋🗿',
-        name: 'Magma Golem',
-        tier: 4,
-        cost: 4,
-        archetype: 'golem_titan',
-        baseHp: 650,
-        baseAtk: 64,
-        attackSpeed: 1.1,
-        range: 1,
-        defense: 30,
-        colorHex: '#b91c1c',
-        ability: {
-          name: 'Volcanic Eruption',
-          desc: 'Ignites surrounding tiles dealing 270 fire damage.',
-          power: 270,
-          type: 'eruption'
-        }
-      },
+      // --- TIER 4 (Cost: 4 Gold) [16 Units] ---
+      { id: 'dragon_drake', emoji: '🐉🔥', name: 'Ancient Pyrodrake', tier: 4, cost: 4, archetype: 'winged_dragon', baseHp: 82, baseAtk: 17, spd: 0.85, rng: 2, def: 18, hex: '#dc2626', elem: 'fire', res: 'water', abName: 'Inferno Cataclysm', abPower: 44, abType: 'fireball', elName: 'Hellfire Burst', elPower: 32 },
+      { id: 'titan_storm', emoji: '⚡🗿', name: 'Storm Colossus', tier: 4, cost: 4, archetype: 'golem_titan', baseHp: 86, baseAtk: 16, spd: 1.0, rng: 2, def: 22, hex: '#f59e0b', elem: 'lightning', res: 'nature', abName: 'Supercell Smash', abPower: 43, abType: 'zap', elName: 'Thunderclap Surge', elPower: 31 },
+      { id: 'archangel_dawn', emoji: '👼☀️', name: 'Dawn Archangel', tier: 4, cost: 4, archetype: 'winged_mystic', baseHp: 78, baseAtk: 18, spd: 0.8, rng: 3, def: 16, hex: '#fef08a', elem: 'holy', res: 'shadow', abName: 'Judgment of Light', abPower: 45, abType: 'beam', elName: 'Solar Flare Smite', elPower: 33 },
+      { id: 'emperor_shadow', emoji: '👑🌑', name: 'Shadow Monarch', tier: 4, cost: 4, archetype: 'humanoid_warrior', baseHp: 80, baseAtk: 18, spd: 0.75, rng: 1, def: 17, hex: '#581c87', elem: 'shadow', res: 'holy', abName: 'Domain of Darkness', abPower: 46, abType: 'drain', elName: 'Void Guillotine', elPower: 34 },
+      { id: 'hydra_elder', emoji: '🐲🧪', name: 'Apex Hydra', tier: 4, cost: 4, archetype: 'serpent', baseHp: 84, baseAtk: 17, spd: 0.9, rng: 2, def: 19, hex: '#15803d', elem: 'nature', res: 'lightning', abName: 'Venomous Barrage', abPower: 44, abType: 'aoe', elName: 'Noxious Geyser', elPower: 32 },
+      { id: 'leviathan_frost', emoji: '🌊❄️', name: 'Glacial Leviathan', tier: 4, cost: 4, archetype: 'serpent', baseHp: 85, baseAtk: 16, spd: 0.95, rng: 2, def: 20, hex: '#0284c7', elem: 'water', res: 'fire', abName: 'Permafrost Surge', abPower: 43, abType: 'ice', elName: 'Arctic Wave', elPower: 31 },
+      { id: 'phoenix_celestial', emoji: '🔥🪽', name: 'Solar Phoenix', tier: 4, cost: 4, archetype: 'winged_mystic', baseHp: 79, baseAtk: 18, spd: 0.8, rng: 3, def: 15, hex: '#ea580c', elem: 'fire', res: 'holy', abName: 'Supernova Burst', abPower: 45, abType: 'aoe', elName: 'Flame Cascade', elPower: 33 },
+      { id: 'behemoth_gaia', emoji: '🦏🌲', name: 'Gaia Behemoth', tier: 4, cost: 4, archetype: 'beast_horn', baseHp: 88, baseAtk: 16, spd: 1.1, rng: 1, def: 23, hex: '#365314', elem: 'nature', res: 'shadow', abName: 'Tectonic Quake', abPower: 43, abType: 'aoe', elName: 'Bramble Armor', elPower: 30 },
+      { id: 'dreadlord_abyss', emoji: '👹🌑', name: 'Abyssal Dreadlord', tier: 4, cost: 4, archetype: 'humanoid_mage', baseHp: 81, baseAtk: 18, spd: 0.8, rng: 3, def: 16, hex: '#4c1d95', elem: 'shadow', res: 'water', abName: 'Hellfire Void', abPower: 45, abType: 'aoe', elName: 'Dark Matter Spike', elPower: 33 },
+      { id: 'templar_radiant', emoji: '🛡️✨', name: 'Radiant Templar', tier: 4, cost: 4, archetype: 'humanoid_warrior', baseHp: 85, baseAtk: 17, spd: 0.85, rng: 1, def: 21, hex: '#fbbf24', elem: 'holy', res: 'fire', abName: 'Aegis of the Sun', abPower: 44, abType: 'shield', elName: 'Daybreak Smite', elPower: 32 },
+      { id: 'tempest_djinn', emoji: '🌪️⚡', name: 'Tempest Djinn', tier: 4, cost: 4, archetype: 'winged_mystic', baseHp: 80, baseAtk: 18, spd: 0.8, rng: 3, def: 16, hex: '#facc15', elem: 'lightning', res: 'shadow', abName: 'Thunder Vortex', abPower: 45, abType: 'zap', elName: 'Static Overcharge', elPower: 33 },
+      { id: 'wyrm_tsunami', emoji: '🐉🌊', name: 'Tsunami Wyrm', tier: 4, cost: 4, archetype: 'winged_dragon', baseHp: 83, baseAtk: 17, spd: 0.85, rng: 2, def: 18, hex: '#0369a1', elem: 'water', res: 'lightning', abName: 'Maelstrom Devastation', abPower: 44, abType: 'aoe', elName: 'Riptide Blast', elPower: 32 },
+      { id: 'berserker_inferno', emoji: '⚔️🌋', name: 'Magma Berserker', tier: 4, cost: 4, archetype: 'humanoid_warrior', baseHp: 82, baseAtk: 19, spd: 0.75, rng: 1, def: 17, hex: '#991b1b', elem: 'fire', res: 'water', abName: 'Raging Inferno', abPower: 46, abType: 'rush', elName: 'Lava Cleave', elPower: 34 },
+      { id: 'lich_king', emoji: '👑❄️', name: 'Frost Lich King', tier: 4, cost: 4, archetype: 'humanoid_mage', baseHp: 80, baseAtk: 18, spd: 0.8, rng: 3, def: 17, hex: '#38bdf8', elem: 'water', res: 'holy', abName: 'Frozen Oblivion', abPower: 45, abType: 'ice', elName: 'Glacial Nova', elPower: 33 },
+      { id: 'chimera_storm', emoji: '🦁⚡', name: 'Storm Chimera', tier: 4, cost: 4, archetype: 'beast_tusks', baseHp: 84, baseAtk: 18, spd: 0.8, rng: 1, def: 18, hex: '#ca8a04', elem: 'lightning', res: 'fire', abName: 'Triple Spark Bite', abPower: 45, abType: 'rush', elName: 'Plasma Roar', elPower: 33 },
+      { id: 'avatar_woodland', emoji: '🧝‍♀️🌿', name: 'Avatar of Gaia', tier: 4, cost: 4, archetype: 'winged_mystic', baseHp: 81, baseAtk: 17, spd: 0.85, rng: 3, def: 16, hex: '#15803d', elem: 'nature', res: 'water', abName: 'Wrath of Nature', abPower: 44, abType: 'heal', elName: 'Verdant Hurricane', elPower: 32 },
 
-      // --- TIER 5 (Cost: 5 Gold - Legendary) ---
-      {
-        id: 'dragon_pyro',
-        emoji: '🐉🔥',
-        name: 'Dragon Pyromancer',
-        tier: 5,
-        cost: 5,
-        archetype: 'winged_dragon',
-        baseHp: 680,
-        baseAtk: 95,
-        attackSpeed: 0.85,
-        range: 3,
-        defense: 25,
-        colorHex: '#dc2626',
-        ability: {
-          name: 'Inferno Cataclysm',
-          desc: 'Rains hellfire upon the enemy board dealing 450 AoE damage.',
-          power: 450,
-          type: 'cataclysm'
-        }
-      },
-      {
-        id: 'valkyrie_cosmic',
-        emoji: '☄️💫',
-        name: 'Cosmic Valkyrie',
-        tier: 5,
-        cost: 5,
-        archetype: 'winged_mystic',
-        baseHp: 620,
-        baseAtk: 92,
-        attackSpeed: 0.8,
-        range: 2,
-        defense: 24,
-        colorHex: '#c084fc',
-        ability: {
-          name: 'Starlight Judgment',
-          desc: 'Beams divine cosmic energy down for 420 true damage.',
-          power: 420,
-          type: 'starlight'
-        }
-      },
-      {
-        id: 'unicorn_prismatic',
-        emoji: '🦄🌈',
-        name: 'Prismatic Unicorn',
-        tier: 5,
-        cost: 5,
-        archetype: 'beast_horn',
-        baseHp: 600,
-        baseAtk: 88,
-        attackSpeed: 0.85,
-        range: 3,
-        defense: 22,
-        colorHex: '#f472b6',
-        ability: {
-          name: 'Rainbow Blessing',
-          desc: 'Shields all allies for 300 HP and smites foes for 350 damage.',
-          power: 350,
-          type: 'rainbow'
-        }
-      },
-      {
-        id: 'drake_wind',
-        emoji: '🐲💨',
-        name: 'Wind Drake',
-        tier: 5,
-        cost: 5,
-        archetype: 'winged_dragon',
-        baseHp: 640,
-        baseAtk: 90,
-        attackSpeed: 0.8,
-        range: 3,
-        defense: 22,
-        colorHex: '#14b8a6',
-        ability: {
-          name: 'Cyclone Devastation',
-          desc: 'Sweeps across the board dealing 400 wind damage to all targets.',
-          power: 400,
-          type: 'cyclone'
-        }
-      }
+      // --- TIER 5 (Cost: 5 Gold) [12 Units] ---
+      { id: 'dragon_cosmic', emoji: '🌌🐉', name: 'Cosmic God-Dragon', tier: 5, cost: 5, archetype: 'winged_dragon', baseHp: 105, baseAtk: 23, spd: 0.75, rng: 3, def: 24, hex: '#a855f7', elem: 'shadow', res: 'holy', abName: 'Singularity Collapse', abPower: 55, abType: 'aoe', elName: 'Abyssal Supernova', elPower: 40 },
+      { id: 'titan_omega', emoji: '🗿⚡', name: 'Omega Colossus', tier: 5, cost: 5, archetype: 'golem_titan', baseHp: 112, baseAtk: 21, spd: 0.95, rng: 2, def: 26, hex: '#f59e0b', elem: 'lightning', res: 'water', abName: 'Cataclysmic Quake', abPower: 52, abType: 'aoe', elName: 'Plasma Overdrive', elPower: 38 },
+      { id: 'deity_sol', emoji: '☀️👑', name: 'Solar Omnipotent', tier: 5, cost: 5, archetype: 'winged_mystic', baseHp: 100, baseAtk: 24, spd: 0.75, rng: 3, def: 23, hex: '#fef08a', elem: 'holy', res: 'shadow', abName: 'Genesis Ray', abPower: 56, abType: 'beam', elName: 'Dawn of Eternity', elPower: 42 },
+      { id: 'leviathan_world', emoji: '🌊🐲', name: 'World Serpent', tier: 5, cost: 5, archetype: 'serpent', baseHp: 108, baseAtk: 22, spd: 0.85, rng: 2, def: 25, hex: '#0284c7', elem: 'water', res: 'lightning', abName: 'Deluge of Ages', abPower: 54, abType: 'aoe', elName: 'Maelstrom Devour', elPower: 39 },
+      { id: 'phoenix_primordial', emoji: '🔥👑', name: 'Primordial Phoenix', tier: 5, cost: 5, archetype: 'winged_mystic', baseHp: 98, baseAtk: 24, spd: 0.75, rng: 3, def: 22, hex: '#dc2626', elem: 'fire', res: 'nature', abName: 'Eternal Flame Rebirth', abPower: 56, abType: 'fireball', elName: 'Solar Incineration', elPower: 41 },
+      { id: 'reaper_death', emoji: '💀🌑', name: 'Grim Sovereign', tier: 5, cost: 5, archetype: 'humanoid_warrior', baseHp: 102, baseAtk: 24, spd: 0.7, rng: 1, def: 23, hex: '#3b0764', elem: 'shadow', res: 'fire', abName: 'Soul Annihilation', abPower: 56, abType: 'drain', elName: 'Void Scythe Storm', elPower: 42 },
+      { id: 'goddess_nature', emoji: '🌸✨', name: 'Gaia Primarch', tier: 5, cost: 5, archetype: 'winged_mystic', baseHp: 102, baseAtk: 22, spd: 0.8, rng: 3, def: 23, hex: '#16a34a', elem: 'nature', res: 'holy', abName: 'Eden Restoration', abPower: 53, abType: 'heal', elName: 'World Tree Wrath', elPower: 39 },
+      { id: 'warlord_infernal', emoji: '🌋⚔️', name: 'Infernal Warmaster', tier: 5, cost: 5, archetype: 'humanoid_warrior', baseHp: 106, baseAtk: 24, spd: 0.75, rng: 1, def: 24, hex: '#7f1d1d', elem: 'fire', res: 'water', abName: 'Hellfire Cataclysm', abPower: 55, abType: 'rush', elName: 'Volcanic Decimation', elPower: 41 },
+      { id: 'empress_glacial_t5', emoji: '👑❄️', name: 'Permafrost Empress', tier: 5, cost: 5, archetype: 'humanoid_mage', baseHp: 99, baseAtk: 24, spd: 0.75, rng: 4, def: 22, hex: '#38bdf8', elem: 'water', res: 'nature', abName: 'Absolute Zero', abPower: 56, abType: 'ice', elName: 'Glacial Singularity', elPower: 42 },
+      { id: 'chimera_apex_t5', emoji: '🦁🐍', name: 'Apex Chimera', tier: 5, cost: 5, archetype: 'beast_tusks', baseHp: 107, baseAtk: 23, spd: 0.8, rng: 1, def: 25, hex: '#d97706', elem: 'lightning', res: 'shadow', abName: 'Triple Apex Bite', abPower: 54, abType: 'rush', elName: 'Thunderfang Frenzy', elPower: 40 },
+      { id: 'titan_chrono_t5', emoji: '⏳⚡', name: 'Chrono Overlord', tier: 5, cost: 5, archetype: 'golem_titan', baseHp: 110, baseAtk: 22, spd: 0.85, rng: 2, def: 26, hex: '#eab308', elem: 'lightning', res: 'fire', abName: 'Temporal Shatter', abPower: 54, abType: 'aoe', elName: 'Time Stop Overload', elPower: 40 },
+      { id: 'seraph_supreme', emoji: '☀️🪽', name: 'Supreme Seraph', tier: 5, cost: 5, archetype: 'winged_mystic', baseHp: 104, baseAtk: 24, spd: 0.75, rng: 3, def: 24, hex: '#fde047', elem: 'holy', res: 'water', abName: 'Dawn Ascension', abPower: 56, abType: 'beam', elName: 'Archangel Radiance', elPower: 42 }
     ];
+
+    // Build the structured 96-character database
+    const CHARACTERS_DATABASE = RAW_UNITS_DATA.map(u => ({
+      id: u.id,
+      emoji: u.emoji,
+      name: u.name,
+      tier: u.tier,
+      cost: u.cost,
+      archetype: u.archetype,
+      baseHp: u.baseHp,
+      baseAtk: u.baseAtk,
+      attackSpeed: u.spd,
+      range: u.rng,
+      defense: u.def,
+      colorHex: u.hex,
+      element: u.elem,
+      resistance: u.res,
+      ability: {
+        name: u.abName,
+        desc: `Channels ${u.elem.toUpperCase()} power dealing ${u.abPower} damage/effect.`,
+        power: u.abPower,
+        type: u.abType,
+        element: u.elem
+      },
+      elementalAbility: {
+        name: `⚡ ${u.elName}`,
+        desc: `Channels ${u.elem.toUpperCase()} elemental power (${u.elPower} dmg), building combo stacks toward 200% Overload.`,
+        power: u.elPower,
+        element: u.elem
+      }
+    }));
 
     // =========================================================================
     // GAME STATE & GRID STRUCTURE (8x8 Main Grid + 2 Benches of 8 slots)
@@ -1324,26 +1306,30 @@
       prepTimeLeft: 25,
       playerHp: 10,
       enemyHp: 10,
-      playerGold: 4, // START AT 4 GOLD AS REQUESTED
+      playerGold: 4,
       enemyGold: 4,
       wins: 0,
       losses: 0,
       totalDamageDealt: 0,
       inspectedUnit: null,
       selectedUnit: null,
-      draftPool: [],
+      mainUnitPool: [], // Diminishing 96-unit pool
+      draftPool: [], // Player's 4 draft cards
+      enemyDraftPool: [], // Rival AI's 4 draft cards
       playerUnits: [],
       enemyUnits: [],
       projectiles: [],
       visualEffects: [],
-      isShopMinimized: false
+      isShopMinimized: false,
+      isSynergyOpen: false,
+      activeAnnouncements: []
     };
 
     // Camera Orbit State
     const cameraOrbit = {
       radius: 38,
-      theta: Math.PI / 2, // horizontal angle
-      phi: Math.PI / 3.2, // vertical pitch
+      theta: Math.PI / 2,
+      phi: Math.PI / 3.2,
       target: new THREE.Vector3(0, 1.5, 0),
       isDragging: false,
       prevMouseX: 0,
@@ -1399,6 +1385,13 @@
           gain.gain.setValueAtTime(0.12, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
           osc.start(now); osc.stop(now + 0.25);
+        } else if (type === 'crit') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(580, now);
+          osc.frequency.exponentialRampToValueAtTime(1160, now + 0.15);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now); osc.stop(now + 0.3);
         } else if (type === 'victory') {
           osc.type = 'sine';
           osc.frequency.setValueAtTime(440, now);
@@ -1420,402 +1413,295 @@
     }
 
     // =========================================================================
-    // THREE.JS SETUP WITH WEBGPU & CAMERA ORBIT
+    // DECAYING ABILITY & COMBO ANNOUNCEMENTS (LAST 3 ANNOUNCEMENTS)
+    // =========================================================================
+    function pushAbilityAnnouncement(icon, title, desc, styleClass = '') {
+      const container = document.getElementById('announcements-decay-list');
+      if (!container) return;
+
+      const item = {
+        id: 'ann_' + Math.random().toString(36).substr(2, 9),
+        icon,
+        title,
+        desc,
+        styleClass,
+        timestamp: Date.now()
+      };
+
+      gameState.activeAnnouncements.push(item);
+      // Keep only last 3 announcements
+      if (gameState.activeAnnouncements.length > 3) {
+        gameState.activeAnnouncements.shift();
+      }
+
+      renderAnnouncementsList();
+
+      // Schedule decay
+      setTimeout(() => {
+        const idx = gameState.activeAnnouncements.findIndex(a => a.id === item.id);
+        if (idx !== -1) {
+          gameState.activeAnnouncements.splice(idx, 1);
+          renderAnnouncementsList();
+        }
+      }, 3500);
+    }
+
+    function renderAnnouncementsList() {
+      const container = document.getElementById('announcements-decay-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      gameState.activeAnnouncements.forEach(ann => {
+        const el = document.createElement('div');
+        el.className = `announcement-item ${ann.styleClass}`;
+        el.innerHTML = `
+          <span style="font-size: 14px; flex-shrink: 0;">${ann.icon}</span>
+          <div style="min-width: 0; flex: 1;">
+            <div style="font-weight: 800; color: #fbbf24; font-size: 11px;">${ann.title}</div>
+            <div style="font-size: 10px; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ann.desc}</div>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    // =========================================================================
+    // THREE.JS 3D SCENE & BOARD GENERATION
     // =========================================================================
     const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050b14);
-    scene.fog = new THREE.FogExp2(0x050b14, 0.015);
+    scene.background = new THREE.Color(0x030712);
+    scene.fog = new THREE.FogExp2(0x030712, 0.015);
 
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 350);
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 200);
     updateCameraOrbit();
 
-    let renderer;
-    try {
-      if (THREE.WebGPURenderer) {
-        renderer = new THREE.WebGPURenderer({ antialias: true, powerPreference: 'high-performance' });
-        if (renderer.init) {
-          await renderer.init();
-        }
-      } else {
-        renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-      }
-    } catch (e) {
-      console.warn('Falling back to WebGL renderer:', e);
-      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    }
-
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 2.2);
-    dirLight.position.set(25, 45, 30);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.8);
+    dirLight.position.set(15, 30, 20);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 2048;
     dirLight.shadow.mapSize.height = 2048;
-    dirLight.shadow.camera.near = 10;
-    dirLight.shadow.camera.far = 100;
-    dirLight.shadow.camera.left = -25;
-    dirLight.shadow.camera.right = 25;
-    dirLight.shadow.camera.top = 25;
-    dirLight.shadow.camera.bottom = -25;
     scene.add(dirLight);
 
-    const blueSpot = new THREE.SpotLight(0x38bdf8, 3.5, 60, Math.PI / 4, 0.5, 1);
-    blueSpot.position.set(0, 30, 20);
-    scene.add(blueSpot);
+    const blueLight = new THREE.PointLight(0x38bdf8, 2.5, 45);
+    blueLight.position.set(-15, 8, 15);
+    scene.add(blueLight);
 
-    const redSpot = new THREE.SpotLight(0xef4444, 3.5, 60, Math.PI / 4, 0.5, 1);
-    redSpot.position.set(0, 30, -20);
-    scene.add(redSpot);
+    const goldLight = new THREE.PointLight(0xf59e0b, 2.5, 45);
+    goldLight.position.set(15, 8, -15);
+    scene.add(goldLight);
 
-    // =========================================================================
-    // MANDATORY INSTANCEDMESH: 8x8 BOARD TILES + BENCHES
-    // =========================================================================
-    const TOTAL_TILES = GRID_COLS * GRID_TOTAL_ROWS; // 72 tiles
-    const tileGeometry = new THREE.BoxGeometry(TILE_SIZE * 0.92, 0.5, TILE_SIZE * 0.92);
+    // Arena Floor
+    const floorGeo = new THREE.PlaneGeometry(120, 120);
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: 0x050b14,
+      roughness: 0.85,
+      metalness: 0.2
+    });
+    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+    floorMesh.rotation.x = -Math.PI / 2;
+    floorMesh.position.y = -0.05;
+    floorMesh.receiveShadow = true;
+    scene.add(floorMesh);
+
+    // InstancedMesh Tactical Grid Tiles
+    const TOTAL_TILES = GRID_TOTAL_ROWS * GRID_COLS;
+    const tileGeometry = new THREE.BoxGeometry(TILE_SIZE * 0.92, 0.35, TILE_SIZE * 0.92);
     const tileMaterial = new THREE.MeshStandardMaterial({
-      roughness: 0.35,
-      metalness: 0.25
+      roughness: 0.4,
+      metalness: 0.3,
+      vertexColors: true
     });
 
     const instancedBoardMesh = new THREE.InstancedMesh(tileGeometry, tileMaterial, TOTAL_TILES);
     instancedBoardMesh.receiveShadow = true;
-    instancedBoardMesh.castShadow = false;
+    instancedBoardMesh.castShadow = true;
+    scene.add(instancedBoardMesh);
 
+    const dummy = new THREE.Object3D();
+    const tileColors = new Float32Array(TOTAL_TILES * 3);
     const tileMetadata = [];
-    const dummyMat = new THREE.Matrix4();
 
-    let tileIndex = 0;
     for (let r = 0; r < GRID_TOTAL_ROWS; r++) {
       for (let c = 0; c < GRID_COLS; c++) {
+        const idx = r * GRID_COLS + c;
         const wx = GRID_OFFSET_X + c * TILE_SIZE;
         const wz = GRID_OFFSET_Z + r * TILE_SIZE;
-        const wy = 0;
 
-        dummyMat.setPosition(wx, wy, wz);
-        instancedBoardMesh.setMatrixAt(tileIndex, dummyMat);
+        dummy.position.set(wx, 0.175, wz);
+        dummy.updateMatrix();
+        instancedBoardMesh.setMatrixAt(idx, dummy.matrix);
 
-        let tileType = 'player_attack';
-        let baseColor = new THREE.Color(0x1d4ed8);
+        let color = new THREE.Color();
+        let tileType = 'neutral';
 
         if (r === 0) {
           tileType = 'enemy_bench';
-          baseColor = new THREE.Color(0x7f1d1d);
+          color.setHex((c % 2 === 0) ? 0x450a0a : 0x7f1d1d);
         } else if (r >= 1 && r <= 3) {
-          tileType = 'enemy_attack';
-          baseColor = new THREE.Color(0x991b1b);
+          tileType = 'enemy_lane';
+          color.setHex(((r + c) % 2 === 0) ? 0x27272a : 0x3f3f46);
         } else if (r === 4) {
-          tileType = 'free_range';
-          baseColor = new THREE.Color(0x0284c7);
+          tileType = 'draft_lane';
+          color.setHex((c % 2 === 0) ? 0x1e1b4b : 0x312e81);
         } else if (r >= 5 && r <= 7) {
-          tileType = 'player_attack';
-          baseColor = new THREE.Color(0x1e40af);
+          tileType = 'player_lane';
+          color.setHex(((r + c) % 2 === 0) ? 0x0f172a : 0x1e293b);
         } else if (r === 8) {
           tileType = 'player_bench';
-          baseColor = new THREE.Color(0x065f46);
+          color.setHex((c % 2 === 0) ? 0x064e3b : 0x065f46);
         }
 
-        if ((r + c) % 2 === 1) {
-          baseColor.offsetHSL(0, 0, 0.05);
-        }
-
-        instancedBoardMesh.setColorAt(tileIndex, baseColor);
-        tileMetadata.push({
-          index: tileIndex,
-          row: r,
-          col: c,
-          position: new THREE.Vector3(wx, wy, wz),
-          type: tileType,
-          baseColor: baseColor.clone()
-        });
-
-        tileIndex++;
+        color.toArray(tileColors, idx * 3);
+        tileMetadata.push({ row: r, col: c, type: tileType, worldX: wx, worldZ: wz });
       }
     }
+    instancedBoardMesh.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(tileColors, 3));
     instancedBoardMesh.instanceMatrix.needsUpdate = true;
-    if (instancedBoardMesh.instanceColor) instancedBoardMesh.instanceColor.needsUpdate = true;
-    scene.add(instancedBoardMesh);
-
-    // Arena Perimeter Pillars with InstancedMesh
-    const pillarCount = 8;
-    const pillarGeo = new THREE.CylinderGeometry(0.7, 0.9, 6, 16);
-    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 });
-    const pillarsMesh = new THREE.InstancedMesh(pillarGeo, pillarMat, pillarCount);
-    pillarsMesh.castShadow = true;
-    pillarsMesh.receiveShadow = true;
-
-    const pillarPositions = [
-      [-16, 3, -17], [16, 3, -17],
-      [-16, 3, -4], [16, 3, -4],
-      [-16, 3, 4], [16, 3, 4],
-      [-16, 3, 17], [16, 3, 17]
-    ];
-    pillarPositions.forEach((pos, idx) => {
-      dummyMat.setPosition(pos[0], pos[1], pos[2]);
-      pillarsMesh.setMatrixAt(idx, dummyMat);
-      pillarsMesh.setColorAt(idx, new THREE.Color(0x38bdf8));
-    });
-    pillarsMesh.instanceMatrix.needsUpdate = true;
-    if (pillarsMesh.instanceColor) pillarsMesh.instanceColor.needsUpdate = true;
-    scene.add(pillarsMesh);
-
-    // Floor Base
-    const arenaFloor = new THREE.Mesh(
-      new THREE.BoxGeometry(40, 1.0, 42),
-      new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.9 })
-    );
-    arenaFloor.position.y = -0.7;
-    arenaFloor.receiveShadow = true;
-    scene.add(arenaFloor);
 
     // =========================================================================
-    // LOW-POLY 3D CHARACTER COMPOUND MESH GENERATOR
+    // PROCEDURAL 3D CHARACTER MODEL BUILDER
     // =========================================================================
     function buildLowPolyCharacterModel(characterDef, starLevel, isEnemy) {
       const group = new THREE.Group();
-      const color = new THREE.Color(characterDef.colorHex);
-      const teamGlowColor = isEnemy ? 0xef4444 : 0x3b82f6;
+      const baseColor = new THREE.Color(characterDef.colorHex);
+      const starScale = 1.0 + (starLevel - 1) * 0.18;
 
-      // Base Pedestal
-      const baseGeo = new THREE.CylinderGeometry(1.0, 1.15, 0.35, 12);
-      const baseMat = new THREE.MeshStandardMaterial({
-        color: isEnemy ? 0x881337 : 0x1e3a8a,
-        roughness: 0.4,
-        metalness: 0.5
-      });
-      const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-      baseMesh.position.y = 0.17;
-      baseMesh.castShadow = true;
-      baseMesh.receiveShadow = true;
-      group.add(baseMesh);
-
-      // Star Tier Trim Ring
-      if (starLevel >= 2) {
-        const ringGeo = new THREE.TorusGeometry(1.15, 0.09, 8, 20);
-        const ringMat = new THREE.MeshStandardMaterial({
-          color: starLevel >= 4 ? 0xf59e0b : 0x38bdf8,
-          emissive: starLevel >= 4 ? 0xd97706 : 0x0284c7,
-          emissiveIntensity: 0.6
-        });
-        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-        ringMesh.rotation.x = Math.PI / 2;
-        ringMesh.position.y = 0.35;
-        group.add(ringMesh);
-      }
-
-      // Archetype-Specific Low-Poly Mesh Hierarchy
       const modelContainer = new THREE.Group();
-      modelContainer.name = 'animatedBody';
+      modelContainer.scale.setScalar(starScale);
+      group.add(modelContainer);
 
       const bodyMat = new THREE.MeshStandardMaterial({
-        color: color,
-        roughness: 0.3,
-        metalness: 0.4,
-        flatShading: true
-      });
-      const darkMat = new THREE.MeshStandardMaterial({
-        color: 0x1e293b,
-        roughness: 0.6,
-        flatShading: true
-      });
-      const metalMat = new THREE.MeshStandardMaterial({
-        color: 0x94a3b8,
-        metalness: 0.8,
-        roughness: 0.2,
-        flatShading: true
+        color: baseColor,
+        roughness: 0.35,
+        metalness: 0.35
       });
       const goldMat = new THREE.MeshStandardMaterial({
-        color: 0xf59e0b,
-        emissive: 0x78350f,
-        emissiveIntensity: 0.4,
-        metalness: 0.7,
-        flatShading: true
+        color: 0xfbbf24,
+        roughness: 0.2,
+        metalness: 0.85
+      });
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: characterDef.element === 'fire' ? 0xef4444 :
+               characterDef.element === 'water' ? 0x0ea5e9 :
+               characterDef.element === 'lightning' ? 0xeab308 :
+               characterDef.element === 'nature' ? 0x22c55e :
+               characterDef.element === 'shadow' ? 0x9333ea : 0xfde047
       });
 
       const archetype = characterDef.archetype || 'humanoid_warrior';
 
-      if (archetype === 'humanoid_warrior' || archetype === 'humanoid_archer') {
-        // Torso
-        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.9, 0.5), bodyMat);
-        torso.position.y = 0.9;
-        torso.castShadow = true;
-        modelContainer.add(torso);
+      if (archetype === 'humanoid_warrior') {
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 1.3, 7), bodyMat);
+        body.position.y = 0.9;
+        modelContainer.add(body);
 
-        // Head / Helmet
-        const head = new THREE.Mesh(new THREE.DodecahedronGeometry(0.38, 0), metalMat);
-        head.position.set(0, 1.6, 0);
-        head.castShadow = true;
+        const head = new THREE.Mesh(new THREE.DodecahedronGeometry(0.4, 0), bodyMat);
+        head.position.y = 1.85;
         modelContainer.add(head);
 
-        // Shoulders
-        const leftShoulder = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.4, 4), goldMat);
-        leftShoulder.position.set(-0.55, 1.25, 0);
-        leftShoulder.rotation.z = Math.PI / 4;
-        modelContainer.add(leftShoulder);
+        const helmet = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.45, 5), goldMat);
+        helmet.position.y = 2.25;
+        modelContainer.add(helmet);
 
-        const rightShoulder = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.4, 4), goldMat);
-        rightShoulder.position.set(0.55, 1.25, 0);
-        rightShoulder.rotation.z = -Math.PI / 4;
-        modelContainer.add(rightShoulder);
+        const shield = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.8, 0.6), goldMat);
+        shield.position.set(-0.65, 1.0, 0.2);
+        modelContainer.add(shield);
 
-        // Weapon
-        if (archetype === 'humanoid_archer') {
-          const bow = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.05, 4, 12, Math.PI), goldMat);
-          bow.position.set(0.6, 1.0, 0.3);
-          bow.rotation.y = Math.PI / 2;
-          modelContainer.add(bow);
-        } else {
-          const swordBlade = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.2, 0.04), metalMat);
-          swordBlade.position.set(0.6, 1.2, 0.2);
-          swordBlade.rotation.x = -Math.PI / 8;
-          modelContainer.add(swordBlade);
-        }
-      } else if (archetype === 'humanoid_mage' || archetype === 'winged_mystic') {
-        // Robe Conical Body
-        const robe = new THREE.Mesh(new THREE.ConeGeometry(0.65, 1.3, 7), bodyMat);
+        const sword = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.1, 0.2), glowMat);
+        sword.position.set(0.65, 1.1, 0.3);
+        sword.rotation.x = 0.3;
+        modelContainer.add(sword);
+      } else if (archetype === 'humanoid_mage') {
+        const robe = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.5, 6), bodyMat);
         robe.position.y = 0.85;
-        robe.castShadow = true;
         modelContainer.add(robe);
 
-        // Floating Mystical Head / Mask
-        const head = new THREE.Mesh(new THREE.OctahedronGeometry(0.35, 0), goldMat);
-        head.position.set(0, 1.65, 0);
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 6, 6), bodyMat);
+        head.position.y = 1.75;
         modelContainer.add(head);
 
-        // Wizard Hat or Halo
-        const hat = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.7, 5), darkMat);
-        hat.position.set(0, 2.1, 0);
-        hat.rotation.x = -0.15;
+        const hat = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.85, 5), goldMat);
+        hat.position.y = 2.25;
         modelContainer.add(hat);
 
-        // Orbiting Spell Orbs
         for (let i = 0; i < 3; i++) {
-          const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(0.14, 0), goldMat);
-          const angle = (i / 3) * Math.PI * 2;
-          orb.position.set(Math.cos(angle) * 0.75, 1.4 + (i % 2) * 0.2, Math.sin(angle) * 0.75);
+          const orb = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 0), glowMat);
           orb.name = `spellOrb_${i}`;
+          orb.position.set(Math.cos(i * 2.1) * 0.75, 1.4, Math.sin(i * 2.1) * 0.75);
           modelContainer.add(orb);
         }
-
-        // Wings for winged mystic
-        if (archetype === 'winged_mystic') {
-          const wingGeo = new THREE.BoxGeometry(0.08, 0.7, 1.0);
-          const leftWing = new THREE.Mesh(wingGeo, metalMat);
-          leftWing.position.set(-0.4, 1.3, -0.4);
-          leftWing.rotation.set(0.3, -0.4, 0.3);
-          modelContainer.add(leftWing);
-
-          const rightWing = new THREE.Mesh(wingGeo, metalMat);
-          rightWing.position.set(0.4, 1.3, -0.4);
-          rightWing.rotation.set(0.3, 0.4, -0.3);
-          modelContainer.add(rightWing);
-        }
-      } else if (archetype === 'winged_dragon') {
-        // Dragon Body
-        const body = new THREE.Mesh(new THREE.DodecahedronGeometry(0.7, 0), bodyMat);
-        body.position.set(0, 1.1, 0);
-        body.scale.set(1.1, 0.9, 1.4);
-        body.castShadow = true;
-        modelContainer.add(body);
-
-        // Neck & Head
-        const neck = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.8, 5), bodyMat);
-        neck.position.set(0, 1.6, 0.5);
-        neck.rotation.x = Math.PI / 4;
-        modelContainer.add(neck);
-
-        const head = new THREE.Mesh(new THREE.DodecahedronGeometry(0.4, 0), goldMat);
-        head.position.set(0, 1.9, 0.8);
-        modelContainer.add(head);
-
-        // Dragon Horns
-        const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.4, 4), darkMat);
-        hornL.position.set(-0.25, 2.2, 0.65);
-        hornL.rotation.z = -0.4;
-        modelContainer.add(hornL);
-
-        const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.4, 4), darkMat);
-        hornR.position.set(0.25, 2.2, 0.65);
-        hornR.rotation.z = 0.4;
-        modelContainer.add(hornR);
-
-        // Dragon Wings
-        const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.9, 1.3), bodyMat);
-        wingL.position.set(-0.8, 1.5, -0.2);
-        wingL.rotation.set(0.4, -0.5, 0.4);
-        modelContainer.add(wingL);
-
-        const wingR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.9, 1.3), bodyMat);
-        wingR.position.set(0.8, 1.5, -0.2);
-        wingR.rotation.set(0.4, 0.5, -0.4);
-        modelContainer.add(wingR);
-      } else if (archetype === 'golem_titan') {
-        // Heavy Titan Block Body
-        const torso = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8, 0), bodyMat);
-        torso.position.y = 1.1;
-        torso.castShadow = true;
+      } else if (archetype === 'winged_dragon' || archetype === 'serpent') {
+        const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.55, 1.0, 4, 8), bodyMat);
+        torso.rotation.x = Math.PI / 3;
+        torso.position.y = 1.0;
         modelContainer.add(torso);
 
-        // Massive Boulder Shoulders
-        const sL = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45, 0), darkMat);
-        sL.position.set(-0.85, 1.35, 0);
-        modelContainer.add(sL);
-
-        const sR = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45, 0), darkMat);
-        sR.position.set(0.85, 1.35, 0);
-        modelContainer.add(sR);
-
-        // Glowing Core Eye
-        const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.25, 0), goldMat);
-        core.position.set(0, 1.3, 0.6);
-        modelContainer.add(core);
-      } else {
-        // Beasts / Serpents / Horned / Tusks
-        const body = new THREE.Mesh(new THREE.DodecahedronGeometry(0.65, 0), bodyMat);
-        body.position.set(0, 0.9, 0);
-        body.scale.set(1.0, 0.8, 1.3);
-        body.castShadow = true;
-        modelContainer.add(body);
-
-        const head = new THREE.Mesh(new THREE.OctahedronGeometry(0.42, 0), bodyMat);
-        head.position.set(0, 1.25, 0.6);
+        const head = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.9, 5), goldMat);
+        head.rotation.x = -Math.PI / 4;
+        head.position.set(0, 1.7, 0.6);
         modelContainer.add(head);
 
-        // Horns / Tusks
-        const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.45, 4), goldMat);
-        hornL.position.set(-0.25, 1.5, 0.6);
-        hornL.rotation.set(-0.3, 0, -0.3);
-        modelContainer.add(hornL);
+        const wingShape = new THREE.BoxGeometry(1.2, 0.05, 0.6);
+        const wMeshL = new THREE.Mesh(wingShape, bodyMat);
+        wMeshL.position.set(-0.8, 1.4, -0.2);
+        wMeshL.rotation.z = 0.35;
+        modelContainer.add(wMeshL);
+        const wMeshR = new THREE.Mesh(wingShape, bodyMat);
+        wMeshR.position.set(0.8, 1.4, -0.2);
+        wMeshR.rotation.z = -0.35;
+        modelContainer.add(wMeshR);
+      } else if (archetype === 'golem_titan') {
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.1, 0.9), bodyMat);
+        torso.position.y = 1.1;
+        modelContainer.add(torso);
 
-        const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.45, 4), goldMat);
-        hornR.position.set(0.25, 1.5, 0.6);
-        hornR.rotation.set(-0.3, 0, 0.3);
-        modelContainer.add(hornR);
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.5), goldMat);
+        head.position.y = 1.85;
+        modelContainer.add(head);
+
+        const shoulderL = new THREE.Mesh(new THREE.DodecahedronGeometry(0.38, 0), glowMat);
+        shoulderL.position.set(-0.85, 1.4, 0);
+        modelContainer.add(shoulderL);
+        const shoulderR = new THREE.Mesh(new THREE.DodecahedronGeometry(0.38, 0), glowMat);
+        shoulderR.position.set(0.85, 1.4, 0);
+        modelContainer.add(shoulderR);
+      } else {
+        const beastBody = new THREE.Mesh(new THREE.SphereGeometry(0.7, 6, 6), bodyMat);
+        beastBody.position.y = 0.9;
+        modelContainer.add(beastBody);
+
+        const horn1 = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.6, 4), goldMat);
+        horn1.position.set(-0.35, 1.65, 0.3);
+        horn1.rotation.x = 0.3;
+        modelContainer.add(horn1);
+
+        const horn2 = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.6, 4), goldMat);
+        horn2.position.set(0.35, 1.65, 0.3);
+        horn2.rotation.x = 0.3;
+        modelContainer.add(horn2);
       }
 
-      // Rotate enemy models to face player
-      if (isEnemy) {
-        modelContainer.rotation.y = Math.PI;
-      }
-      group.add(modelContainer);
-
-      // Floating Stylized Emoji & Star Billboard Banner
+      // 3D Canvas Emoji & Star Banner
       const bannerCanvas = document.createElement('canvas');
       bannerCanvas.width = 192;
-      bannerCanvas.height = 80;
+      bannerCanvas.height = 72;
       const bCtx = bannerCanvas.getContext('2d');
 
-      // Draw Emoji Banner
-      bCtx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-      bCtx.roundRect ? bCtx.roundRect(16, 8, 160, 64, 16) : bCtx.fillRect(16, 8, 160, 64);
+      bCtx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      bCtx.beginPath();
+      bCtx.roundRect(4, 4, 184, 64, 12);
       bCtx.fill();
       bCtx.strokeStyle = isEnemy ? '#ef4444' : '#38bdf8';
       bCtx.lineWidth = 4;
@@ -1859,15 +1745,17 @@
     }
 
     // =========================================================================
-    // 3D UNIT CREATION & RIGGING
+    // 3D UNIT CREATION & RIGGING (UPGRADE SCALING: 120%, 145%, 175%, 210%)
     // =========================================================================
     let unitIdCounter = 1;
+    const STAR_SCALING_FACTORS = [1.0, 1.20, 1.45, 1.75, 2.10];
 
     function create3DUnit(characterDef, starLevel = 1, isEnemy = false, row = 8, col = 0) {
-      const starMultiplier = Math.pow(1.85, starLevel - 1);
+      const starMultiplier = STAR_SCALING_FACTORS[starLevel - 1] || 1.0;
       const starBonusHp = Math.round(characterDef.baseHp * starMultiplier);
       const starBonusAtk = Math.round(characterDef.baseAtk * starMultiplier);
       const starBonusAbility = Math.round(characterDef.ability.power * starMultiplier);
+      const starBonusElemAbility = Math.round(characterDef.elementalAbility.power * starMultiplier);
 
       const {
         group,
@@ -1889,6 +1777,7 @@
         emoji: characterDef.emoji,
         tier: characterDef.tier,
         cost: characterDef.cost,
+        archetype: characterDef.archetype,
         starLevel: starLevel,
         isEnemy: isEnemy,
         row: row,
@@ -1899,12 +1788,25 @@
         attackSpeed: characterDef.attackSpeed,
         attackRange: characterDef.range,
         defense: characterDef.defense,
+        element: characterDef.element,
+        resistance: characterDef.resistance,
         ability: {
           name: characterDef.ability.name,
           desc: characterDef.ability.desc,
           power: starBonusAbility,
-          type: characterDef.ability.type
+          type: characterDef.ability.type,
+          element: characterDef.element
         },
+        elementalAbility: {
+          name: characterDef.elementalAbility.name,
+          desc: characterDef.elementalAbility.desc,
+          power: starBonusElemAbility,
+          element: characterDef.element
+        },
+        // Combo state tracking
+        consecutiveElement: null,
+        consecutiveHits: 0,
+        lastDamageTaken: 0,
         mana: 0,
         maxMana: 100,
         mesh: group,
@@ -1938,7 +1840,7 @@
       const ctx = unit.hpCanvas.getContext('2d');
       ctx.clearRect(0, 0, 128, 28);
 
-      // Dark background container
+      // Dark background
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(0, 2, 128, 16);
 
@@ -1960,6 +1862,12 @@
       ctx.strokeRect(0, 2, 128, 16);
 
       unit.hpTexture.needsUpdate = true;
+    }
+
+    // Helper: count active fielded units (Rows 5-7 for player, Rows 1-3 for enemy)
+    function countFieldedUnits(isEnemy) {
+      const units = isEnemy ? gameState.enemyUnits : gameState.playerUnits;
+      return units.filter(u => !u.isDead && (isEnemy ? (u.row >= 1 && u.row <= 3) : (u.row >= 5 && u.row <= 7))).length;
     }
 
     // =========================================================================
@@ -2002,8 +1910,10 @@
           upgradedAny = true;
           playAudio('upgrade');
 
-          // Trigger Particle Fusion FX
           spawnFusionParticles(upgradedUnit.mesh.position);
+
+          const upgradePct = STAR_SCALING_FACTORS[newStarLevel - 1] * 100;
+          pushAbilityAnnouncement('⭐', `MATCH-3 FUSION ★${newStarLevel}!`, `${charDef.name} evolved with ${upgradePct}% stats!`, 'upgrade');
 
           if (!isEnemy) {
             showToast(`⭐ MATCH 3! ${charDef.name} UPGRADED TO ★${newStarLevel}! ⭐`);
@@ -2097,64 +2007,92 @@
     }
 
     // =========================================================================
-    // DRAFTING SHOP LOGIC (START AT 4 GOLD)
+    // 96-UNIT DIMINISHING MAIN POOL & SEPARATE DRAFT POOLS
     // =========================================================================
-    function generateDraftPool() {
-      const pool = [];
-      const tierChances = [
-        [0.70, 0.30, 0.00, 0.00, 0.00], // Round 1-2
-        [0.50, 0.35, 0.15, 0.00, 0.00], // Round 3-4
-        [0.30, 0.40, 0.20, 0.10, 0.00], // Round 5-6
-        [0.15, 0.30, 0.30, 0.20, 0.05], // Round 7+
-      ];
-
-      const roundTierIdx = Math.min(tierChances.length - 1, Math.floor((gameState.round - 1) / 2));
-      const weights = tierChances[roundTierIdx];
-
-      for (let i = 0; i < 4; i++) {
-        const rand = Math.random();
-        let cumulative = 0;
-        let selectedTier = 1;
-
-        for (let t = 0; t < weights.length; t++) {
-          cumulative += weights[t];
-          if (rand <= cumulative) {
-            selectedTier = t + 1;
-            break;
-          }
+    function initOrReplenishMainPool() {
+      if (!gameState.mainUnitPool || gameState.mainUnitPool.length < 8) {
+        const deck = [...CHARACTERS_DATABASE];
+        // Fisher-Yates shuffle
+        for (let i = deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [deck[i], deck[j]] = [deck[j], deck[i]];
         }
-
-        const tierChars = CHARACTERS_DATABASE.filter(c => c.tier === selectedTier);
-        const chosen = tierChars[Math.floor(Math.random() * tierChars.length)];
-        pool.push(chosen);
+        gameState.mainUnitPool = deck;
       }
+      updateMainPoolHUD();
+    }
 
-      gameState.draftPool = pool;
+    function updateMainPoolHUD() {
+      const countEl = document.getElementById('main-pool-count');
+      if (countEl) {
+        countEl.innerText = `${gameState.mainUnitPool.length}/96`;
+      }
+    }
+
+    function generateDraftPool() {
+      initOrReplenishMainPool();
+
+      // Separate Player Draft Pool (4 units pulled and diminished from 96-unit pool)
+      const pPool = [];
+      for (let i = 0; i < 4; i++) {
+        if (gameState.mainUnitPool.length === 0) initOrReplenishMainPool();
+        const drawn = gameState.mainUnitPool.pop();
+        if (drawn) pPool.push(drawn);
+      }
+      gameState.draftPool = pPool;
+
+      // Separate Rival AI Draft Pool (4 units pulled and diminished from 96-unit pool)
+      const ePool = [];
+      for (let i = 0; i < 4; i++) {
+        if (gameState.mainUnitPool.length === 0) initOrReplenishMainPool();
+        const drawn = gameState.mainUnitPool.pop();
+        if (drawn) ePool.push(drawn);
+      }
+      gameState.enemyDraftPool = ePool;
+
+      updateMainPoolHUD();
       renderShopUI();
+      updateSynergyAnalyzer();
     }
 
     function renderShopUI() {
-      const container = document.getElementById('shop-cards-row');
+      const container = document.getElementById('side-draft-list');
+      const countLabel = document.getElementById('draft-count-label');
       if (!container) return;
       container.innerHTML = '';
+
+      if (countLabel) countLabel.innerText = gameState.draftPool.length;
 
       gameState.draftPool.forEach((charDef, idx) => {
         const card = document.createElement('div');
         const canAfford = gameState.playerGold >= charDef.cost;
-        card.className = `shop-card tier-${charDef.tier} ${canAfford ? '' : 'disabled'}`;
-        card.onclick = () => buyCharacterFromShop(idx);
+        card.className = `side-draft-card tier-${charDef.tier} ${canAfford ? '' : 'disabled'}`;
 
         card.innerHTML = `
-          <div class="shop-card-emoji">${charDef.emoji}</div>
-          <div class="shop-card-name">${charDef.name}</div>
-          <div class="shop-card-stats">❤️${charDef.baseHp} ⚔️${charDef.baseAtk}</div>
-          <div class="shop-card-cost"><span>🪙</span><span>${charDef.cost} Gold</span></div>
+          <div class="side-card-top">
+            <div class="side-card-identity">
+              <div class="side-card-emoji">${charDef.emoji}</div>
+              <div style="min-width: 0;">
+                <div class="side-card-name">${charDef.name}</div>
+                <div class="side-card-badges">
+                  <span class="element-badge ${charDef.element}">${charDef.element}</span>
+                  <span class="resist-badge">Resist: ${charDef.resistance}</span>
+                </div>
+              </div>
+            </div>
+            <button class="side-card-cost-btn" onclick="event.stopPropagation(); buyCharacterFromShop(${idx})">
+              <span>🪙</span><span>${charDef.cost}</span>
+            </button>
+          </div>
+          <div class="side-card-stats">
+            <span>❤️${charDef.baseHp} ⚔️${charDef.baseAtk}</span>
+            <span style="color: #94a3b8; font-size: 8.5px;">Tier ${charDef.tier}</span>
+          </div>
         `;
+
+        card.onclick = () => buyCharacterFromShop(idx);
         container.appendChild(card);
       });
-
-      const countEl = document.getElementById('minimized-card-count');
-      if (countEl) countEl.innerText = gameState.draftPool.length;
     }
 
     function buyCharacterFromShop(cardIndex) {
@@ -2181,7 +2119,7 @@
       }
 
       if (targetCol === -1) {
-        showToast('Bench Full! Deploy units onto attack rows.');
+        showToast('Bench Full! Deploy units onto Attack Lanes (Rows 5-7).');
         return;
       }
 
@@ -2199,6 +2137,7 @@
 
       // Check Match-3 auto combine
       checkAndApplyMatch3Upgrades(false);
+      updateSynergyAnalyzer();
     }
 
     function rerollShop() {
@@ -2212,77 +2151,342 @@
       updateHUD();
     }
 
-    function enemyAiDraftAndDeploy() {
-      // AI buys suitable units with its gold
-      while (gameState.enemyGold >= 1) {
-        const affordable = CHARACTERS_DATABASE.filter(c => c.cost <= gameState.enemyGold);
-        if (affordable.length === 0) break;
-        const charDef = affordable[Math.floor(Math.random() * affordable.length)];
+    window.toggleSideDraft = function() {
+      const panel = document.getElementById('side-draft-panel');
+      const btn = document.getElementById('toggle-draft-btn');
+      if (!panel) return;
+      panel.classList.toggle('collapsed');
+      if (btn) {
+        btn.innerText = panel.classList.contains('collapsed') ? '+' : '−';
+      }
+    };
 
-        // Place on enemy board rows 1-3
-        const occupied = gameState.enemyUnits.filter(u => !u.isDead).map(u => `${u.row},${u.col}`);
-        let placed = false;
+    // =========================================================================
+    // PLAYER SYNERGY & COMBOS ANALYZER PANEL
+    // =========================================================================
+    window.toggleSynergyPanel = function(force) {
+      const panel = document.getElementById('synergy-analyzer-panel');
+      if (!panel) return;
+      if (typeof force === 'boolean') {
+        gameState.isSynergyOpen = force;
+      } else {
+        gameState.isSynergyOpen = !gameState.isSynergyOpen;
+      }
+      panel.style.display = gameState.isSynergyOpen ? 'flex' : 'none';
+      if (gameState.isSynergyOpen) updateSynergyAnalyzer();
+    };
 
-        for (let r = 1; r <= 3; r++) {
-          for (let c = 0; c < GRID_COLS; c++) {
-            if (!occupied.includes(`${r},${c}`)) {
-              const u = create3DUnit(charDef, 1, true, r, c);
-              gameState.enemyUnits.push(u);
-              gameState.enemyGold -= charDef.cost;
-              placed = true;
-              break;
-            }
-          }
-          if (placed) break;
+    function updateSynergyAnalyzer() {
+      const upgradesContainer = document.getElementById('combo-upgrades-list');
+      const synergiesContainer = document.getElementById('combo-synergies-list');
+      const adviceEl = document.getElementById('combo-advice-text');
+      const badgeEl = document.getElementById('combo-alert-badge');
+
+      if (!upgradesContainer || !synergiesContainer || !adviceEl) return;
+
+      upgradesContainer.innerHTML = '';
+      synergiesContainer.innerHTML = '';
+
+      let alertCount = 0;
+
+      // 1. Analyze Star Evolution Opportunities
+      const playerUnitCounts = {};
+      gameState.playerUnits.forEach(u => {
+        if (u.isDead) return;
+        const key = `${u.charId}_star${u.starLevel}`;
+        if (!playerUnitCounts[key]) {
+          playerUnitCounts[key] = { charId: u.charId, name: u.name, emoji: u.emoji, starLevel: u.starLevel, count: 0 };
         }
-        if (!placed) break;
+        playerUnitCounts[key].count++;
+      });
+
+      const shopCharIds = gameState.draftPool.map(c => c.id);
+      const upgradeItems = [];
+
+      for (const key in playerUnitCounts) {
+        const item = playerUnitCounts[key];
+        const inShop = shopCharIds.includes(item.charId);
+
+        if (item.count >= 2 && inShop && item.starLevel < 5) {
+          alertCount++;
+          upgradeItems.push({
+            priority: 1,
+            html: `
+              <div class="combo-card upgrade-ready">
+                <div class="combo-title" style="color: #fbbf24; justify-content: space-between;">
+                  <span>⚡ IMMEDIATE EVOLUTION!</span>
+                  <span>★${item.starLevel} ➔ ★${item.starLevel + 1}</span>
+                </div>
+                <div class="combo-desc">
+                  Buy <strong>${item.emoji} ${item.name}</strong> from draft to trigger Match-3 Fusion!
+                </div>
+              </div>
+            `
+          });
+        } else if (item.count === 2 && item.starLevel < 5) {
+          upgradeItems.push({
+            priority: 2,
+            html: `
+              <div class="combo-card">
+                <div class="combo-title" style="color: #38bdf8;">⭐ 2/3 Collected: ${item.emoji} ${item.name} (★${item.starLevel})</div>
+                <div class="combo-desc">Need 1 more copy to fuse into ★${item.starLevel + 1}.</div>
+              </div>
+            `
+          });
+        } else if (item.count === 1 && inShop && item.starLevel < 5) {
+          upgradeItems.push({
+            priority: 3,
+            html: `
+              <div class="combo-card">
+                <div class="combo-title" style="color: #c084fc;">🛒 1/3 Owned: ${item.emoji} ${item.name} in Shop</div>
+                <div class="combo-desc">Purchasing brings you to 2/3 copies.</div>
+              </div>
+            `
+          });
+        }
       }
 
+      if (upgradeItems.length === 0) {
+        upgradesContainer.innerHTML = `
+          <div style="font-size: 11px; color: #64748b; font-style: italic; padding: 4px;">
+            No immediate Match-3 combinations. Buy matching units from the draft pool to trigger star fusions!
+          </div>
+        `;
+      } else {
+        upgradeItems.sort((a, b) => a.priority - b.priority);
+        upgradeItems.forEach(item => {
+          upgradesContainer.innerHTML += item.html;
+        });
+      }
+
+      // 2. Analyze Archetype Synergies
+      const archetypeDefinitions = {
+        'humanoid_warrior': { name: 'Vanguard', emoji: '⚔️', bonus: '+15% ATK' },
+        'humanoid_mage': { name: 'Arcane', emoji: '🔮', bonus: '+25 Ability Power' },
+        'winged_dragon': { name: 'Draconic', emoji: '🐲', bonus: '+20% Crit' },
+        'winged_mystic': { name: 'Mythic', emoji: '✨', bonus: '+15% Speed' },
+        'golem_titan': { name: 'Titan', emoji: '🗿', bonus: '+20% Max HP' },
+        'beast_horn': { name: 'Horned', emoji: '🦏', bonus: '+10 Armor' },
+        'beast_tusks': { name: 'Fangs', emoji: '🐗', bonus: '+15 True DMG' },
+        'serpent': { name: 'Serpent', emoji: '🐍', bonus: '+20 Poison' }
+      };
+
+      const archetypeCounts = {};
+      gameState.playerUnits.forEach(u => {
+        if (u.isDead) return;
+        const charDef = CHARACTERS_DATABASE.find(c => c.id === u.charId);
+        if (charDef && charDef.archetype) {
+          archetypeCounts[charDef.archetype] = (archetypeCounts[charDef.archetype] || 0) + 1;
+        }
+      });
+
+      let hasSynergy = false;
+      for (const arch in archetypeCounts) {
+        const count = archetypeCounts[arch];
+        const def = archetypeDefinitions[arch] || { name: arch, emoji: '🛡️', bonus: 'Synergy Active' };
+        const isActive = count >= 2;
+        if (isActive) hasSynergy = true;
+
+        const chip = document.createElement('div');
+        chip.className = `synergy-chip ${isActive ? 'active' : ''}`;
+        chip.innerHTML = `
+          <span>${def.emoji} ${def.name}:</span>
+          <strong>${count} Units</strong>
+          <span class="synergy-count">${isActive ? 'Active' : 'Need 2'}</span>
+        `;
+        synergiesContainer.appendChild(chip);
+      }
+
+      if (!hasSynergy) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.fontSize = '11px';
+        emptyMsg.style.color = '#64748b';
+        emptyMsg.style.fontStyle = 'italic';
+        emptyMsg.innerText = 'Deploy 2 or more units of the same archetype to activate synergy stat bonuses!';
+        synergiesContainer.appendChild(emptyMsg);
+      }
+
+      // 3. Dynamic Strategic Advice
+      const fieldedCount = countFieldedUnits(false);
+      if (alertCount > 0) {
+        adviceEl.innerText = `🔥 Priority: You have ${alertCount} unit(s) in the shop ready for an instant Match-3 Star Evolution!`;
+        adviceEl.style.borderColor = '#fbbf24';
+        adviceEl.style.color = '#fde68a';
+      } else if (fieldedCount === 0) {
+        adviceEl.innerText = `⚠️ Tactical Warning: Your bench units cannot fight! Move units onto Attack Lanes (Rows 5-7). Max 8 fielded units.`;
+        adviceEl.style.borderColor = '#f87171';
+        adviceEl.style.color = '#fca5a5';
+      } else {
+        adviceEl.innerText = `💡 Recommended: Fielded ${fieldedCount}/8 units. Hit enemies with 3x non-resistant elements for a 200% Overload critical hit!`;
+        adviceEl.style.borderColor = '#38bdf8';
+        adviceEl.style.color = '#bae6fd';
+      }
+
+      if (badgeEl) {
+        if (alertCount > 0) {
+          badgeEl.innerText = alertCount;
+          badgeEl.style.display = 'inline-block';
+        } else {
+          badgeEl.style.display = 'none';
+        }
+      }
+    }
+
+    // =========================================================================
+    // AI STRATEGY ENGINE & DIFFICULTY SCALING (NON-VISIBLE STRATEGY LIST)
+    // =========================================================================
+    function getAiAdvancedStrategyChance() {
+      const cappedWins = Math.min(gameState.wins, 256);
+      return (cappedWins / 512) * 100;
+    }
+
+    function enemyAiDraftAndDeploy() {
+      const advancedChance = getAiAdvancedStrategyChance();
+      const isAdvanced = (Math.random() * 100) < advancedChance;
+
+      // Internal non-visible strategic target and score evaluation list
+      const aiInternalStrategyList = [];
+
+      const aiUnitCounts = {};
+      gameState.enemyUnits.forEach(u => {
+        if (u.isDead) return;
+        const key = `${u.charId}_star${u.starLevel}`;
+        aiUnitCounts[key] = (aiUnitCounts[key] || 0) + 1;
+      });
+
+      // Score each candidate unit in the AI's separate draft pool
+      gameState.enemyDraftPool.forEach((charDef, index) => {
+        let score = charDef.cost * 15;
+
+        // Check Match-3 potential
+        const currentCount = aiUnitCounts[`${charDef.id}_star1`] || 0;
+        if (currentCount === 2) score += 140;
+        else if (currentCount === 1) score += 70;
+
+        // Check Frontline vs Backline balance
+        const frontlineCount = gameState.enemyUnits.filter(u => !u.isDead && ['golem_titan', 'beast_horn', 'humanoid_warrior'].includes(u.archetype)).length;
+        if (frontlineCount < 2 && ['golem_titan', 'beast_horn'].includes(charDef.archetype)) {
+          score += 50;
+        } else if (['humanoid_mage', 'winged_dragon'].includes(charDef.archetype)) {
+          score += 40;
+        }
+
+        aiInternalStrategyList.push({
+          charDef,
+          draftIndex: index,
+          strategicScore: score
+        });
+      });
+
+      if (isAdvanced) {
+        aiInternalStrategyList.sort((a, b) => b.strategicScore - a.strategicScore);
+      }
+
+      // Execute AI Purchasing up to max 8 fielded units
+      for (let i = 0; i < aiInternalStrategyList.length; i++) {
+        if (countFieldedUnits(true) >= 8) break;
+
+        const candidate = aiInternalStrategyList[i];
+        const charDef = candidate.charDef;
+
+        if (gameState.enemyGold >= charDef.cost) {
+          const occupied = gameState.enemyUnits.filter(u => !u.isDead).map(u => `${u.row},${u.col}`);
+          let targetRow = 2;
+          let targetCol = -1;
+
+          if (isAdvanced) {
+            const isFrontliner = ['golem_titan', 'beast_horn', 'beast_tusks', 'humanoid_warrior'].includes(charDef.archetype);
+            const preferredRows = isFrontliner ? [3, 2, 1] : [1, 2, 3];
+
+            for (const r of preferredRows) {
+              for (let c = 0; c < GRID_COLS; c++) {
+                if (!occupied.includes(`${r},${c}`)) {
+                  targetRow = r;
+                  targetCol = c;
+                  break;
+                }
+              }
+              if (targetCol !== -1) break;
+            }
+          } else {
+            for (let r = 1; r <= 3; r++) {
+              for (let c = 0; c < GRID_COLS; c++) {
+                if (!occupied.includes(`${r},${c}`)) {
+                  targetRow = r;
+                  targetCol = c;
+                  break;
+                }
+              }
+              if (targetCol !== -1) break;
+            }
+          }
+
+          if (targetCol !== -1) {
+            const u = create3DUnit(charDef, 1, true, targetRow, targetCol);
+            gameState.enemyUnits.push(u);
+            gameState.enemyGold -= charDef.cost;
+          }
+        }
+      }
+
+      // Check Match-3 upgrades for Enemy AI
       checkAndApplyMatch3Upgrades(true);
     }
 
     // =========================================================================
-    // COMBAT SIMULATION ENGINE
+    // COMBAT SIMULATION & ELEMENTAL COMBO SYSTEM (MAX 8 FIELDED UNITS)
     // =========================================================================
     function startCombatPhase() {
       if (gameState.phase === 'combat') return;
 
-      // Auto-deploy at least 1 unit if player forgot
-      const activePlayerUnits = gameState.playerUnits.filter(u => !u.isDead && u.row >= 4 && u.row <= 7);
+      // Active combat units must be on Attack Lanes (Player: 5-7, Enemy: 1-3)
+      const activePlayerUnits = gameState.playerUnits.filter(u => !u.isDead && u.row >= 5 && u.row <= 7);
       if (activePlayerUnits.length === 0) {
-        const benchUnits = gameState.playerUnits.filter(u => !u.isDead && u.row === 8);
+        const benchUnits = gameState.playerUnits.filter(u => !u.isDead && u.row === 8).slice(0, 8);
         if (benchUnits.length > 0) {
-          benchUnits[0].row = 7;
-          benchUnits[0].mesh.position.copy(getTileWorldPosition(7, benchUnits[0].col));
+          benchUnits.forEach((u, idx) => {
+            u.row = 7;
+            u.col = idx;
+            u.mesh.position.copy(getTileWorldPosition(7, idx));
+          });
+          showToast('⚠️ Bench is reserves only! Deployed units to Attack Lanes (Row 7).');
+        } else {
+          showToast('⚠️ No units deployed! Buy characters to battle.');
+          return;
         }
       }
+
+      // Ensure enemy bench units on row 0 are moved to attack rows 1-3 (max 8)
+      const enemyBenchUnits = gameState.enemyUnits.filter(u => !u.isDead && u.row === 0).slice(0, 8);
+      enemyBenchUnits.forEach((u, idx) => {
+        u.row = 1;
+        u.col = idx % GRID_COLS;
+        u.mesh.position.copy(getTileWorldPosition(1, u.col));
+      });
 
       gameState.phase = 'combat';
       updateHUD();
       showToast('⚔️ BATTLE COMMENCED! ⚔️');
 
-      // Minimize shop during combat for full view
-      toggleDraftShop(false);
+      toggleSideDraft();
+      toggleSynergyPanel(false);
     }
 
     function updateCombatSimulation(dt, time) {
       if (gameState.phase !== 'combat') return;
 
-      const livingPlayer = gameState.playerUnits.filter(u => !u.isDead);
-      const livingEnemy = gameState.enemyUnits.filter(u => !u.isDead);
+      const livingPlayer = gameState.playerUnits.filter(u => !u.isDead && u.row >= 5 && u.row <= 7);
+      const livingEnemy = gameState.enemyUnits.filter(u => !u.isDead && u.row >= 1 && u.row <= 3);
 
-      // Check Victory / Defeat condition
       if (livingEnemy.length === 0 || livingPlayer.length === 0) {
         resolveCombatOutcome(livingEnemy.length === 0 && livingPlayer.length > 0);
         return;
       }
 
-      // Simulate Player Units
       livingPlayer.forEach(unit => {
         simulateUnitCombat(unit, livingEnemy, dt, time);
       });
 
-      // Simulate Enemy Units
       livingEnemy.forEach(unit => {
         simulateUnitCombat(unit, livingPlayer, dt, time);
       });
@@ -2291,7 +2495,6 @@
     function simulateUnitCombat(unit, opponentList, dt, time) {
       if (unit.isDead) return;
 
-      // Find nearest living enemy using THREE.Vector3.distanceTo()
       let nearestFoe = null;
       let minDistance = Infinity;
 
@@ -2310,7 +2513,6 @@
       const attackRangeWorld = unit.attackRange * TILE_SIZE;
 
       if (minDistance > attackRangeWorld) {
-        // Move toward enemy
         const moveDir = new THREE.Vector3()
           .subVectors(nearestFoe.mesh.position, unit.mesh.position)
           .normalize();
@@ -2319,48 +2521,88 @@
         unit.mesh.position.addScaledVector(moveDir, moveSpeed * dt);
         unit.mesh.position.y = 0.25;
 
-        // Face movement direction
         unit.modelContainer.lookAt(nearestFoe.mesh.position.x, unit.modelContainer.position.y, nearestFoe.mesh.position.z);
       } else {
-        // In attack range: auto-attack or cast power ability
         if (time - unit.lastAttackTime >= unit.attackSpeed) {
           unit.lastAttackTime = time;
 
           if (unit.mana >= unit.maxMana) {
-            // CAST POWER ABILITY!
             castUnitPowerAbility(unit, opponentList);
           } else {
-            // AUTO ATTACK
             performUnitAutoAttack(unit, nearestFoe);
           }
         }
       }
     }
 
-    function performUnitAutoAttack(unit, target) {
-      playAudio('attack');
-      unit.animState.attackLunge = 1.0;
+    // Apply damage and handle 3-in-a-row Elemental Combo System
+    function applyElementalHit(target, attacker, rawDamage, element, isAbility = false) {
+      if (target.isDead) return 0;
 
-      // Damage calculation with defense mitigation
-      const defFactor = 1 - (target.defense / 100);
-      const damage = Math.round(unit.attackDamage * defFactor);
-      target.currentHp = Math.max(0, target.currentHp - damage);
+      let finalDamage = rawDamage;
+
+      // Resistance check
+      if (target.resistance === element) {
+        finalDamage = Math.max(1, Math.round(finalDamage * 0.6));
+        target.consecutiveHits = 0;
+        target.consecutiveElement = null;
+        spawnDamageText(target.mesh.position, `🛡️ RESIST! -${finalDamage}`, '#94a3b8');
+      } else {
+        // Elemental Combo tracking
+        if (target.consecutiveElement === element) {
+          target.consecutiveHits++;
+        } else {
+          target.consecutiveElement = element;
+          target.consecutiveHits = 1;
+        }
+
+        // Check if 3 consecutive non-resistant elemental hits occurred
+        if (target.consecutiveHits >= 3) {
+          const critBonus = Math.round((target.lastDamageTaken || finalDamage) * 2.0);
+          finalDamage += critBonus;
+          playAudio('crit');
+          spawnDamageText(target.mesh.position, `💥 200% CRIT! -${finalDamage}`, '#f59e0b');
+          spawnFusionParticles(target.mesh.position);
+          pushAbilityAnnouncement('💥', '200% ELEMENTAL OVERLOAD!', `${target.name} suffered 200% ${element.toUpperCase()} Overload (${finalDamage} DMG)!`, 'combo-crit');
+          target.consecutiveHits = 0;
+          target.consecutiveElement = null;
+        } else {
+          const elemColor = element === 'fire' ? '#f87171' :
+                           element === 'water' ? '#38bdf8' :
+                           element === 'lightning' ? '#facc15' :
+                           element === 'nature' ? '#4ade80' :
+                           element === 'shadow' ? '#c084fc' : '#fef08a';
+          spawnDamageText(target.mesh.position, `-${finalDamage}`, elemColor);
+        }
+      }
+
+      target.lastDamageTaken = finalDamage;
+      target.currentHp = Math.max(0, target.currentHp - finalDamage);
 
       // Charge Mana
-      unit.mana = Math.min(unit.maxMana, unit.mana + 35);
+      attacker.mana = Math.min(attacker.maxMana, attacker.mana + (isAbility ? 0 : 35));
       target.mana = Math.min(target.maxMana, target.mana + 20);
 
-      updateUnitHpBar(unit);
+      updateUnitHpBar(attacker);
       updateUnitHpBar(target);
-
-      // Spawn 3D hit spark & damage text
-      spawnDamageText(target.mesh.position, `-${damage}`, unit.isEnemy ? '#ef4444' : '#38bdf8');
-      spawnSpellParticleWave(unit.mesh.position, target.mesh.position, unit.isEnemy ? 0xef4444 : 0x38bdf8);
 
       if (target.currentHp <= 0) {
         target.isDead = true;
         scene.remove(target.mesh);
       }
+
+      return finalDamage;
+    }
+
+    function performUnitAutoAttack(unit, target) {
+      playAudio('attack');
+      unit.animState.attackLunge = 1.0;
+
+      const defFactor = 1 - (target.defense / 100);
+      const baseDmg = Math.max(1, Math.round(unit.attackDamage * defFactor));
+
+      applyElementalHit(target, unit, baseDmg, unit.element, false);
+      spawnSpellParticleWave(unit.mesh.position, target.mesh.position, unit.isEnemy ? 0xef4444 : 0x38bdf8);
     }
 
     function castUnitPowerAbility(unit, opponentList) {
@@ -2369,7 +2611,7 @@
       playAudio('ability');
 
       const ability = unit.ability;
-      showToast(`✨ ${unit.name} cast ${ability.name}! ✨`);
+      pushAbilityAnnouncement('✨', `${unit.name} CAST ${ability.name}`, `Channels ${unit.element.toUpperCase()} ability power!`);
 
       if (ability.type === 'heal') {
         const allyList = unit.isEnemy ? gameState.enemyUnits : gameState.playerUnits;
@@ -2384,19 +2626,10 @@
           spawnSpellParticleWave(unit.mesh.position, lowestAlly.mesh.position, 0x10b981);
         }
       } else {
-        // AoE / Target Damage Spell
         const targets = opponentList.filter(o => !o.isDead).slice(0, 3);
         targets.forEach(t => {
-          const dmg = ability.power;
-          t.currentHp = Math.max(0, t.currentHp - dmg);
-          updateUnitHpBar(t);
-          spawnDamageText(t.mesh.position, `💥 ${dmg}!`, '#fbbf24');
+          applyElementalHit(t, unit, ability.power, unit.element, true);
           spawnSpellParticleWave(unit.mesh.position, t.mesh.position, 0xf59e0b);
-
-          if (t.currentHp <= 0) {
-            t.isDead = true;
-            scene.remove(t.mesh);
-          }
         });
       }
 
@@ -2409,31 +2642,27 @@
       if (playerWon) {
         gameState.wins++;
         gameState.enemyHp = Math.max(0, gameState.enemyHp - 1);
-        gameState.playerGold += 6; // WIN: 6 GOLD
+        gameState.playerGold += 6;
         gameState.enemyGold += 2;
         playAudio('victory');
         showToast('🎉 VICTORY! +6 GOLD ACCUMULATED 🎉');
       } else {
         gameState.losses++;
         gameState.playerHp = Math.max(0, gameState.playerHp - 1);
-        gameState.playerGold += 2; // LOSS: 2 GOLD
+        gameState.playerGold += 2;
         gameState.enemyGold += 6;
         playAudio('defeat');
         showToast('💀 DEFEAT! +2 GOLD EARNED 💀');
       }
 
-      // PERSIST WINS AS HIGH SCORE TO DATABASE IMMEDIATELY
       saveWinsToDatabase();
-
       updateHUD();
 
-      // Check Game Over Match Finale
       if (gameState.playerHp <= 0 || gameState.enemyHp <= 0) {
         setTimeout(showGameOverModal, 1500);
         return;
       }
 
-      // Transition to next round prep after short victory parade
       setTimeout(() => {
         prepareNextRound();
       }, 2500);
@@ -2444,11 +2673,13 @@
       gameState.phase = 'draft';
       gameState.prepTimeLeft = 25;
 
-      // Reset all surviving units back to their original row placement & restore HP
+      // Reset surviving units
       gameState.playerUnits.forEach(u => {
         u.isDead = false;
         u.currentHp = u.maxHp;
         u.mana = 0;
+        u.consecutiveHits = 0;
+        u.consecutiveElement = null;
         if (!scene.children.includes(u.mesh)) scene.add(u.mesh);
         u.mesh.position.copy(getTileWorldPosition(u.row, u.col));
         updateUnitHpBar(u);
@@ -2458,20 +2689,20 @@
         u.isDead = false;
         u.currentHp = u.maxHp;
         u.mana = 0;
+        u.consecutiveHits = 0;
+        u.consecutiveElement = null;
         if (!scene.children.includes(u.mesh)) scene.add(u.mesh);
         u.mesh.position.copy(getTileWorldPosition(u.row, u.col));
         updateUnitHpBar(u);
       });
 
-      // Draft fresh pool
       generateDraftPool();
       enemyAiDraftAndDeploy();
-      toggleDraftShop(true); // Open draft shop
       updateHUD();
     }
 
     // =========================================================================
-    // DATABASE HIGH SCORE SYNC (WINS AS HIGH SCORE)
+    // DATABASE HIGH SCORE SYNC
     // =========================================================================
     function saveWinsToDatabase() {
       try {
@@ -2489,7 +2720,7 @@
     }
 
     // =========================================================================
-    // 3D CAMERA ORBIT & POINTER CONTROLS
+    // 3D CAMERA ORBIT CONTROLS (SIMPLIFIED TO CENTER VIEW & ROTATE 45°)
     // =========================================================================
     function updateCameraOrbit() {
       cameraOrbit.phi = Math.max(0.15, Math.min(Math.PI / 2.05, cameraOrbit.phi));
@@ -2508,16 +2739,6 @@
       updateCameraOrbit();
     };
 
-    window.pitchCamera = function(dPhi) {
-      cameraOrbit.phi += dPhi;
-      updateCameraOrbit();
-    };
-
-    window.zoomCamera = function(dRadius) {
-      cameraOrbit.radius += dRadius;
-      updateCameraOrbit();
-    };
-
     window.resetCameraView = function() {
       cameraOrbit.radius = 38;
       cameraOrbit.theta = Math.PI / 2;
@@ -2525,7 +2746,7 @@
       updateCameraOrbit();
     };
 
-    // Mouse & Touch Orbit Drag Listeners
+    // Pointer listeners
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
@@ -2549,47 +2770,17 @@
       }
     });
 
-    window.addEventListener('mouseup', (e) => {
-      if (cameraOrbit.isDragging) {
-        cameraOrbit.isDragging = false;
-      }
-    });
-
-    // Touch orbit drag
-    container.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) {
-        cameraOrbit.isDragging = true;
-        cameraOrbit.prevMouseX = e.touches[0].clientX;
-        cameraOrbit.prevMouseY = e.touches[0].clientY;
-      }
-    }, { passive: true });
-
-    container.addEventListener('touchmove', (e) => {
-      if (cameraOrbit.isDragging && e.touches.length === 1) {
-        const dx = e.touches[0].clientX - cameraOrbit.prevMouseX;
-        const dy = e.touches[0].clientY - cameraOrbit.prevMouseY;
-
-        cameraOrbit.theta -= dx * 0.008;
-        cameraOrbit.phi -= dy * 0.008;
-        updateCameraOrbit();
-
-        cameraOrbit.prevMouseX = e.touches[0].clientX;
-        cameraOrbit.prevMouseY = e.touches[0].clientY;
-      }
-    }, { passive: true });
-
-    container.addEventListener('touchend', () => {
+    window.addEventListener('mouseup', () => {
       cameraOrbit.isDragging = false;
     });
 
-    // Wheel Zoom
     container.addEventListener('wheel', (e) => {
       cameraOrbit.radius += e.deltaY * 0.025;
       updateCameraOrbit();
     }, { passive: true });
 
     // =========================================================================
-    // RAYCASTER UNIT INSPECTION & CLICK TO OPEN CLOSABLE INFO WINDOW
+    // RAYCASTER UNIT INSPECTION & CLICK POSITIONING
     // =========================================================================
     container.addEventListener('click', (e) => {
       const rect = container.getBoundingClientRect();
@@ -2598,7 +2789,6 @@
 
       raycaster.setFromCamera(mouse, camera);
 
-      // Check unit meshes first
       const allUnits = [...gameState.playerUnits, ...gameState.enemyUnits].filter(u => !u.isDead);
       const unitMeshes = allUnits.map(u => u.mesh);
 
@@ -2616,7 +2806,6 @@
         }
       }
 
-      // Check InstancedMesh Board tile clicks
       const boardIntersects = raycaster.intersectObject(instancedBoardMesh);
       if (boardIntersects.length > 0) {
         const instanceId = boardIntersects[0].instanceId;
@@ -2626,6 +2815,46 @@
         }
       }
     });
+
+    function updateInspectorPositionControls(unit) {
+      const deployBox = document.getElementById('inspector-deploy-controls');
+      const laneSection = document.getElementById('inspector-lane-section');
+      const currentPosLabel = document.getElementById('inspector-current-pos');
+      if (!deployBox || !laneSection) return;
+
+      if (!unit || unit.isEnemy) {
+        deployBox.style.display = 'none';
+        laneSection.style.display = 'none';
+        return;
+      }
+
+      deployBox.style.display = 'flex';
+      laneSection.style.display = 'flex';
+
+      const benchBtn = document.getElementById('deploy-bench-btn');
+      const r1Btn = document.getElementById('deploy-field-r1');
+      const r2Btn = document.getElementById('deploy-field-r2');
+      const r3Btn = document.getElementById('deploy-field-r3');
+
+      if (benchBtn) benchBtn.classList.toggle('active', unit.row === 8);
+      if (r1Btn) r1Btn.classList.toggle('active', unit.row === 5);
+      if (r2Btn) r2Btn.classList.toggle('active', unit.row === 6);
+      if (r3Btn) r3Btn.classList.toggle('active', unit.row === 7);
+
+      const laneBtns = laneSection.querySelectorAll('.lane-btn');
+      laneBtns.forEach(btn => {
+        const laneVal = parseInt(btn.getAttribute('data-lane'), 10);
+        btn.classList.toggle('active', laneVal === (unit.col + 1));
+      });
+
+      if (currentPosLabel) {
+        let rowName = 'Bench';
+        if (unit.row === 5) rowName = 'Field Row 1 (Back)';
+        else if (unit.row === 6) rowName = 'Field Row 2 (Mid)';
+        else if (unit.row === 7) rowName = 'Field Row 3 (Front)';
+        currentPosLabel.innerText = `${rowName}, Lane ${unit.col + 1}`;
+      }
+    }
 
     function openUnitInspector(unit) {
       gameState.inspectedUnit = unit;
@@ -2640,10 +2869,27 @@
       document.getElementById('inspector-spd').innerText = `${unit.attackSpeed}s`;
       document.getElementById('inspector-rng').innerText = `${unit.attackRange} Tiles`;
       document.getElementById('inspector-def').innerText = `${unit.defense}%`;
-      document.getElementById('inspector-pwr').innerText = `Level ${unit.starLevel}`;
+      document.getElementById('inspector-pwr').innerText = `★${unit.starLevel} (${STAR_SCALING_FACTORS[unit.starLevel - 1] * 100}%)`;
+
+      // Badges
+      const elemBadge = document.getElementById('inspector-element-badge');
+      const resistBadge = document.getElementById('inspector-resist-badge');
+      if (elemBadge) {
+        elemBadge.className = `element-badge ${unit.element}`;
+        elemBadge.innerText = unit.element.toUpperCase();
+      }
+      if (resistBadge) {
+        resistBadge.innerText = `🛡️ Resist: ${unit.resistance.toUpperCase()}`;
+      }
 
       document.getElementById('inspector-ability-name').innerText = unit.ability.name;
       document.getElementById('inspector-ability-desc').innerText = unit.ability.desc;
+
+      // 3rd Elemental Ability
+      const elemAbName = document.getElementById('inspector-elem-ability-name');
+      const elemAbDesc = document.getElementById('inspector-elem-ability-desc');
+      if (elemAbName && unit.elementalAbility) elemAbName.innerText = unit.elementalAbility.name;
+      if (elemAbDesc && unit.elementalAbility) elemAbDesc.innerText = unit.elementalAbility.desc;
 
       const sellBtn = document.getElementById('inspector-sell-btn');
       const sellGoldSpan = document.getElementById('inspector-sell-gold');
@@ -2656,6 +2902,7 @@
         }
       }
 
+      updateInspectorPositionControls(unit);
       card.style.display = 'block';
       playAudio('click');
     }
@@ -2664,6 +2911,83 @@
       const card = document.getElementById('unit-info-card');
       if (card) card.style.display = 'none';
       gameState.inspectedUnit = null;
+    };
+
+    window.moveInspectedUnitToZone = function(zone) {
+      const unit = gameState.inspectedUnit;
+      if (!unit || unit.isEnemy) return;
+      if (gameState.phase === 'combat') {
+        showToast('Cannot reposition units during combat!');
+        return;
+      }
+
+      let targetRow = 8;
+      let zoneName = 'Bench';
+      if (zone === 'bench') {
+        targetRow = 8;
+        zoneName = 'Reserve Bench';
+      } else if (zone === 'row1') {
+        targetRow = 5;
+        zoneName = 'Field Row 1 (Backline)';
+      } else if (zone === 'row2') {
+        targetRow = 6;
+        zoneName = 'Field Row 2 (Midline)';
+      } else if (zone === 'row3') {
+        targetRow = 7;
+        zoneName = 'Field Row 3 (Frontline)';
+      }
+
+      if (unit.row === targetRow) return;
+
+      // Enforce max 8 fielded units constraint
+      if (unit.row === 8 && targetRow !== 8) {
+        if (countFieldedUnits(false) >= 8) {
+          showToast('⚠️ Max 8 units fielded! Free a field slot or keep on bench.');
+          return;
+        }
+      }
+
+      const occupied = gameState.playerUnits.find(u => u !== unit && u.row === targetRow && u.col === unit.col && !u.isDead);
+      if (occupied) {
+        occupied.row = unit.row;
+        occupied.mesh.position.copy(getTileWorldPosition(occupied.row, occupied.col));
+      }
+
+      unit.row = targetRow;
+      unit.mesh.position.copy(getTileWorldPosition(unit.row, unit.col));
+
+      playAudio('click');
+      showToast(`Moved ${unit.name} to ${zoneName}!`);
+      updateInspectorPositionControls(unit);
+      updateSynergyAnalyzer();
+      updateHUD();
+    };
+
+    window.moveInspectedUnitToLane = function(laneNum) {
+      const unit = gameState.inspectedUnit;
+      if (!unit || unit.isEnemy) return;
+      if (gameState.phase === 'combat') {
+        showToast('Cannot reposition units during combat!');
+        return;
+      }
+
+      const targetCol = Math.max(0, Math.min(7, laneNum - 1));
+      if (unit.col === targetCol) return;
+
+      const occupied = gameState.playerUnits.find(u => u !== unit && u.row === unit.row && u.col === targetCol && !u.isDead);
+      if (occupied) {
+        occupied.col = unit.col;
+        occupied.mesh.position.copy(getTileWorldPosition(occupied.row, occupied.col));
+      }
+
+      unit.col = targetCol;
+      unit.mesh.position.copy(getTileWorldPosition(unit.row, unit.col));
+
+      playAudio('click');
+      showToast(`Moved ${unit.name} to Lane ${laneNum}!`);
+      updateInspectorPositionControls(unit);
+      updateSynergyAnalyzer();
+      updateHUD();
     };
 
     window.sellInspectedUnit = function() {
@@ -2687,16 +3011,21 @@
       const unit = gameState.selectedUnit;
       if (!unit || unit.isEnemy || gameState.phase === 'combat') return;
 
-      // Restrict player placement to attack rows (5-7) or bench (8)
-      if (targetRow < 4) {
-        showToast('Cannot deploy onto enemy territory!');
+      if (targetRow < 5) {
+        showToast('Place units on Attack Lanes (Rows 5-7) or Bench (Row 8).');
         return;
       }
 
-      // Check tile occupancy
+      // Check max 8 fielded units
+      if (unit.row === 8 && targetRow >= 5 && targetRow <= 7) {
+        if (countFieldedUnits(false) >= 8) {
+          showToast('⚠️ Max 8 units fielded! Free a field slot or keep on bench.');
+          return;
+        }
+      }
+
       const occupied = gameState.playerUnits.find(u => u !== unit && u.row === targetRow && u.col === targetCol && !u.isDead);
       if (occupied) {
-        // Swap positions
         occupied.row = unit.row;
         occupied.col = unit.col;
         occupied.mesh.position.copy(getTileWorldPosition(occupied.row, occupied.col));
@@ -2707,31 +3036,17 @@
       unit.mesh.position.copy(getTileWorldPosition(targetRow, targetCol));
       gameState.selectedUnit = null;
       playAudio('click');
-    }
-
-    // =========================================================================
-    // UI MINIMIZE / EXPAND TOGGLE & HUD HELPERS
-    // =========================================================================
-    window.toggleDraftShop = function(expand) {
-      const container = document.getElementById('draft-shop-container');
-      const minBar = document.getElementById('minimized-shop-bar');
-      if (!container || !minBar) return;
-
-      gameState.isShopMinimized = !expand;
-      if (expand) {
-        container.classList.remove('minimized');
-        minBar.style.display = 'none';
-      } else {
-        container.classList.add('minimized');
-        minBar.style.display = 'flex';
+      if (gameState.inspectedUnit === unit) {
+        updateInspectorPositionControls(unit);
       }
-    };
+      updateSynergyAnalyzer();
+      updateHUD();
+    }
 
     window.rerollShop = rerollShop;
     window.triggerCombatPhase = startCombatPhase;
 
     function updateHUD() {
-      // Player HP & Gold & Wins
       const pBar = document.getElementById('player-hp-bar');
       const pText = document.getElementById('player-hp-text');
       const pGold = document.getElementById('player-gold-text');
@@ -2742,7 +3057,6 @@
       if (pGold) pGold.innerText = `${gameState.playerGold} Gold`;
       if (pWins) pWins.innerText = `${gameState.wins} Wins`;
 
-      // Enemy HP & Gold
       const eBar = document.getElementById('enemy-hp-bar');
       const eText = document.getElementById('enemy-hp-text');
       const eGold = document.getElementById('enemy-gold-text');
@@ -2750,6 +3064,32 @@
       if (eBar) eBar.style.width = `${Math.max(0, (gameState.enemyHp / 10) * 100)}%`;
       if (eText) eText.innerText = `${gameState.enemyHp}/10`;
       if (eGold) eGold.innerText = `${gameState.enemyGold}`;
+
+      // Match Score (Wins and Losses)
+      const matchScoreEl = document.getElementById('match-score-text');
+      if (matchScoreEl) {
+        matchScoreEl.innerText = `${gameState.wins}W - ${gameState.losses}L`;
+      }
+
+      // Main Unit Pool Count (96)
+      const poolCountEl = document.getElementById('main-pool-count');
+      if (poolCountEl && gameState.mainUnitPool) {
+        poolCountEl.innerText = `${gameState.mainUnitPool.length}/96`;
+      }
+
+      // Fielded count badge (Max 8)
+      const fieldedBadge = document.getElementById('player-fielded-count');
+      if (fieldedBadge) {
+        const count = countFieldedUnits(false);
+        fieldedBadge.innerText = `${count}/8`;
+        fieldedBadge.style.color = count >= 8 ? '#f59e0b' : '#10b981';
+      }
+
+      // AI Tactical IQ percentage
+      const aiIqEl = document.getElementById('ai-iq-text');
+      if (aiIqEl) {
+        aiIqEl.innerText = `${getAiAdvancedStrategyChance().toFixed(1)}%`;
+      }
 
       // Round & Phase
       const rText = document.getElementById('round-text');
@@ -2764,6 +3104,8 @@
           phaseBadge.innerText = 'DRAFT & PREP';
         }
       }
+
+      updateSynergyAnalyzer();
     }
 
     function showToast(msg) {
@@ -2822,19 +3164,15 @@
       lastTimestamp = now;
       const time = now / 1000;
 
-      // Update Combat Simulator
       updateCombatSimulation(dt, time);
 
-      // Animate Unit 3D Low-Poly Models (Breathing bobbing, spell orbs, lunges)
       const allUnits = [...gameState.playerUnits, ...gameState.enemyUnits];
       allUnits.forEach(u => {
         if (u.isDead || !u.modelContainer) return;
 
-        // Idle floating / bobbing
         const idleSin = Math.sin(time * 3 + u.animState.idleOffset) * 0.08;
         u.modelContainer.position.y = idleSin;
 
-        // Animate orbiting spell orbs for mages
         for (let i = 0; i < 3; i++) {
           const orb = u.modelContainer.getObjectByName(`spellOrb_${i}`);
           if (orb) {
@@ -2844,14 +3182,12 @@
           }
         }
 
-        // Attack Lunge recovery
         if (u.animState.attackLunge > 0) {
           u.animState.attackLunge = Math.max(0, u.animState.attackLunge - dt * 4);
           u.modelContainer.position.z = Math.sin(u.animState.attackLunge * Math.PI) * 0.4 * (u.isEnemy ? -1 : 1);
         }
       });
 
-      // Update visual particle effects
       for (let i = gameState.visualEffects.length - 1; i >= 0; i--) {
         const p = gameState.visualEffects[i];
         p.age += dt;
@@ -2867,7 +3203,6 @@
       renderer.render(scene, camera);
     }
 
-    // Window Resize Handler
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -2878,12 +3213,12 @@
     // INITIALIZATION
     // =========================================================================
     function initGame() {
-      // Create starting unit on player bench
+      // Create starting unit on player bench (Row 8, Col 3)
       const starterChar = CHARACTERS_DATABASE[0]; // Berserk Boar
       const starterUnit = create3DUnit(starterChar, 1, false, 8, 3);
       gameState.playerUnits.push(starterUnit);
 
-      // Create starting enemy unit on enemy bench
+      // Create starting enemy unit on enemy bench (Row 0, Col 4)
       const enemyStarter = CHARACTERS_DATABASE[1]; // Flora Fairy
       const enemyUnit = create3DUnit(enemyStarter, 1, true, 0, 4);
       gameState.enemyUnits.push(enemyUnit);
@@ -2892,7 +3227,6 @@
       updateHUD();
       requestAnimationFrame(animate);
 
-      // Save initial score
       saveWinsToDatabase();
     }
 
