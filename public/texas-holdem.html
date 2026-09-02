@@ -1008,7 +1008,7 @@
     "imports": {
       "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
       "three/webgpu": "https://unpkg.com/three@0.170.0/build/three.webgpu.js",
-      "three/tsl": "https://unpkg.com/three@0.170.0/build/three.tsl.js",
+      "three/tsl": "https://unpkg.com/three@0.170.0/build/three.webgpu.js",
       "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
     }
   }
@@ -1192,7 +1192,7 @@
     <div style="display: flex; flex-direction: column; gap: 12px;">
       <div>
         <label style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">
-          AI Opponents (1 to 9 Opponents &bull; 10 Player Table)
+          AI Opponents (1 to 4 Opponents &bull; 5 Player Table)
         </label>
         <p style="font-size: 11px; color: #64748b; margin-bottom: 8px;">
           Choose how many AI adversaries challenge you at the table:
@@ -1200,8 +1200,8 @@
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
           <button id="ai-count-1" class="btn" style="font-size: 11px; padding: 6px;" onclick="setAiOpponentsCount(1)">1 AI</button>
           <button id="ai-count-2" class="btn" style="font-size: 11px; padding: 6px;" onclick="setAiOpponentsCount(2)">2 AI</button>
-          <button id="ai-count-4" class="btn" style="font-size: 11px; padding: 6px;" onclick="setAiOpponentsCount(4)">4 AI</button>
-          <button id="ai-count-9" class="btn" style="font-size: 11px; padding: 6px; background: #2563eb; border-color: #3b82f6;" onclick="setAiOpponentsCount(9)">9 AI (10p)</button>
+          <button id="ai-count-3" class="btn" style="font-size: 11px; padding: 6px;" onclick="setAiOpponentsCount(3)">3 AI</button>
+          <button id="ai-count-4" class="btn" style="font-size: 11px; padding: 6px; background: #2563eb; border-color: #3b82f6;" onclick="setAiOpponentsCount(4)">4 AI (5p)</button>
         </div>
       </div>
 
@@ -1342,21 +1342,21 @@
         </div>
       </div>
 
-      <!-- 10-Player P2P Simulation Test Panel -->
+      <!-- 5-Player P2P Simulation Test Panel -->
       <div class="p2p-panel-card" style="border: 1.5px solid rgba(56, 189, 248, 0.4); background: rgba(15, 23, 42, 0.95);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
           <div style="display: flex; align-items: center; gap: 6px;">
             <span style="font-size: 13px;">🧪</span>
-            <strong style="font-size: 11px; color: #38bdf8; text-transform: uppercase;">10-Player Full-Mesh P2P Test Harness</strong>
+            <strong style="font-size: 11px; color: #38bdf8; text-transform: uppercase;">5-Player Full-Mesh P2P Test Harness</strong>
           </div>
-          <span id="test-5p-status-badge" style="font-size: 9.5px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3);">Ready to test (10p)</span>
+          <span id="test-5p-status-badge" style="font-size: 9.5px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3);">Ready to test (5p)</span>
         </div>
         <p style="font-size: 10.5px; color: #94a3b8; line-height: 1.35; margin: 0 0 8px 0;">
-          Simulates 9 genuine browser WebRTC peer connections with unordered binary DataChannels ({ ordered: false, maxRetransmits: 0 }) to test a 10 human player table with 12.5 Hz state sync, live binary pings, card dealing, and P2P turn actions across all seats.
+          Simulates 4 genuine browser WebRTC peer connections with unordered binary DataChannels ({ ordered: false, maxRetransmits: 0 }) to test a 5 human player table with 12.5 Hz state sync, live binary pings, card dealing, and P2P turn actions across all seats.
         </p>
         <div style="display: flex; gap: 8px;">
-          <button id="btn-toggle-5p-test" class="btn btn-call" style="flex: 1; padding: 6px 12px; font-size: 11px;" onclick="toggle10PlayerP2PTest()">
-            <span id="btn-toggle-5p-test-text">▶ Run 10-Player P2P Test</span>
+          <button id="btn-toggle-5p-test" class="btn btn-call" style="flex: 1; padding: 6px 12px; font-size: 11px;" onclick="toggle5PlayerP2PTest()">
+            <span id="btn-toggle-5p-test-text">▶ Run 5-Player P2P Test</span>
           </button>
           <button class="btn" style="font-size: 11px; padding: 6px 12px;" onclick="disconnectP2PSession()">
             <span>Reset Seats</span>
@@ -1367,14 +1367,14 @@
       <!-- Room Manager Panel (Tabs: Host or Join) -->
       <div class="p2p-panel-card">
         <div class="p2p-tabs">
-          <button id="tab-p2p-host" class="p2p-tab-btn active" onclick="switchP2PTab('host')">Host Room (Up to 10 Peers)</button>
+          <button id="tab-p2p-host" class="p2p-tab-btn active" onclick="switchP2PTab('host')">Host Room (Up to 4 Peers)</button>
           <button id="tab-p2p-join" class="p2p-tab-btn" onclick="switchP2PTab('join')">Join Room (Remote Peer)</button>
         </div>
 
         <!-- Host View -->
         <div id="p2p-host-view" style="display: flex; flex-direction: column; gap: 8px;">
           <p style="font-size: 11px; color: #94a3b8;">
-            Host a private full-mesh table for up to 10 concurrent players (Host + 9 remote peers). Unfilled seats remain populated by local AI opponents.
+            Host a private full-mesh table for up to 5 concurrent players (Host + 4 remote peers). Unfilled seats remain populated by local AI opponents.
           </p>
           <div style="display: flex; gap: 8px;">
             <button id="btn-create-room" class="btn btn-call" style="flex: 1;" onclick="createP2PRoom()">
@@ -1407,11 +1407,11 @@
         </div>
       </div>
 
-      <!-- Table Roster & AI Replacement View (Up to 10 Players) -->
+      <!-- Table Roster & AI Replacement View (Up to 5 Players) -->
       <div class="p2p-panel-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 11px; font-weight: 800; color: #cbd5e1; text-transform: uppercase;">👥 Table Seats (10 Players: Host + 9 Remote)</span>
-          <span style="font-size: 10px; color: #10b981;" id="p2p-peer-count-badge">1 Human • 9 AI Admitted</span>
+          <span style="font-size: 11px; font-weight: 800; color: #cbd5e1; text-transform: uppercase;">👥 Table Seats (5 Players: Host + 4 Remote)</span>
+          <span style="font-size: 10px; color: #10b981;" id="p2p-peer-count-badge">1 Human • 4 AI Admitted</span>
         </div>
         <div class="p2p-roster-grid">
           <div class="p2p-roster-card" style="border-color: #38bdf8;">
@@ -1438,31 +1438,6 @@
             <span style="font-size: 14px;" id="roster-seat-4-icon">🤠</span>
             <strong id="roster-seat-4-name" style="color: #a855f7;">AI Sloan</strong>
             <span id="roster-seat-4-role" style="color: #94a3b8;">Hard AI</span>
-          </div>
-          <div class="p2p-roster-card" id="roster-seat-5">
-            <span style="font-size: 14px;" id="roster-seat-5-icon">🎯</span>
-            <strong id="roster-seat-5-name" style="color: #ec4899;">AI Rex</strong>
-            <span id="roster-seat-5-role" style="color: #94a3b8;">Expert AI</span>
-          </div>
-          <div class="p2p-roster-card" id="roster-seat-6">
-            <span style="font-size: 14px;" id="roster-seat-6-icon">🦊</span>
-            <strong id="roster-seat-6-name" style="color: #10b981;">AI Ivy</strong>
-            <span id="roster-seat-6-role" style="color: #94a3b8;">Medium AI</span>
-          </div>
-          <div class="p2p-roster-card" id="roster-seat-7">
-            <span style="font-size: 14px;" id="roster-seat-7-icon">⚡</span>
-            <strong id="roster-seat-7-name" style="color: #8b5cf6;">AI Jax</strong>
-            <span id="roster-seat-7-role" style="color: #94a3b8;">Hard AI</span>
-          </div>
-          <div class="p2p-roster-card" id="roster-seat-8">
-            <span style="font-size: 14px;" id="roster-seat-8-icon">🌙</span>
-            <strong id="roster-seat-8-name" style="color: #38bdf8;">AI Luna</strong>
-            <span id="roster-seat-8-role" style="color: #94a3b8;">Medium AI</span>
-          </div>
-          <div class="p2p-roster-card" id="roster-seat-9">
-            <span style="font-size: 14px;" id="roster-seat-9-icon">🥷</span>
-            <strong id="roster-seat-9-name" style="color: #64748b;">AI Zane</strong>
-            <span id="roster-seat-9-role" style="color: #94a3b8;">Expert AI</span>
           </div>
         </div>
       </div>
@@ -1498,7 +1473,7 @@
      ========================================================================= -->
 <script type="module">
 import * as THREE from 'three/webgpu';
-import { color, float, vec3 } from 'three/tsl';
+import { color, float, vec3 } from 'three/webgpu';
 
 // FIREBASE V10+ SDK NATIVE IMPORTS VIA GSTATIC CDN FOR TEMPORARY RTDB SIGNALING
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
@@ -1930,7 +1905,7 @@ const AI_PROFILES = [
 ];
 
 let seatedPlayers = [];
-let aiOpponentsCount = 9; // Default 10-player table (1 Host + 9 Opponents)
+let aiOpponentsCount = 4; // Default 5-player table (1 Host + 4 Opponents)
 let activeTurnIndex = 0;
 let dealerSeatIndex = 0;
 let smallBlind = 10;
@@ -1971,12 +1946,24 @@ async function initThreeWebGPU() {
     renderer = new THREE.WebGPURenderer({ canvas, antialias: true, alpha: true });
     await renderer.init();
   } catch (e) {
-    console.warn('WebGPU init fallback to WebGL renderer:', e);
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    console.warn('WebGPU not directly available, falling back to WebGPURenderer with WebGL backend:', e);
+    try {
+      renderer = new THREE.WebGPURenderer({ canvas, antialias: true, alpha: true, forceWebGL: true });
+      await renderer.init();
+    } catch (e2) {
+      console.warn('WebGPU/WebGL fallback notice:', e2);
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      } catch (e3) {
+        console.error('All renderer attempts failed:', e3);
+      }
+    }
   }
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  if (renderer) {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  }
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0f1d);
@@ -2327,7 +2314,11 @@ function renderLoop(time) {
   }
 
   if (renderer && scene && camera) {
-    renderer.render(scene, camera);
+    try {
+      renderer.render(scene, camera);
+    } catch (renderErr) {
+      // Keep render loop going even if a frame has compilation lag
+    }
   }
   updateSeatOverlays();
 }
@@ -2338,6 +2329,14 @@ function renderLoop(time) {
 function updateSeatOverlays() {
   const container = document.getElementById('seats-overlay-container');
   if (!container || !camera || seatedPlayers.length === 0) return;
+
+  // Prune any excess badges from previous higher seat counts
+  Array.from(container.children).forEach(child => {
+    const idx = parseInt(child.id.replace('seat-badge-', ''));
+    if (isNaN(idx) || idx >= seatedPlayers.length) {
+      child.remove();
+    }
+  });
 
   seatedPlayers.forEach((p, idx) => {
     let el = document.getElementById(`seat-badge-${idx}`);
@@ -3176,7 +3175,7 @@ function showToast(msg, extraClass = '') {
    ------------------------------------------------------------- */
 window.setAiOpponentsCount = function (count) {
   aiOpponentsCount = count;
-  [1, 2, 4, 9].forEach(i => {
+  [1, 2, 3, 4].forEach(i => {
     const btn = document.getElementById(`ai-count-${i}`);
     if (btn) {
       btn.style.background = i === count ? '#2563eb' : '#1e293b';
@@ -3187,18 +3186,26 @@ window.setAiOpponentsCount = function (count) {
   updateCardsUI();
   update3DTableVisuals();
   updateHUD();
-  showToast(`👥 Table configured for ${count} AI Opponent${count > 1 ? 's' : ''}`);
+  showToast(`👥 Table configured for ${count} AI Opponent${count > 1 ? 's' : ''} (5p Table)`);
 };
 
-window.setTableFeltColor = function (color) {
+window.setTableFeltColor = function (colorName) {
   if (!tableFeltMesh) return;
   const hexMap = {
     emerald: 0x059669,
     crimson: 0x9f1239,
     midnight: 0x1e1b4b
   };
-  tableFeltMesh.material.colorNode = color(hexMap[color] || 0x059669);
-  showToast(`🎨 Table felt changed to ${color.toUpperCase()}`);
+  const hex = hexMap[colorName] || 0x059669;
+  if (tableFeltMesh.material) {
+    if (tableFeltMesh.material.color) {
+      tableFeltMesh.material.color.setHex(hex);
+    }
+    try {
+      tableFeltMesh.material.colorNode = color(hex);
+    } catch (e) {}
+  }
+  showToast(`🎨 Table felt changed to ${colorName.toUpperCase()}`);
 };
 
 window.toggleSfx = function () {
@@ -3277,9 +3284,10 @@ let currentRoomId = null;
 let isP2PHost = false;
 let isWaitingForRoundEnd = false;
 let p2pBroadcastChannel = null;
+let is5PlayerTestActive = false;
 let is10PlayerTestActive = false;
 
-// Multi-peer registry for up to 9 remote players (seats 1 through 9)
+// Multi-peer registry for up to 4 remote players (seats 1 through 4)
 let remotePeers = {};
 let p2pBroadcastInterval = null;
 let p2pPacketSeq = 0;
@@ -3341,8 +3349,8 @@ function updateP2PStatusUI(status, meta = {}) {
   } else if (status === 'connected' || connectedCount > 0) {
     dot.style.background = '#10b981';
     const totalHumans = 1 + connectedCount;
-    const isFullTable = totalHumans >= 10;
-    text.innerHTML = `🟢 P2P Active: ${totalHumans} Human Players (${connectedCount} Remote Peer${connectedCount > 1 ? 's' : ''} + Host)${isFullTable ? ' &bull; 10P Full Table' : ''}`;
+    const isFullTable = totalHumans >= 5;
+    text.innerHTML = `🟢 P2P Active: ${totalHumans} Human Players (${connectedCount} Remote Peer${connectedCount > 1 ? 's' : ''} + Host)${isFullTable ? ' &bull; 5P Full Table' : ''}`;
     if (hudDot) hudDot.style.background = '#10b981';
     if (hudStatus) {
       hudStatus.innerText = isP2PHost ? `P2P Host (${totalHumans}P)` : `P2P Client`;
@@ -3377,7 +3385,7 @@ function updateRosterDisplay() {
   const badge = document.getElementById('p2p-peer-count-badge');
   let humanCount = 1; // Seat 0 is Host Human
 
-  for (let s = 1; s <= 9; s++) {
+  for (let s = 1; s <= 4; s++) {
     const peer = remotePeers[s];
     const isPeerConnected = !!(peer && peer.status === 'connected');
     if (isPeerConnected) humanCount++;
@@ -3410,7 +3418,7 @@ function updateRosterDisplay() {
   }
 
   if (badge) {
-    const aiCount = 10 - humanCount;
+    const aiCount = 5 - humanCount;
     badge.innerText = `${humanCount} Human${humanCount > 1 ? 's' : ''} • ${aiCount} AI Fill${aiCount !== 1 ? 's' : ''}`;
   }
 }
@@ -3680,7 +3688,7 @@ async function createP2PRoom() {
   if (hostInfo) hostInfo.style.display = 'flex';
 
   updateP2PStatusUI('signaling', { roomId, isHost: true });
-  logP2PTraffic(`[SIGNALING] Hosting Room ${roomId} for up to 10 players on Firebase RTDB under /rooms/${roomId}/peers/...`, 'sys');
+  logP2PTraffic(`[SIGNALING] Hosting Room ${roomId} for up to 5 players on Firebase RTDB under /rooms/${roomId}/peers/...`, 'sys');
 
   const db = getFirebaseDb();
   if (db) {
@@ -3693,7 +3701,7 @@ async function createP2PRoom() {
         createdAt: Date.now(),
         hostSeat: 0,
         isRoundActive: (roundPhase !== 'hand_ended'),
-        maxPeers: 9
+        maxPeers: 4
       });
       logP2PTraffic(`[SIGNALING] Armed onDisconnect().remove() on /rooms/${roomId}`, 'sys');
     } catch (err) {
@@ -3707,7 +3715,7 @@ async function createP2PRoom() {
     p2pBroadcastChannel.onmessage = async (evt) => {
       const data = evt.data;
       if (data.type === 'PEER_JOIN_REQUEST') {
-        const availableSeats = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        const availableSeats = [1, 2, 3, 4];
         const nextSeat = availableSeats.find(s => !remotePeers[s]);
         if (nextSeat) {
           logP2PTraffic(`📥 Received Join Request from ${data.name || 'Remote Peer'} for Seat ${nextSeat}`, 'sys');
@@ -3829,34 +3837,36 @@ async function joinP2PRoom() {
 }
 
 /* -------------------------------------------------------------
-   10-PLAYER FULL-MESH P2P TEST HARNESS
-   Simulates 9 genuine browser WebRTC peer connections (Seats 1-9)
+   5-PLAYER FULL-MESH P2P TEST HARNESS
+   Simulates 4 genuine browser WebRTC peer connections (Seats 1-4)
    with unordered binary DataChannels ({ ordered: false, maxRetransmits: 0 })
    ------------------------------------------------------------- */
-window.toggle10PlayerP2PTest = async function () {
-  if (is10PlayerTestActive) {
-    window.stop10PlayerP2PTest();
+window.toggle5PlayerP2PTest = async function () {
+  if (is5PlayerTestActive) {
+    window.stop5PlayerP2PTest();
   } else {
-    await window.run10PlayerP2PTest();
+    await window.run5PlayerP2PTest();
   }
 };
+window.toggle10PlayerP2PTest = window.toggle5PlayerP2PTest;
 
-window.run10PlayerP2PTest = async function () {
+window.run5PlayerP2PTest = async function () {
   logP2PTraffic('====================================================', 'sys');
-  logP2PTraffic('🧪 INITIALIZING 10-PLAYER FULL-MESH P2P TEST HARNESS', 'sys');
-  logP2PTraffic('Establishing 9 genuine WebRTC DataChannels ({ ordered: false, maxRetransmits: 0 }, binaryType: arraybuffer)...', 'sys');
+  logP2PTraffic('🧪 INITIALIZING 5-PLAYER FULL-MESH P2P TEST HARNESS', 'sys');
+  logP2PTraffic('Establishing 4 genuine WebRTC DataChannels ({ ordered: false, maxRetransmits: 0 }, binaryType: arraybuffer)...', 'sys');
 
   disconnectAllPeers();
 
   isP2PHost = true;
-  currentRoomId = 'TEST-10P';
+  currentRoomId = 'TEST-5P';
+  is5PlayerTestActive = true;
   is10PlayerTestActive = true;
 
   const testBtnText = document.getElementById('btn-toggle-5p-test-text');
   const testBadge = document.getElementById('test-5p-status-badge');
-  if (testBtnText) testBtnText.innerText = '⏹ Stop 10P Test (Reset to AI)';
+  if (testBtnText) testBtnText.innerText = '⏹ Stop 5P Test (Reset to AI)';
   if (testBadge) {
-    testBadge.innerText = '10P Running';
+    testBadge.innerText = '5P Running';
     testBadge.style.background = 'rgba(16, 185, 129, 0.2)';
     testBadge.style.color = '#34d399';
     testBadge.style.borderColor = '#10b981';
@@ -3866,27 +3876,22 @@ window.run10PlayerP2PTest = async function () {
     { seat: 1, name: 'Guest P2P (Alex)', avatar: '🧑‍💻', chips: 500 },
     { seat: 2, name: 'Guest P2P (Sarah)', avatar: '👩‍💻', chips: 500 },
     { seat: 3, name: 'Guest P2P (David)', avatar: '🧑‍💼', chips: 500 },
-    { seat: 4, name: 'Guest P2P (Elena)', avatar: '🧑‍🚀', chips: 500 },
-    { seat: 5, name: 'Guest P2P (Marcus)', avatar: '👨‍🎨', chips: 500 },
-    { seat: 6, name: 'Guest P2P (Chloe)', avatar: '👩‍🔬', chips: 500 },
-    { seat: 7, name: 'Guest P2P (Liam)', avatar: '🧑‍✈️', chips: 500 },
-    { seat: 8, name: 'Guest P2P (Maya)', avatar: '👩‍🎤', chips: 500 },
-    { seat: 9, name: 'Guest P2P (Noah)', avatar: '🧑‍🎓', chips: 500 }
+    { seat: 4, name: 'Guest P2P (Elena)', avatar: '🧑‍🚀', chips: 500 }
   ];
 
   for (const prof of peerProfiles) {
     await createSimulatedPeerPair(prof);
   }
 
-  updateP2PStatusUI('connected', { isHost: true, roomId: 'TEST-10P' });
+  updateP2PStatusUI('connected', { isHost: true, roomId: 'TEST-5P' });
   startHighFrequencyBroadcastLoop();
   updateRosterDisplay();
 
-  logP2PTraffic('✅ All 9 WebRTC DataChannels successfully opened!', 'sys');
-  logP2PTraffic('👥 Full Table Active: 10 Human Players (Host + 9 Remote Peers). 0 AI.', 'sys');
+  logP2PTraffic('✅ All 4 WebRTC DataChannels successfully opened!', 'sys');
+  logP2PTraffic('👥 Full Table Active: 5 Human Players (Host + 4 Remote Peers). 0 AI.', 'sys');
   logP2PTraffic('====================================================', 'sys');
 
-  showToast('🧪 10-Player P2P full table active! All 10 seats filled with human players.');
+  showToast('🧪 5-Player P2P full table active! All 5 seats filled with human players.');
 
   if (roundPhase === 'hand_ended' || seatedPlayers.every(p => p.holeCards.length === 0)) {
     setTimeout(() => {
@@ -3894,6 +3899,7 @@ window.run10PlayerP2PTest = async function () {
     }, 400);
   }
 };
+window.run10PlayerP2PTest = window.run5PlayerP2PTest;
 
 async function createSimulatedPeerPair(prof) {
   const s = prof.seat;
@@ -3972,21 +3978,23 @@ async function createSimulatedPeerPair(prof) {
   logP2PTraffic(`🔗 WebRTC DataChannel established for Seat ${s}: ${prof.name}`, 'sys');
 }
 
-window.stop10PlayerP2PTest = function () {
+window.stop5PlayerP2PTest = function () {
   disconnectAllPeers();
+  is5PlayerTestActive = false;
   is10PlayerTestActive = false;
   const testBtnText = document.getElementById('btn-toggle-5p-test-text');
   const testBadge = document.getElementById('test-5p-status-badge');
-  if (testBtnText) testBtnText.innerText = '▶ Run 10-Player P2P Test';
+  if (testBtnText) testBtnText.innerText = '▶ Run 5-Player P2P Test';
   if (testBadge) {
-    testBadge.innerText = 'Ready to test (10p)';
+    testBadge.innerText = 'Ready to test (5p)';
     testBadge.style.background = 'rgba(56, 189, 248, 0.15)';
     testBadge.style.color = '#38bdf8';
     testBadge.style.borderColor = 'rgba(56, 189, 248, 0.3)';
   }
   updateP2PStatusUI('disconnected');
-  showToast('ℹ️ 10-Player P2P test stopped. Seats restored to local AI opponents.');
+  showToast('ℹ️ 5-Player P2P test stopped. Seats restored to local AI opponents.');
 };
+window.stop10PlayerP2PTest = window.stop5PlayerP2PTest;
 
 function disconnectAllPeers() {
   stopHighFrequencyBroadcastLoop();
@@ -4117,12 +4125,13 @@ window.copyP2PRoomCode = function () {
 
 window.disconnectP2PSession = function () {
   disconnectAllPeers();
+  is5PlayerTestActive = false;
   is10PlayerTestActive = false;
   const testBtnText = document.getElementById('btn-toggle-5p-test-text');
   const testBadge = document.getElementById('test-5p-status-badge');
-  if (testBtnText) testBtnText.innerText = '▶ Run 10-Player P2P Test';
+  if (testBtnText) testBtnText.innerText = '▶ Run 5-Player P2P Test';
   if (testBadge) {
-    testBadge.innerText = 'Ready to test (10p)';
+    testBadge.innerText = 'Ready to test (5p)';
     testBadge.style.background = 'rgba(56, 189, 248, 0.15)';
     testBadge.style.color = '#38bdf8';
     testBadge.style.borderColor = 'rgba(56, 189, 248, 0.3)';
@@ -4141,16 +4150,21 @@ window.clearP2PTrafficLog = function () {
    13. INITIALIZATION ON LOAD
    ------------------------------------------------------------- */
 async function startApp() {
-  loadHoldemData();
-  cardDeck = generateFreshDeck();
-  setupSeats();
-  await initThreeWebGPU();
-  updateHUD();
-  updateCardsUI();
+  try {
+    loadHoldemData();
+    cardDeck = generateFreshDeck();
+    setupSeats();
+    await initThreeWebGPU();
+    updateHUD();
+    updateCardsUI();
 
-  document.getElementById('deal-next-container').style.display = 'flex';
-  document.getElementById('main-actions-row').style.display = 'none';
-  showToast('♠️ Welcome to 3D Texas Hold\'em! Click Deal to begin. ♦️');
+    document.getElementById('deal-next-container').style.display = 'flex';
+    document.getElementById('main-actions-row').style.display = 'none';
+    showToast('♠️ Welcome to 3D Texas Hold\'em! Click Deal to begin. ♦️');
+  } catch (err) {
+    console.error('startApp initialization caught error:', err);
+    showToast('Notice: Initialized Texas Hold\'em 3D.');
+  }
 }
 
 if (document.readyState === 'loading') {
