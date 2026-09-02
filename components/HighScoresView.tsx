@@ -28,7 +28,7 @@ interface HighScoresViewProps {
   playTacticalSound: (type: 'click' | 'menu' | 'launch' | 'switch' | 'success' | 'alert') => void;
 }
 
-type GameFilter = 'all' | 'emoji-tactics' | 'rpg-game' | 'block-drop' | 'code-pressed' | 'slots-up';
+type GameFilter = 'all' | 'texas-holdem' | 'emoji-tactics' | 'rpg-game' | 'block-drop' | 'code-pressed' | 'slots-up';
 
 export default function HighScoresView({
   currentUser,
@@ -68,6 +68,7 @@ export default function HighScoresView({
   const filteredScores = useMemo(() => {
     const list = scores
       .filter((s) => {
+        if (selectedFilter === 'texas-holdem' && s.gameId !== 'texas-holdem') return false;
         if (selectedFilter === 'emoji-tactics' && s.gameId !== 'emoji-tactics') return false;
         if (selectedFilter === 'rpg-game' && s.gameId !== 'rpg-game') return false;
         if (selectedFilter === 'block-drop' && s.gameId !== 'block-drop') return false;
@@ -213,7 +214,7 @@ export default function HighScoresView({
                     <span className="text-xs font-bold uppercase tracking-wider">{medalText}</span>
                   </div>
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-900/80 border border-slate-700 text-slate-300">
-                    {item.gameId === 'emoji-tactics' ? 'Emoji Tactics' : item.gameId === 'rpg-game' ? '3D Action RPG' : item.gameId === 'block-drop' ? 'Block Drop' : item.gameId === 'code-pressed' ? 'Reaction' : 'Supply'}
+                    {item.gameId === 'texas-holdem' ? "Texas Hold'em" : item.gameId === 'emoji-tactics' ? 'Emoji Tactics' : item.gameId === 'rpg-game' ? '3D Action RPG' : item.gameId === 'block-drop' ? 'Block Drop' : item.gameId === 'code-pressed' ? 'Reaction' : 'Supply'}
                   </span>
                 </div>
 
@@ -273,6 +274,23 @@ export default function HighScoresView({
             }`}
           >
             All Games
+          </button>
+
+          <button
+            id="filter-texas-holdem-btn"
+            type="button"
+            onClick={() => {
+              setSelectedFilter('texas-holdem');
+              playTacticalSound('switch');
+            }}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              selectedFilter === 'texas-holdem'
+                ? 'bg-amber-600 text-white shadow-md'
+                : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-750'
+            }`}
+          >
+            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <span>Texas Hold&apos;em 3D</span>
           </button>
 
           <button
@@ -450,7 +468,9 @@ export default function HighScoresView({
                       {/* Game Name */}
                       <td className="py-3.5 px-4">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 border border-slate-700 text-slate-200">
-                          {item.gameId === 'emoji-tactics' ? (
+                          {item.gameId === 'texas-holdem' ? (
+                            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                          ) : item.gameId === 'emoji-tactics' ? (
                             <Crown className="w-3.5 h-3.5 text-violet-400" />
                           ) : item.gameId === 'rpg-game' ? (
                             <Sparkles className="w-3.5 h-3.5 text-amber-400" />

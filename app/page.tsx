@@ -63,6 +63,20 @@ interface StationInfo {
 
 const STATIONS: StationInfo[] = [
   {
+    id: 'texas-holdem',
+    name: "Texas Hold'em 3D",
+    url: '/texas-holdem.html',
+    icon: Trophy,
+    tag: '3D POKER',
+    category: 'Progressive Hold\'em Arena',
+    themeColor: 'text-amber-400',
+    accentBg: 'bg-amber-500/10',
+    borderAccent: 'border-amber-500/30',
+    badgeClass: 'bg-amber-900/60 text-amber-200 border-amber-500/40',
+    description: '3D Texas Hold\'em with a community shared Progressive Jackpot pool won on Straight Flushes, diminishing 52-card pool, lump sum reshuffling, and AI opponents deploying advanced strategies.',
+    status: 'ONLINE'
+  },
+  {
     id: 'emoji-tactics',
     name: 'Emoji Tactics 3D',
     url: '/emoji-tactics.html',
@@ -276,8 +290,8 @@ export default function Home() {
         if (typeof score === 'number') {
           const res = saveGameHighScore(gameId, score, details || '', activeUser);
           playTacticalSound('success');
-          // High score notifications disabled for rpg-game, slots-up, and emoji-tactics as requested
-          if (gameId !== 'rpg-game' && gameId !== 'slots-up' && gameId !== 'emoji-tactics') {
+          // High score notifications disabled for rpg-game, slots-up, emoji-tactics, and texas-holdem as requested
+          if (gameId !== 'rpg-game' && gameId !== 'slots-up' && gameId !== 'emoji-tactics' && gameId !== 'texas-holdem') {
             setHighScoreNotification({
               id: Date.now().toString(),
               gameId,
@@ -977,43 +991,8 @@ export default function Home() {
           </nav>
 
           {/* Main Game Viewport */}
-          <main className="flex-1 flex flex-col p-3 sm:p-6 max-w-7xl w-full mx-auto relative z-10">
-            <div className="flex-1 flex flex-col rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-2xl relative min-h-[500px] h-[calc(100vh-210px)]">
-              {/* Game Viewport Header Bar */}
-              <div className="flex flex-wrap items-center justify-between px-4 py-3 bg-slate-850 border-b border-slate-800 text-sm text-slate-300 shrink-0 gap-2">
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <span className="font-bold text-white text-base">{activeStation.name}</span>
-                  <span className="text-slate-500">&bull;</span>
-                  <span className="text-slate-400 text-xs hidden sm:inline">{activeStation.category}</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 hidden lg:inline mr-2">{activeStation.description}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setGameVersionKey(Date.now());
-                      playTacticalSound('click');
-                    }}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-colors cursor-pointer"
-                    title="Reload game frame to get newest version"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5 text-blue-400" />
-                    <span>Reload Station</span>
-                  </button>
-                  <a
-                    href={activeStation.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-colors"
-                    title="Open game in full tab"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                    <span className="hidden sm:inline">New Tab</span>
-                  </a>
-                </div>
-              </div>
-
+          <main className="flex-1 flex flex-col p-2 sm:p-4 max-w-7xl w-full mx-auto relative z-10">
+            <div className="flex-1 flex flex-col rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-2xl relative min-h-[550px] h-[calc(100vh-140px)]">
               {/* Interactive Game Frame Viewport */}
               <div className="flex-1 relative w-full h-full bg-slate-950">
                 <iframe

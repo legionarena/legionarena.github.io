@@ -381,27 +381,55 @@ export default function AuthLandingView({
               </div>
             </div>
 
-            {/* Demo Account Quick Button */}
-            <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-white">Demo Account:</span>
-                <span className="text-slate-300 font-medium">player@firestorm.gg</span>
-                <span className="text-slate-500">&bull;</span>
-                <span className="text-slate-300 font-medium">password123</span>
+            {/* Demo Accounts Quick Buttons */}
+            <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 flex flex-col gap-2.5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-white uppercase tracking-wider text-[11px] text-amber-400">⚡ Quick Demo Login Accounts</span>
+                <span className="text-[10px] text-slate-400 font-medium">Click to auto-fill credentials</span>
               </div>
-              <button
-                id="demo-fill-btn"
-                type="button"
-                onClick={() => {
-                  setLoginIdentifier('player@firestorm.gg');
-                  setLoginPassword('password123');
-                  setAuthMode('LOGIN');
-                  playTacticalSound('click');
-                }}
-                className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors cursor-pointer"
-              >
-                Demo Fill
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {/* Demo Account 1 */}
+                <div className="p-2.5 rounded-lg bg-slate-950/80 border border-blue-900/40 flex items-center justify-between gap-2">
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-bold text-white text-xs truncate">#1 GhostRider</span>
+                    <span className="text-[10px] text-slate-400 truncate">player@firestorm.gg</span>
+                  </div>
+                  <button
+                    id="demo-fill-btn-1"
+                    type="button"
+                    onClick={() => {
+                      setLoginIdentifier('player@firestorm.gg');
+                      setLoginPassword('password123');
+                      setAuthMode('LOGIN');
+                      playTacticalSound('click');
+                    }}
+                    className="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors cursor-pointer shrink-0"
+                  >
+                    Demo #1 Fill
+                  </button>
+                </div>
+
+                {/* Demo Account 2 */}
+                <div className="p-2.5 rounded-lg bg-slate-950/80 border border-emerald-900/40 flex items-center justify-between gap-2">
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-bold text-white text-xs truncate">#2 ApexViper</span>
+                    <span className="text-[10px] text-slate-400 truncate">viper@firestorm.gg</span>
+                  </div>
+                  <button
+                    id="demo-fill-btn-2"
+                    type="button"
+                    onClick={() => {
+                      setLoginIdentifier('viper@firestorm.gg');
+                      setLoginPassword('password123');
+                      setAuthMode('LOGIN');
+                      playTacticalSound('click');
+                    }}
+                    className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors cursor-pointer shrink-0"
+                  >
+                    Demo #2 Fill
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 

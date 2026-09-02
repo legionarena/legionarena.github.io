@@ -17,7 +17,9 @@ export interface User {
     blockDrop?: number;
     rpgGame?: number;
     emojiTactics?: number;
+    texasHoldem?: number;
   };
+  holdemChips?: number;
   createdAt: string;
   lastLoginAt: string;
 }
@@ -35,7 +37,7 @@ export interface DispatchedEmail {
 
 export interface GameHighScore {
   id: string;
-  gameId: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game' | 'emoji-tactics';
+  gameId: 'code-pressed' | 'slots-up' | 'block-drop' | 'rpg-game' | 'emoji-tactics' | 'texas-holdem';
   gameName: string;
   userId: string;
   userCallsign: string;

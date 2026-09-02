@@ -66,13 +66,14 @@
       pointer-events: auto;
     }
 
-    /* TOP BAR STATS */
+    /* TOP BAR STATS & Z-INDEX ORDER */
     .top-stats-bar {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: 12px;
-      flex-wrap: wrap;
+      position: relative;
+      z-index: 20;
     }
     .player-vitals-card {
       background: var(--panel-bg);
@@ -82,6 +83,8 @@
       backdrop-filter: blur(8px);
       box-shadow: 0 8px 24px rgba(0,0,0,0.5);
       min-width: 260px;
+      position: relative;
+      z-index: 20;
     }
     .player-header {
       display: flex;
@@ -172,20 +175,18 @@
       clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
     }
 
-    /* DECAYING SLAIN FOES & DROPS LOG (LEFT SIDE) */
+    /* MERGED PLAYER VITALS & SLAIN COMBAT LOOT LOG */
     .slain-loot-box {
-      margin-top: 8px;
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      padding: 8px 10px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      margin-top: 10px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+      border-radius: 8px;
+      padding: 7px 9px;
       width: 100%;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
     .slain-loot-header {
       display: flex;
@@ -698,6 +699,302 @@
       color: #fff;
     }
 
+    /* REAL-TIME SYNC (RTDB) & METRICS COST ANALYZER HUD (CENTER TOP WINDOW) */
+    .telemetry-center-window {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 340px;
+      max-width: calc(100vw - 640px);
+      min-width: 270px;
+      z-index: 35;
+      background: var(--panel-bg);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      border-radius: 12px;
+      padding: 8px 12px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+      box-sizing: border-box;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .telemetry-center-window:hover {
+      border-color: rgba(16, 185, 129, 0.85);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.25), 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+    .rtdb-metrics-card {
+      background: var(--panel-bg);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 12px;
+      padding: 8px 11px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+      width: 100%;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .rtdb-metrics-card:hover {
+      border-color: rgba(16, 185, 129, 0.8);
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
+    }
+    .rtdb-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .rtdb-header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .rtdb-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: rtdbPulse 1.8s infinite;
+    }
+    @keyframes rtdbPulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px #34d399; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .rtdb-pulse-dot.paused {
+      background: #f59e0b;
+      box-shadow: 0 0 6px #f59e0b;
+      animation: none;
+    }
+    .rtdb-pulse-dot.ended {
+      background: #ef4444;
+      box-shadow: 0 0 6px #ef4444;
+      animation: none;
+    }
+    .rtdb-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: #34d399;
+      letter-spacing: 0.3px;
+    }
+    .rtdb-badge {
+      font-family: monospace;
+      font-size: 9px;
+      font-weight: 800;
+      background: rgba(16, 185, 129, 0.18);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    .rtdb-toggle-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 9px;
+      cursor: pointer;
+      padding: 1px 3px;
+    }
+    .rtdb-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .rtdb-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+    .rtdb-stat-item {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      padding: 4px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      text-align: left;
+    }
+    .rtdb-stat-label {
+      font-size: 8.5px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+    .rtdb-stat-val {
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+    .rtdb-cost-box {
+      background: rgba(6, 78, 59, 0.25);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 7px;
+      padding: 5px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: left;
+    }
+    .rtdb-cost-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 8.5px;
+      font-weight: 800;
+      color: #6ee7b7;
+      text-transform: uppercase;
+    }
+    .rtdb-cost-rate {
+      font-size: 8px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .rtdb-cost-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .rtdb-cost-val {
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 900;
+      color: #34d399;
+      text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);
+    }
+    .rtdb-cost-proj {
+      font-family: monospace;
+      font-size: 9px;
+      color: #cbd5e1;
+    }
+    .rtdb-node-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 9px;
+      color: #94a3b8;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 3px 6px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .rtdb-node-id-tag code {
+      color: #38bdf8;
+      font-family: monospace;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.1);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    .rtdb-actions-row {
+      display: grid;
+      grid-template-columns: 1.3fr 0.9fr;
+      gap: 5px;
+      margin-top: 2px;
+    }
+    .rtdb-btn {
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+    .rtdb-btn-danger {
+      background: rgba(220, 38, 38, 0.25);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+    }
+    .rtdb-btn-danger:hover {
+      background: #dc2626;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
+    }
+    .rtdb-btn-primary {
+      background: rgba(14, 165, 233, 0.25);
+      border-color: rgba(56, 189, 248, 0.5);
+      color: #bae6fd;
+    }
+    .rtdb-btn-primary:hover {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    /* FRIENDLY 3D CHARACTER FLOATING NAMEPLATE */
+    .friendly-char-tag {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      pointer-events: none;
+      background: rgba(6, 78, 59, 0.88);
+      border: 1px solid #10b981;
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #6ee7b7;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6), 0 0 8px rgba(16, 185, 129, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      z-index: 5;
+    }
+    .friendly-char-tag .ally-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 6px #34d399;
+    }
+
+    /* ARCHIVE MODAL STYLES */
+    .archive-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 500px) {
+      .archive-summary-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .archive-stat-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: left;
+    }
+    .archive-stat-title {
+      font-size: 9px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+    .archive-stat-val {
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
     /* TARGET CARD */
     .target-card {
       position: absolute;
@@ -944,51 +1241,159 @@
       margin-top: 2px;
     }
 
-    /* INVENTORY BAG */
+    /* INVENTORY BAG & GEAR INFO LIST - DISTINCT ITEM WINDOWS WITH BORDERS */
     .inventory-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-      gap: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       background: #090d16;
       border: 1px solid #1e293b;
-      padding: 10px;
+      padding: 12px;
       border-radius: 12px;
-      max-height: 240px;
+      max-height: 380px;
       overflow-y: auto;
     }
     .inv-item {
-      width: 100%;
-      aspect-ratio: 1;
-      background: #131d31;
-      border: 1px solid #334155;
-      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(23, 33, 56, 0.95) 0%, rgba(13, 20, 36, 0.98) 100%);
+      border: 1.5px solid #334155;
+      border-radius: 10px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      padding: 4px;
-      text-align: center;
-      transition: all 0.15s;
+      gap: 7px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
     }
     .inv-item:hover {
-      border-color: #38bdf8;
-      transform: scale(1.05);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+    .inv-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.45);
+      padding-bottom: 5px;
+      gap: 8px;
+    }
+    .inv-item-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
     }
     .inv-item-name {
-      font-size: 8px;
-      font-weight: 700;
-      color: #f1f5f9;
-      line-height: 1.1;
+      font-size: 12px;
+      font-weight: 800;
+      color: #f8fafc;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.2px;
+    }
+    .gear-lvl-pill {
+      font-family: monospace;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(59, 130, 246, 0.25);
+      border: 1px solid rgba(59, 130, 246, 0.5);
+      color: #93c5fd;
+      flex-shrink: 0;
+    }
+    .gear-stats-desc {
+      background: rgba(10, 15, 29, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      padding: 6px 9px;
+      font-size: 11px;
+      color: #cbd5e1;
+      line-height: 1.4;
+      text-align: left;
+    }
+    .gear-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
       margin-top: 2px;
     }
+    .gear-action-btn {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .btn-equip {
+      background: rgba(59, 130, 246, 0.25);
+      border-color: #3b82f6;
+      color: #93c5fd;
+    }
+    .btn-equip:hover {
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+    .btn-convert-xp {
+      background: rgba(168, 85, 247, 0.2);
+      border-color: #a855f7;
+      color: #d8b4fe;
+    }
+    .btn-convert-xp:hover {
+      background: #9333ea;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    }
+    .btn-convert-essence {
+      background: rgba(14, 165, 233, 0.2);
+      border-color: #0ea5e9;
+      color: #7dd3fc;
+    }
+    .btn-convert-essence:hover {
+      background: #0284c7;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+    }
+    .gear-locked-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #64748b;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
 
-    /* RARITY COLORS */
-    .rarity-common { border-color: #64748b !important; color: #cbd5e1; }
-    .rarity-uncommon { border-color: #22c55e !important; color: #4ade80; }
-    .rarity-rare { border-color: #3b82f6 !important; color: #60a5fa; }
-    .rarity-epic { border-color: #a855f7 !important; color: #c084fc; }
-    .rarity-legendary { border-color: #f59e0b !important; color: #fbbf24; }
+    /* RARITY WINDOW BORDERS & GLOW EFFECTS */
+    .rarity-common {
+      border-color: #64748b !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(148, 163, 184, 0.15) !important;
+    }
+    .rarity-uncommon {
+      border-color: #22c55e !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 0 10px rgba(34, 197, 94, 0.2), inset 0 1px 0 rgba(34, 197, 94, 0.25) !important;
+    }
+    .rarity-rare {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 0 12px rgba(59, 130, 246, 0.25), inset 0 1px 0 rgba(59, 130, 246, 0.3) !important;
+    }
+    .rarity-epic {
+      border-color: #a855f7 !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 0 14px rgba(168, 85, 247, 0.3), inset 0 1px 0 rgba(168, 85, 247, 0.35) !important;
+    }
+    .rarity-legendary {
+      border-color: #f59e0b !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 0 16px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(245, 158, 11, 0.4) !important;
+    }
 
     /* STATS & ESSENCE SHOP UPGRADES */
     .stat-upgrade-row {
@@ -1076,12 +1481,108 @@
 
   <!-- HUD OVERLAY -->
   <div class="hud-overlay">
+    <!-- CENTER TOP FLOATING TELEMETRY WINDOW (GPU ENGINE & RTDB SYNC) -->
+    <div class="rtdb-metrics-card hud-interactive telemetry-center-window" id="unified-perf-sync-card">
+      <div class="rtdb-header" id="rtdb-header-toggle" title="Click to Expand / Collapse Telemetry Details">
+        <div class="rtdb-header-left">
+          <span class="rtdb-pulse-dot" id="rtdb-pulse-dot"></span>
+          <span class="rtdb-title">GPU Engine &amp; RTDB Sync</span>
+          <span class="perf-fps-badge" id="perf-fps-badge">60 FPS</span>
+        </div>
+        <div class="rtdb-header-right">
+          <button class="rtdb-toggle-btn" id="rtdb-toggle-btn" title="Toggle Stats Details">▲</button>
+        </div>
+      </div>
+
+      <div class="rtdb-body" id="rtdb-body">
+        <!-- GPU & Instancing Stats Section -->
+        <div style="border-bottom: 1px solid rgba(51, 65, 85, 0.5); padding-bottom: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">⚡ GPU &amp; Instancing</span>
+            <span style="font-size: 8.5px; color: #64748b; font-family: monospace;" id="perf-inst-mesh-summary">InstancedMesh</span>
+          </div>
+          <div class="perf-grid">
+            <div class="perf-stat-item">
+              <span class="perf-stat-label">Draw Calls</span>
+              <span class="perf-stat-val text-emerald" id="perf-draw-calls">--</span>
+            </div>
+            <div class="perf-stat-item">
+              <span class="perf-stat-label">Polygons (Tris)</span>
+              <span class="perf-stat-val text-cyan" id="perf-poly-count">--</span>
+            </div>
+            <div class="perf-stat-item">
+              <span class="perf-stat-label">Frame Time</span>
+              <span class="perf-stat-val text-amber" id="perf-fps-ms">--</span>
+            </div>
+            <div class="perf-stat-item">
+              <span class="perf-stat-label">Instanced Meshes</span>
+              <span class="perf-stat-val text-purple" id="perf-instanced-count">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-Time Sync Section -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+          <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">🌐 RTDB Sync Metrics</span>
+          <span class="rtdb-badge" id="rtdb-status-badge">2s Active</span>
+        </div>
+        <div class="rtdb-grid">
+          <div class="rtdb-stat-item">
+            <span class="rtdb-stat-label">Total Transactions</span>
+            <span class="rtdb-stat-val text-emerald" id="rtdb-total-tx">0 TX</span>
+          </div>
+          <div class="rtdb-stat-item">
+            <span class="rtdb-stat-label">Total Bandwidth</span>
+            <span class="rtdb-stat-val text-cyan" id="rtdb-total-kb">0.00 KB</span>
+          </div>
+          <div class="rtdb-stat-item">
+            <span class="rtdb-stat-label">Connected Nodes</span>
+            <span class="rtdb-stat-val text-amber" id="rtdb-nodes-count">1 (Local)</span>
+          </div>
+          <div class="rtdb-stat-item">
+            <span class="rtdb-stat-label">Transfer Rate</span>
+            <span class="rtdb-stat-val text-purple" id="rtdb-rate-val">0 B/s</span>
+          </div>
+        </div>
+
+        <!-- Cost Analyzer Box -->
+        <div class="rtdb-cost-box">
+          <div class="rtdb-cost-header">
+            <span>💰 Est. Firebase RTDB Monthly Cost</span>
+            <span class="rtdb-cost-rate">($1.00 / GB)</span>
+          </div>
+          <div class="rtdb-cost-row">
+            <span class="rtdb-cost-val" id="rtdb-monthly-cost">$0.0000 / mo</span>
+            <span class="rtdb-cost-proj" id="rtdb-cost-proj">~0.00 MB / mo</span>
+          </div>
+        </div>
+
+        <!-- Node Identity & Quick Peer Actions -->
+        <div class="rtdb-node-row">
+          <div class="rtdb-node-id-tag">
+            <span>Node:</span>
+            <code id="rtdb-local-node-id">node-init</code>
+          </div>
+          <span id="rtdb-peers-summary">0 Remote Allies</span>
+        </div>
+
+        <div class="rtdb-actions-row">
+          <button class="rtdb-btn rtdb-btn-danger" id="btn-end-session" title="End Broadcast &amp; Archive Session to Native IndexedDB">
+            💾 End Session
+          </button>
+          <button class="rtdb-btn rtdb-btn-primary" id="btn-sim-node" title="Simulate Friendly Peer Broadcast across Tab/Channel">
+            🤖 Sim Ally
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- TOP BAR -->
     <div class="top-stats-bar">
-      <!-- Left Column: Player Vitals & Decaying Slain Foes & Drops Log -->
-      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start; max-width: 280px; width: 100%;">
-        <!-- Player Vitals -->
-        <div class="player-vitals-card hud-interactive">
+      <!-- Left Column: Unified Player Info & Combat Loot Log -->
+      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start; max-width: 290px; width: 100%;">
+        <!-- Merged Player Vitals & Combat Loot Card -->
+        <div class="player-vitals-card hud-interactive" id="player-loot-merged-card">
           <div class="player-header">
             <span class="player-name" id="hud-player-name">Hero</span>
             <span class="player-level-badge" id="hud-player-lvl">LVL 1</span>
@@ -1104,7 +1605,7 @@
               <div class="stat-bar-fill mana-fill" id="hud-mana-bar" style="width: 100%"></div>
             </div>
           </div>
-          <div class="bar-wrap" style="margin-bottom: 0;">
+          <div class="bar-wrap" style="margin-bottom: 4px;">
             <div class="bar-label">
               <span>EXPERIENCE (LVL 1 - 50)</span>
               <span id="hud-xp-val">0 / 100</span>
@@ -1113,65 +1614,15 @@
               <div class="stat-bar-fill xp-fill" id="hud-xp-bar" style="width: 0%"></div>
             </div>
           </div>
-        </div>
 
-        <!-- Decaying Slain Foes & Drops Log on the Left -->
-        <div class="slain-loot-box hud-interactive" id="slain-loot-box">
-          <div class="slain-loot-header">
-            <span>💀 Slain Foes &amp; Loot Drops</span>
-            <span id="slain-decay-badge" class="slain-badge">0 / 3</span>
-          </div>
-          <div class="slain-loot-list" id="slain-loot-list">
-            <div class="slain-empty-hint">Defeat enemies to log combat drops</div>
-          </div>
-        </div>
-
-        <!-- Performance & THREE.InstancedMesh Metrics HUD (Small Area) -->
-        <div class="perf-metrics-card hud-interactive" id="perf-metrics-card">
-          <div class="perf-header" onclick="togglePerfDetails()">
-            <div class="perf-header-left">
-              <span class="perf-dot"></span>
-              <span class="perf-title">GPU &amp; Instancing Stats</span>
-              <span class="perf-fps-badge" id="perf-fps-badge">60 FPS</span>
+          <!-- Embedded Decaying Slain Foes & Drops Log -->
+          <div class="slain-loot-box" id="slain-loot-box">
+            <div class="slain-loot-header">
+              <span>💀 Slain Foes &amp; Loot Drops</span>
+              <span id="slain-decay-badge" class="slain-badge">0 / 3</span>
             </div>
-            <div class="perf-header-right">
-              <button class="perf-toggle-btn" id="perf-toggle-btn" title="Toggle detailed stats [P]">▲</button>
-            </div>
-          </div>
-          <div class="perf-body" id="perf-body">
-            <div class="perf-grid">
-              <div class="perf-stat-item">
-                <span class="perf-stat-label">Draw Calls</span>
-                <span class="perf-stat-val text-emerald" id="perf-draw-calls">--</span>
-              </div>
-              <div class="perf-stat-item">
-                <span class="perf-stat-label">Polygons (Triangles)</span>
-                <span class="perf-stat-val text-cyan" id="perf-poly-count">--</span>
-              </div>
-              <div class="perf-stat-item">
-                <span class="perf-stat-label">Frame Time (ms)</span>
-                <span class="perf-stat-val text-amber" id="perf-fps-ms">--</span>
-              </div>
-              <div class="perf-stat-item">
-                <span class="perf-stat-label">Instanced Meshes</span>
-                <span class="perf-stat-val text-purple" id="perf-instanced-count">--</span>
-              </div>
-            </div>
-            <div class="perf-colorizer-section">
-              <div class="perf-colorizer-title">
-                <span>🎨 <code>instanceColor</code> Target:</span>
-                <span class="perf-colorizer-status" id="perf-colorizer-target">Click object</span>
-              </div>
-              <div class="perf-color-palette">
-                <button class="perf-color-btn" style="background:#ef4444" onclick="applyColorToSelectedInstance('#ef4444')" title="Flame Red"></button>
-                <button class="perf-color-btn" style="background:#f59e0b" onclick="applyColorToSelectedInstance('#f59e0b')" title="Sun Amber"></button>
-                <button class="perf-color-btn" style="background:#10b981" onclick="applyColorToSelectedInstance('#10b981')" title="Emerald Green"></button>
-                <button class="perf-color-btn" style="background:#06b6d4" onclick="applyColorToSelectedInstance('#06b6d4')" title="Frost Cyan"></button>
-                <button class="perf-color-btn" style="background:#8b5cf6" onclick="applyColorToSelectedInstance('#8b5cf6')" title="Arcane Violet"></button>
-                <button class="perf-color-btn" style="background:#ec4899" onclick="applyColorToSelectedInstance('#ec4899')" title="Prismatic Pink"></button>
-                <button class="perf-action-btn" onclick="cycleSelectedInstanceColor()" title="Cycle Selected Instance Color [C]">Cycle [C]</button>
-                <button class="perf-action-btn" onclick="pulseInstancedMeshWave()" title="Pulse Instanced Wave across nearby objects [V]">Wave [V]</button>
-              </div>
+            <div class="slain-loot-list" id="slain-loot-list">
+              <div class="slain-empty-hint">Defeat enemies to log combat drops</div>
             </div>
           </div>
         </div>
@@ -1186,78 +1637,85 @@
         <div class="target-resist" id="target-resist">Resist: None</div>
       </div>
 
-      <!-- Right Realm Info Card with Integrated Hamburger Menu -->
-      <div class="zone-info-card hud-interactive" id="realm-info-card">
-        <div class="zone-header-row">
-          <div style="text-align: left;">
-            <div class="zone-title" id="hud-zone-title">Zone 1: Forbidden Ruins</div>
-            <div class="zone-kills" id="hud-zone-kills">Area Kills: 0 / 256 (Boss Unlocks)</div>
-          </div>
-          <button class="realm-hamburger-btn" id="btn-realm-hamburger" title="Realm Actions &amp; Settings Menu" aria-label="Realm Menu">
-            <span class="bar"></span>
-            <span class="bar"></span>
-            <span class="bar"></span>
-          </button>
-        </div>
-
-        <div class="essence-counter">
-          <div class="essence-icon"></div>
-          <span id="hud-essence-val">0 Essence</span>
-        </div>
-
-        <!-- Nearby Foes List Under Realm Info -->
-        <div class="nearby-foes-box">
-          <div class="nearby-foes-header">
-            <span>Nearby Foes (Click to Target)</span>
-            <span id="foes-count-badge" style="color: #fbbf24;">0 Foes</span>
-          </div>
-          <div class="nearby-foes-list" id="nearby-foes-list">
-            <div style="font-size: 10px; color: #64748b; text-align: center; padding: 4px;">No enemies nearby</div>
-          </div>
-        </div>
-
-        <!-- Hamburger Dropdown Menu inside Realm Info Box -->
-        <div class="realm-hamburger-dropdown" id="realm-hamburger-menu">
-          <div class="menu-heading">Realm Actions &amp; Gear Settings</div>
-          <button class="realm-menu-item" id="btn-open-gear">
-            <span>🛡️ Gear &amp; Bag</span>
-            <span class="key-tag">[I]</span>
-          </button>
-          <button class="realm-menu-item" id="btn-open-essence">
-            <span>💎 Essence Shop</span>
-            <span class="key-tag">[K]</span>
-          </button>
-          <button class="realm-menu-item" id="btn-autowalk">
-            <span id="autowalk-text">🏃 Auto-Walk: OFF</span>
-            <span class="key-tag">[X]</span>
-          </button>
-          <button class="realm-menu-item" id="btn-reset-controls">
-            <span>🔄 Reset Controls</span>
-            <span class="key-tag">[R]</span>
-          </button>
-          <button class="realm-menu-item realm-menu-item-warp" id="btn-warp-sanctuary" onclick="warpToSanctuary()" title="Teleport to Sanctuary Temple [T]">
-            <span>✨ Teleport to Sanctuary</span>
-            <span class="key-tag">[T]</span>
-          </button>
-          <button class="realm-menu-item" id="btn-sound-toggle">
-            <span id="sound-toggle-text">🔊 Sound: ON</span>
-            <span class="key-tag">SFX</span>
-          </button>
-
-          <!-- 3D Raycaster & Proximity Distance Radar -->
-          <div class="radar-panel">
-            <div class="radar-title">📡 3D Raycaster &amp; Proximity (vector.distanceTo)</div>
-            <div class="radar-row">
-              <span>Raycast Path:</span>
-              <strong id="radar-ray-status" class="radar-val text-emerald">Clear Ahead</strong>
+      <!-- Right Column: Realm Info Card -->
+      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end; max-width: 300px; width: 100%;">
+        <!-- Right Realm Info Card with Integrated Hamburger Menu -->
+        <div class="zone-info-card hud-interactive" id="realm-info-card">
+          <div class="zone-header-row">
+            <div style="text-align: left;">
+              <div class="zone-title" id="hud-zone-title">Zone 1: Forbidden Ruins</div>
+              <div class="zone-kills" id="hud-zone-kills">Area Kills: 0 / 256 (Boss Unlocks)</div>
             </div>
-            <div class="radar-row">
-              <span>Nearest Obstacle:</span>
-              <strong id="radar-obs-status" class="radar-val">-</strong>
+            <button class="realm-hamburger-btn" id="btn-realm-hamburger" title="Realm Actions &amp; Settings Menu" aria-label="Realm Menu">
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+            </button>
+          </div>
+
+          <div class="essence-counter">
+            <div class="essence-icon"></div>
+            <span id="hud-essence-val">0 Essence</span>
+          </div>
+
+          <!-- Nearby Foes List Under Realm Info -->
+          <div class="nearby-foes-box">
+            <div class="nearby-foes-header">
+              <span>Nearby Foes (Click to Target)</span>
+              <span id="foes-count-badge" style="color: #fbbf24;">0 Foes</span>
             </div>
-            <div class="radar-row">
-              <span>Nearest Enemy:</span>
-              <strong id="radar-enemy-status" class="radar-val">-</strong>
+            <div class="nearby-foes-list" id="nearby-foes-list">
+              <div style="font-size: 10px; color: #64748b; text-align: center; padding: 4px;">No enemies nearby</div>
+            </div>
+          </div>
+
+          <!-- Hamburger Dropdown Menu inside Realm Info Box -->
+          <div class="realm-hamburger-dropdown" id="realm-hamburger-menu">
+            <div class="menu-heading">Realm Actions &amp; Gear Settings</div>
+            <button class="realm-menu-item" id="btn-open-gear">
+              <span>🛡️ Gear &amp; Bag</span>
+              <span class="key-tag">[I]</span>
+            </button>
+            <button class="realm-menu-item" id="btn-open-essence">
+              <span>💎 Essence Shop</span>
+              <span class="key-tag">[K]</span>
+            </button>
+            <button class="realm-menu-item" id="btn-autowalk">
+              <span id="autowalk-text">🏃 Auto-Walk: OFF</span>
+              <span class="key-tag">[X]</span>
+            </button>
+            <button class="realm-menu-item" id="btn-reset-controls">
+              <span>🔄 Reset Controls</span>
+              <span class="key-tag">[R]</span>
+            </button>
+            <button class="realm-menu-item realm-menu-item-warp" id="btn-warp-sanctuary" onclick="warpToSanctuary()" title="Teleport to Sanctuary Temple [T]">
+              <span>✨ Teleport to Sanctuary</span>
+              <span class="key-tag">[T]</span>
+            </button>
+            <button class="realm-menu-item" id="btn-sound-toggle">
+              <span id="sound-toggle-text">🔊 Sound: ON</span>
+              <span class="key-tag">SFX</span>
+            </button>
+            <button class="realm-menu-item" id="btn-menu-end-session" style="border-top: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5;">
+              <span>💾 End Session &amp; Archive</span>
+              <span class="key-tag">DB</span>
+            </button>
+
+            <!-- 3D Raycaster & Proximity Distance Radar -->
+            <div class="radar-panel">
+              <div class="radar-title">📡 3D Raycaster &amp; Proximity (vector.distanceTo)</div>
+              <div class="radar-row">
+                <span>Raycast Path:</span>
+                <strong id="radar-ray-status" class="radar-val text-emerald">Clear Ahead</strong>
+              </div>
+              <div class="radar-row">
+                <span>Nearest Obstacle:</span>
+                <strong id="radar-obs-status" class="radar-val">-</strong>
+              </div>
+              <div class="radar-row">
+                <span>Nearest Enemy:</span>
+                <strong id="radar-enemy-status" class="radar-val">-</strong>
+              </div>
             </div>
           </div>
         </div>
@@ -1508,6 +1966,63 @@
     <button class="stat-buy-btn" id="btn-enter-portal" style="margin-top: 16px; padding: 12px 24px; font-size: 14px; background: #2563eb;">
       🌌 Enter Next Realm
     </button>
+  </div>
+</div>
+
+<!-- MODAL: SESSION ARCHIVE (INDEXEDDB / SIMULATED FIRESTORE) -->
+<div class="modal-backdrop" id="modal-archive" style="display: none;">
+  <div class="modal-box" style="max-width: 580px;">
+    <div class="modal-title" style="justify-content: space-between; color: #38bdf8; font-size: 18px; margin-bottom: 12px;">
+      <span>💾 Session Archived to Native IndexedDB</span>
+      <button class="modal-close-btn" id="btn-close-archive" style="background:transparent; border:none; color:#94a3b8; font-size:16px; cursor:pointer;">✕</button>
+    </div>
+    <p style="font-size: 12px; color: #cbd5e1; line-height: 1.5; margin-bottom: 12px;">
+      Real-time broadcast sync has been stopped. The session telemetry record has been written to the browser's native <strong>IndexedDB (Firestore simulation)</strong> database.
+    </p>
+
+    <div class="archive-summary-grid">
+      <div class="archive-stat-card">
+        <span class="archive-stat-title">Session Time</span>
+        <span class="archive-stat-val text-amber" id="arch-duration">00:00</span>
+      </div>
+      <div class="archive-stat-card">
+        <span class="archive-stat-title">Nodes Seen</span>
+        <span class="archive-stat-val text-emerald" id="arch-nodes-seen">1 Node</span>
+      </div>
+      <div class="archive-stat-card">
+        <span class="archive-stat-title">Total Bandwidth</span>
+        <span class="archive-stat-val text-cyan" id="arch-bandwidth">0.00 KB</span>
+      </div>
+      <div class="archive-stat-card">
+        <span class="archive-stat-title">Total Transactions</span>
+        <span class="archive-stat-val text-purple" id="arch-transactions">0 TX</span>
+      </div>
+      <div class="archive-stat-card">
+        <span class="archive-stat-title">Est. Monthly Cost</span>
+        <span class="archive-stat-val text-emerald" id="arch-monthly-cost">$0.0000</span>
+      </div>
+      <div class="archive-stat-card">
+        <span class="archive-stat-title">Hero Progression</span>
+        <span class="archive-stat-val text-cyan" id="arch-hero-prog">LVL 1</span>
+      </div>
+    </div>
+
+    <div class="archive-json-preview">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <span style="font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase;">IndexedDB Record Payload (`RealmChampions_FirestoreDB`)</span>
+        <span style="font-size:9.5px; color:#4ade80; font-family:monospace; font-weight:800;" id="arch-db-status">✓ STORED IN INDEXEDDB</span>
+      </div>
+      <pre id="arch-json-view" style="font-family:monospace; font-size:10px; color:#e2e8f0; max-height:140px; overflow-y:auto; background:#070b14; padding:8px; border-radius:6px; border:1px solid #1e293b; text-align:left;"></pre>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+      <button class="stat-buy-btn" id="btn-restart-sync" style="background:#2563eb; padding:8px 16px;">
+        🔄 Start New Sync Session
+      </button>
+      <button class="stat-buy-btn" id="btn-archive-done" style="background:#334155; padding:8px 16px;">
+        Close View
+      </button>
+    </div>
   </div>
 </div>
 
@@ -2523,112 +3038,63 @@ const _vScreen = new THREE.Vector3();
   }
   window.togglePerfDetails = togglePerfDetails;
 
-  const INSTANCE_COLOR_PALETTE = [
-    '#ef4444', // Flame Red
-    '#f59e0b', // Solar Amber
-    '#10b981', // Emerald Jade
-    '#06b6d4', // Glacial Cyan
-    '#8b5cf6', // Arcane Violet
-    '#ec4899', // Prismatic Rose
-    '#e2e8f0', // Celestial White
-    '#38bdf8'  // Radiant Sky
+  // =========================================================================
+  // PROCEDURAL SEASONAL RANDOMIZATION FOR TREES & ROCKS
+  // =========================================================================
+  const SEASONS = [
+    {
+      name: 'Verdant Spring',
+      foliageColors: ['#15803d', '#16a34a', '#22c55e', '#4ade80', '#10b981', '#34d399', '#86efac'],
+      rockColors: ['#475569', '#64748b', '#334155', '#52525b', '#3f3f46', '#4b5563']
+    },
+    {
+      name: 'Lush Summer',
+      foliageColors: ['#14532d', '#166534', '#15803d', '#1e3a1e', '#234e23', '#2d6a4f', '#065f46'],
+      rockColors: ['#3f3f46', '#52525b', '#475569', '#374151', '#4b5563', '#1f2937']
+    },
+    {
+      name: 'Golden Autumn',
+      foliageColors: ['#d97706', '#f59e0b', '#b45309', '#ea580c', '#c2410c', '#dc2626', '#eab308', '#ca8a04'],
+      rockColors: ['#78350f', '#57534e', '#44403c', '#525252', '#4b5563', '#713f12']
+    },
+    {
+      name: 'Frost Winter',
+      foliageColors: ['#e2e8f0', '#cbd5e1', '#94a3b8', '#38bdf8', '#7dd3fc', '#0284c7', '#bfdbfe', '#f8fafc'],
+      rockColors: ['#334155', '#475569', '#64748b', '#94a3b8', '#1e293b', '#0f172a']
+    }
   ];
-  let currentPaletteIndex = 0;
 
-  function findNearestInstancedObject() {
-    if (!playerMesh || instancedMeshRegistry.length === 0) return null;
-    let closest = null;
-    let minDist = 9999;
-    const mat = new THREE.Matrix4();
-    const pos = new THREE.Vector3();
-    const rot = new THREE.Quaternion();
-    const scale = new THREE.Vector3();
+  let currentSeason = SEASONS[0];
+
+  function applyRandomSeasonalColors() {
+    const chosenSeason = SEASONS[Math.floor(Math.random() * SEASONS.length)];
+    currentSeason = chosenSeason;
 
     for (const reg of instancedMeshRegistry) {
       const mesh = reg.mesh;
-      for (let i = 0; i < mesh.count; i++) {
-        mesh.getMatrixAt(i, mat);
-        mat.decompose(pos, rot, scale);
-        const dist = playerMesh.position.distanceTo(pos);
-        if (dist < minDist) {
-          minDist = dist;
-          closest = { mesh, instanceId: i, name: reg.name, distance: dist, position: pos.clone() };
+      if (!mesh) continue;
+
+      if (reg.id === 'pine_foliage' || reg.id === 'oak_trees' || reg.category === 'foliage') {
+        for (let i = 0; i < mesh.count; i++) {
+          const colHex = chosenSeason.foliageColors[Math.floor(Math.random() * chosenSeason.foliageColors.length)];
+          mesh.setColorAt(i, new THREE.Color(colHex));
         }
-      }
-    }
-    return closest;
-  }
-
-  function applyColorToSelectedInstance(hexColor) {
-    if (!selectedInstancedTarget) {
-      // If no instance currently clicked, apply to nearest instanced object to player
-      const nearest = findNearestInstancedObject();
-      if (nearest) {
-        selectedInstancedTarget = {
-          mesh: nearest.mesh,
-          instanceId: nearest.instanceId,
-          name: nearest.name,
-          position: nearest.position
-        };
-      }
-    }
-
-    if (selectedInstancedTarget && selectedInstancedTarget.mesh) {
-      const { mesh, instanceId, name } = selectedInstancedTarget;
-      setInstancedMeshColor(mesh, instanceId, hexColor);
-      playSound('spell');
-
-      const targetLabel = document.getElementById('perf-colorizer-target');
-      if (targetLabel) {
-        targetLabel.innerText = `${name} #${instanceId} (${hexColor})`;
-        targetLabel.style.color = hexColor;
-      }
-
-      const worldPos = getInstancedMeshWorldPosition(mesh, instanceId) || playerMesh.position;
-      showDamageNumber(worldPos.x, worldPos.y + 2.5, worldPos.z, `🎨 ${name} #${instanceId}`, hexColor);
-    }
-  }
-  window.applyColorToSelectedInstance = applyColorToSelectedInstance;
-
-  function cycleSelectedInstanceColor() {
-    currentPaletteIndex = (currentPaletteIndex + 1) % INSTANCE_COLOR_PALETTE.length;
-    const nextColor = INSTANCE_COLOR_PALETTE[currentPaletteIndex];
-    applyColorToSelectedInstance(nextColor);
-  }
-  window.cycleSelectedInstanceColor = cycleSelectedInstanceColor;
-
-  function pulseInstancedMeshWave() {
-    if (!playerMesh || instancedMeshRegistry.length === 0) return;
-    playSound('launch');
-    const pPos = playerMesh.position;
-    const mat = new THREE.Matrix4();
-    const pos = new THREE.Vector3();
-    const rot = new THREE.Quaternion();
-    const scale = new THREE.Vector3();
-
-    let affectedCount = 0;
-    const waveColorHexes = ['#38bdf8', '#818cf8', '#c084fc', '#f472b6', '#fb7185', '#fbbf24', '#34d399'];
-
-    for (const reg of instancedMeshRegistry) {
-      const mesh = reg.mesh;
-      for (let i = 0; i < mesh.count; i++) {
-        mesh.getMatrixAt(i, mat);
-        mat.decompose(pos, rot, scale);
-        const dist = pPos.distanceTo(pos);
-        if (dist < 65) {
-          affectedCount++;
-          const colIdx = Math.floor(dist / 9) % waveColorHexes.length;
-          const chosenCol = waveColorHexes[colIdx];
-          setTimeout(() => {
-            setInstancedMeshColor(mesh, i, chosenCol);
-          }, dist * 12);
+        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      } else if (reg.id === 'land_rocks' || reg.category === 'rock') {
+        for (let i = 0; i < mesh.count; i++) {
+          const colHex = chosenSeason.rockColors[Math.floor(Math.random() * chosenSeason.rockColors.length)];
+          mesh.setColorAt(i, new THREE.Color(colHex));
         }
+        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
       }
     }
 
-    showDamageNumber(pPos.x, pPos.y + 3.2, pPos.z, `✨ INSTANCED WAVE (${affectedCount} MESHES)`, '#38bdf8');
+    const summaryEl = document.getElementById('perf-inst-mesh-summary');
+    if (summaryEl) {
+      summaryEl.innerText = `${chosenSeason.name}`;
+    }
   }
-  window.pulseInstancedMeshWave = pulseInstancedMeshWave;
+  window.applyRandomSeasonalColors = applyRandomSeasonalColors;
 
   // --- STYLIZED CHARACTER GENERATION WITH LIMB RIGGING ---
   function createStylizedPlayerMesh(classType) {
@@ -3881,6 +4347,9 @@ const _vScreen = new THREE.Vector3();
     if (manaCrystalsMesh.instanceColor) manaCrystalsMesh.instanceColor.needsUpdate = true;
     scene.add(manaCrystalsMesh);
     registerInstancedMesh('mana_crystals', 'Mana Crystal', manaCrystalsMesh, 'crystal');
+
+    // Apply procedural seasonal color randomization to trees and rocks on load
+    applyRandomSeasonalColors();
 
     // =========================================================================
     // STYLIZED PLAYER CHARACTER MESH
@@ -5260,6 +5729,76 @@ const _vScreen = new THREE.Vector3();
       }
     }
 
+    // =========================================================================
+    // REAL-TIME BROADCAST SYNC: FRIENDLY 3D ALLY NODES RENDERING & ANIMATION
+    // =========================================================================
+    const nowMs = Date.now();
+    for (const [nodeId, remoteNode] of connectedRemoteNodes.entries()) {
+      // Timeout cleanup if no broadcast received for 8 seconds
+      if (nowMs - remoteNode.lastSeen > 8000) {
+        if (remoteNode.mesh && remoteNode.mesh.parent) {
+          scene.remove(remoteNode.mesh);
+        }
+        if (remoteNode.tagElement && remoteNode.tagElement.parentNode) {
+          remoteNode.tagElement.remove();
+        }
+        connectedRemoteNodes.delete(nodeId);
+        updateMetricsUI();
+        continue;
+      }
+
+      const fMesh = remoteNode.mesh;
+      if (!fMesh) continue;
+
+      // Smooth position interpolation
+      fMesh.position.lerp(remoteNode.targetPos, Math.min(1.0, delta * 7.5));
+      fMesh.position.y = getTerrainHeight(fMesh.position.x, fMesh.position.z);
+
+      // Smooth rotation
+      if (typeof remoteNode.targetRotY === 'number') {
+        fMesh.rotation.y = THREE.MathUtils.lerp(fMesh.rotation.y, remoteNode.targetRotY, Math.min(1.0, delta * 7.5));
+      }
+
+      // Friendly Character Limb & Ring animations
+      if (fMesh.userData) {
+        const fud = fMesh.userData;
+        const isPeerMoving = remoteNode.actionState === 'walk' || fMesh.position.distanceTo(remoteNode.targetPos) > 0.15;
+        if (isPeerMoving) {
+          fud.walkCycle = (fud.walkCycle || 0) + delta * 7.5;
+          fud.leftLegPivot.rotation.x = Math.sin(fud.walkCycle) * 0.5;
+          fud.rightLegPivot.rotation.x = -Math.sin(fud.walkCycle) * 0.5;
+          fud.leftArmPivot.rotation.x = -Math.sin(fud.walkCycle) * 0.4;
+          fud.rightArmPivot.rotation.x = Math.sin(fud.walkCycle) * 0.4;
+        } else {
+          fud.leftLegPivot.rotation.x = THREE.MathUtils.lerp(fud.leftLegPivot.rotation.x, 0, delta * 6);
+          fud.rightLegPivot.rotation.x = THREE.MathUtils.lerp(fud.rightLegPivot.rotation.x, 0, delta * 6);
+          fud.leftArmPivot.rotation.x = THREE.MathUtils.lerp(fud.leftArmPivot.rotation.x, 0, delta * 6);
+          fud.rightArmPivot.rotation.x = THREE.MathUtils.lerp(fud.rightArmPivot.rotation.x, 0, delta * 6);
+        }
+
+        // Pulse ground aura ring
+        if (fud.groundRing) {
+          fud.groundRing.rotation.z += delta * 1.5;
+          const scale = 1.0 + Math.sin(nowMs * 0.004) * 0.08;
+          fud.groundRing.scale.set(scale, scale, 1);
+        }
+
+        // Project floating ally tag to 2D screen coordinates
+        if (fud.tagElement) {
+          _vScreen.copy(fMesh.position).add(new THREE.Vector3(0, 2.5, 0)).project(camera);
+          if (_vScreen.z > 1.0) {
+            fud.tagElement.style.display = 'none';
+          } else {
+            const screenX = (_vScreen.x * 0.5 + 0.5) * window.innerWidth;
+            const screenY = (-(_vScreen.y * 0.5) + 0.5) * window.innerHeight;
+            fud.tagElement.style.display = 'flex';
+            fud.tagElement.style.left = `${screenX}px`;
+            fud.tagElement.style.top = `${screenY}px`;
+          }
+        }
+      }
+    }
+
     // Mana natural regeneration
     if (gameState.mana < gameState.maxMana) {
       gameState.mana = safeClamp(gameState.mana + 4 * delta, 0, gameState.maxMana);
@@ -5306,19 +5845,17 @@ const _vScreen = new THREE.Vector3();
         totalInstances += reg.count;
       }
 
-      const fpsEl = document.getElementById('perf-fps-val');
-      const msEl = document.getElementById('perf-ms-val');
-      const callsEl = document.getElementById('perf-calls-val');
-      const trisEl = document.getElementById('perf-tris-val');
-      const instMeshCountEl = document.getElementById('perf-inst-mesh-count');
-      const instTotalEl = document.getElementById('perf-inst-total');
+      const fpsEl = document.getElementById('perf-fps-badge');
+      const msEl = document.getElementById('perf-fps-ms');
+      const callsEl = document.getElementById('perf-draw-calls');
+      const trisEl = document.getElementById('perf-poly-count');
+      const instCountEl = document.getElementById('perf-instanced-count');
 
-      if (fpsEl) fpsEl.innerText = currentFps;
+      if (fpsEl) fpsEl.innerText = `${currentFps} FPS`;
       if (msEl) msEl.innerText = `${currentFrameTimeMs} ms`;
-      if (callsEl) callsEl.innerText = drawCalls;
-      if (trisEl) trisEl.innerText = triangles.toLocaleString();
-      if (instMeshCountEl) instMeshCountEl.innerText = `${instancedMeshRegistry.length} Meshes`;
-      if (instTotalEl) instTotalEl.innerText = `${totalInstances} Blocks`;
+      if (callsEl) callsEl.innerText = `${drawCalls}`;
+      if (trisEl) trisEl.innerText = `${triangles.toLocaleString()}`;
+      if (instCountEl) instCountEl.innerText = `${instancedMeshRegistry.length} (${totalInstances.toLocaleString()})`;
     }
   }
 
@@ -5403,24 +5940,118 @@ const _vScreen = new THREE.Vector3();
     const countEl = document.getElementById('inv-count');
     if (countEl) countEl.innerText = `${gameState.inventory.length} items`;
 
+    if (gameState.inventory.length === 0) {
+      container.innerHTML = '<div style="font-size: 11px; color: #64748b; text-align: center; padding: 16px;">Backpack is empty. Defeat monsters in the realm to find loot!</div>';
+      return;
+    }
+
+    const slotIconMap = {
+      rightHand: '🗡️',
+      leftHand: '🛡️',
+      head: '👑',
+      shoulders: '🥋',
+      chest: '🦺',
+      belt: '📿',
+      pants: '👖',
+      boots: '🥾'
+    };
+    const slotLabelMap = {
+      rightHand: 'Right Hand',
+      leftHand: 'Left Hand',
+      head: 'Head',
+      shoulders: 'Shoulders',
+      chest: 'Chest',
+      belt: 'Belt',
+      pants: 'Pants',
+      boots: 'Boots'
+    };
+
     gameState.inventory.forEach((item, index) => {
       const div = document.createElement('div');
       div.className = `inv-item rarity-${item.rarity}`;
-      div.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-          <span style="font-size: 16px;">${item.slot.includes('Hand') ? '⚔️' : '🛡️'}</span>
-          <div style="display: flex; flex-direction: column; text-align: left; flex: 1; min-width: 0;">
-            <span class="inv-item-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</span>
-            <span style="font-size: 10px; color: #94a3b8; font-weight: 500;">${getItemStatDescription(item)}</span>
-          </div>
+      const itemLvl = item.level || 1;
+      const canConvertEssence = (itemLvl > 16);
+      const slotIcon = slotIconMap[item.slot] || (item.slot.includes('Hand') ? '⚔️' : '🛡️');
+      const slotName = slotLabelMap[item.slot] || item.slot;
+      
+      const xpYield = Math.max(10, Math.round(itemLvl * 12));
+      const essenceYield = Math.max(1, Math.round((itemLvl - 16) * 3 + (item.rarity === 'legendary' ? 15 : item.rarity === 'rare' ? 8 : 4)));
+
+      let conversionButtonsHtml = `
+        <div class="gear-actions-row">
+          <button class="gear-action-btn btn-equip" onclick="event.stopPropagation(); equipItem(${index})" title="Equip this gear piece">
+            ⚔️ Equip
+          </button>
+          <button class="gear-action-btn btn-convert-xp" onclick="event.stopPropagation(); convertGearToXp(${index})" title="Convert to ${xpYield} Experience Points">
+            ⚡ To XP (+${xpYield})
+          </button>
+          ${canConvertEssence ? `
+            <button class="gear-action-btn btn-convert-essence" onclick="event.stopPropagation(); convertGearToEssence(${index})" title="Level ${itemLvl} > 16: Convert to ${essenceYield} Essence">
+              💎 To Essence (+${essenceYield})
+            </button>
+          ` : `
+            <span class="gear-locked-badge" title="Essence conversion unlocks at gear Level 17+">
+              🔒 Essence (L17+)
+            </span>
+          `}
         </div>
       `;
-      div.onclick = () => {
-        equipItem(index);
-      };
+
+      div.innerHTML = `
+        <div class="inv-item-top">
+          <div class="inv-item-header">
+            <span style="font-size: 16px; line-height: 1;">${slotIcon}</span>
+            <span class="inv-item-name">${item.name}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; background: rgba(0,0,0,0.3); padding: 1px 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.06);">${slotName}</span>
+            <span class="gear-lvl-pill">LVL ${itemLvl}</span>
+          </div>
+        </div>
+        <div class="gear-stats-desc">${getItemStatDescription(item)}</div>
+        ${conversionButtonsHtml}
+      `;
+
       container.appendChild(div);
     });
   }
+
+  function convertGearToXp(invIndex) {
+    const item = gameState.inventory[invIndex];
+    if (!item) return;
+
+    const itemLvl = item.level || 1;
+    const xpYield = Math.max(10, Math.round(itemLvl * 12));
+
+    gameState.inventory.splice(invIndex, 1);
+    playSound('spell');
+    showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2.8, playerMesh.position.z, `⚡ +${xpYield} XP (Converted ${item.name})`, '#38bdf8');
+    gainExperience(xpYield);
+    renderGearUI();
+  }
+  window.convertGearToXp = convertGearToXp;
+
+  function convertGearToEssence(invIndex) {
+    const item = gameState.inventory[invIndex];
+    if (!item) return;
+
+    const itemLvl = item.level || 1;
+    if (itemLvl <= 16) {
+      showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2.5, playerMesh.position.z, `🔒 Requires Gear Level > 16 to Convert to Essence`, '#ef4444');
+      return;
+    }
+
+    const essenceYield = Math.max(1, Math.round((itemLvl - 16) * 3 + (item.rarity === 'legendary' ? 15 : item.rarity === 'rare' ? 8 : 4)));
+
+    gameState.inventory.splice(invIndex, 1);
+    gameState.essence += essenceYield;
+    playSound('loot');
+    showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2.8, playerMesh.position.z, `💎 +${essenceYield} Essence (Converted ${item.name})`, '#f59e0b');
+    updateHud();
+    renderGearUI();
+    saveProgressToParent();
+  }
+  window.convertGearToEssence = convertGearToEssence;
 
   function equipItem(invIndex) {
     const item = gameState.inventory[invIndex];
@@ -5439,6 +6070,7 @@ const _vScreen = new THREE.Vector3();
     renderGearUI();
     saveProgressToParent();
   }
+  window.equipItem = equipItem;
 
   function renderEssenceShop() {
     document.getElementById('modal-essence-count').innerText = gameState.essence;
@@ -5523,6 +6155,604 @@ const _vScreen = new THREE.Vector3();
     saveProgressToParent();
   }
 
+  // =========================================================================
+  // NATIVE INDEXEDDB ENGINE (SIMULATING FIRESTORE SESSION ARCHIVE)
+  // =========================================================================
+  const DB_NAME = 'RealmChampions_FirestoreDB';
+  const DB_VERSION = 1;
+  const STORE_NAME = 'session_archives';
+
+  function openArchiveDB() {
+    return new Promise((resolve) => {
+      if (!window.indexedDB) {
+        console.warn('IndexedDB not supported in this browser context.');
+        resolve(null);
+        return;
+      }
+      try {
+        const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'sessionId' });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => {
+          console.warn('IndexedDB open error:', request.error);
+          resolve(null);
+        };
+      } catch (err) {
+        console.warn('IndexedDB error:', err);
+        resolve(null);
+      }
+    });
+  }
+
+  async function saveSessionToIndexedDB(record) {
+    try {
+      const db = await openArchiveDB();
+      if (!db) {
+        // Safe fallback
+        try {
+          localStorage.setItem(`archive_${record.sessionId}`, JSON.stringify(record));
+        } catch(e) {}
+        return record;
+      }
+      return new Promise((resolve) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.put(record);
+        req.onsuccess = () => resolve(record);
+        req.onerror = () => {
+          try {
+            localStorage.setItem(`archive_${record.sessionId}`, JSON.stringify(record));
+          } catch(e) {}
+          resolve(record);
+        };
+      });
+    } catch (err) {
+      console.warn('IndexedDB write warning:', err);
+      return record;
+    }
+  }
+
+  // =========================================================================
+  // REAL-TIME SYNC (SIMULATING RTDB) & METRICS COST ANALYZER
+  // =========================================================================
+  const RTDB_CHANNEL_NAME = 'realm_champions_rtdb_sync';
+  let rtdbChannel = null;
+  let broadcastInterval = null;
+  let isSessionActive = true;
+  let sessionStartTime = Date.now();
+  let sessionEndTime = null;
+  const localNodeId = 'node-' + Math.random().toString(36).substring(2, 6) + '-' + Math.floor(1000 + Math.random() * 9000);
+
+  // Metrics Tally
+  let rtdbTotalTx = 0;
+  let rtdbTotalBytes = 0;
+  let rtdbTxSent = 0;
+  let rtdbTxReceived = 0;
+  const seenNodeIds = new Set([localNodeId]);
+  const connectedRemoteNodes = new Map(); // nodeId -> { data, mesh, lastSeen, targetPos, targetRotY, actionState }
+  let latestArchivedSession = null;
+  let simCompanionActive = false;
+  let simCompanionTimer = null;
+  let simNodeId = null;
+  let simAngle = 0;
+
+  // Calculates exact byte size using new Blob([JSON.stringify(payload)]).size
+  function getPayloadByteSize(payload) {
+    try {
+      return new Blob([JSON.stringify(payload)]).size;
+    } catch (e) {
+      return JSON.stringify(payload).length;
+    }
+  }
+
+  // Calculates estimated Firebase RTDB monthly cost at current rate ($1.00 per GB)
+  function calculateMonthlyCost() {
+    const elapsedSec = Math.max(1, ((sessionEndTime || Date.now()) - sessionStartTime) / 1000);
+    const bytesPerSec = rtdbTotalBytes / elapsedSec;
+    const secondsPerMonth = 86400 * 30.4375; // average seconds in a month
+    const monthlyBytes = bytesPerSec * secondsPerMonth;
+    const monthlyGB = monthlyBytes / (1024 * 1024 * 1024);
+    const monthlyMB = monthlyBytes / (1024 * 1024);
+    const costUSD = monthlyGB * 1.00; // $1.00 per GB standard RTDB bandwidth
+
+    return {
+      costUSD,
+      monthlyGB,
+      monthlyMB,
+      bytesPerSec,
+      formattedCost: costUSD < 0.0001 ? `$0.0001 / mo` : (costUSD < 0.01 ? `$${costUSD.toFixed(4)} / mo` : `$${costUSD.toFixed(3)} / mo`),
+      formattedArchiveCost: costUSD < 0.0001 ? `$0.0001` : (costUSD < 0.01 ? `$${costUSD.toFixed(4)}` : `$${costUSD.toFixed(3)}`),
+      formattedMB: `~${monthlyMB.toFixed(2)} MB / mo`,
+      formattedRate: bytesPerSec > 1024 ? `${(bytesPerSec / 1024).toFixed(2)} KB/s` : `${Math.round(bytesPerSec)} B/s`
+    };
+  }
+
+  function updateMetricsUI() {
+    const txEl = document.getElementById('rtdb-total-tx');
+    const kbEl = document.getElementById('rtdb-total-kb');
+    const nodesEl = document.getElementById('rtdb-nodes-count');
+    const rateEl = document.getElementById('rtdb-rate-val');
+    const costEl = document.getElementById('rtdb-monthly-cost');
+    const projEl = document.getElementById('rtdb-cost-proj');
+    const localNodeEl = document.getElementById('rtdb-local-node-id');
+    const peersSummaryEl = document.getElementById('rtdb-peers-summary');
+    const badgeEl = document.getElementById('rtdb-status-badge');
+    const dotEl = document.getElementById('rtdb-pulse-dot');
+
+    const kbVal = (rtdbTotalBytes / 1024).toFixed(2);
+    const costData = calculateMonthlyCost();
+
+    if (txEl) txEl.innerText = `${rtdbTotalTx} TX`;
+    if (kbEl) kbEl.innerText = `${kbVal} KB`;
+    if (nodesEl) {
+      const activeCount = 1 + connectedRemoteNodes.size;
+      nodesEl.innerText = activeCount === 1 ? `1 (Local)` : `${activeCount} Active`;
+    }
+    if (rateEl) rateEl.innerText = costData.formattedRate;
+    if (costEl) costEl.innerText = costData.formattedCost;
+    if (projEl) projEl.innerText = costData.formattedMB;
+    if (localNodeEl) localNodeEl.innerText = localNodeId;
+
+    if (peersSummaryEl) {
+      const remoteCount = connectedRemoteNodes.size;
+      peersSummaryEl.innerText = remoteCount === 1 ? `1 Remote Ally` : `${remoteCount} Remote Allies`;
+      peersSummaryEl.style.color = remoteCount > 0 ? '#34d399' : '#94a3b8';
+    }
+
+    if (badgeEl && dotEl) {
+      if (!isSessionActive) {
+        badgeEl.innerText = 'Archived';
+        badgeEl.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        badgeEl.style.color = '#fca5a5';
+        dotEl.className = 'rtdb-pulse-dot ended';
+      } else {
+        badgeEl.innerText = '2s Active';
+        badgeEl.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        badgeEl.style.color = '#6ee7b7';
+        dotEl.className = 'rtdb-pulse-dot';
+      }
+    }
+  }
+
+  // Real-Time BroadcastChannel Initialization
+  function initRealTimeSync() {
+    sessionStartTime = Date.now();
+    isSessionActive = true;
+    sessionEndTime = null;
+
+    if (typeof window.BroadcastChannel !== 'undefined') {
+      try {
+        rtdbChannel = new BroadcastChannel(RTDB_CHANNEL_NAME);
+        rtdbChannel.onmessage = handleIncomingBroadcast;
+      } catch(e) {
+        console.warn('BroadcastChannel error:', e);
+      }
+    }
+
+    // 2-Second Heartbeat Broadcast Loop (Simulating Firebase RTDB real-time WebSocket stream)
+    if (broadcastInterval) clearInterval(broadcastInterval);
+    broadcastInterval = setInterval(() => {
+      if (!isSessionActive || !playerMesh) return;
+      broadcastPresencePayload();
+    }, 2000);
+
+    updateMetricsUI();
+  }
+
+  // Broadcasts player telemetry every 2 seconds
+  function broadcastPresencePayload() {
+    if (!playerMesh || !isSessionActive) return;
+
+    const payload = {
+      nodeId: localNodeId,
+      name: gameState.characterName || 'Hero',
+      classType: gameState.classType || 'melee',
+      level: gameState.level || 1,
+      position: {
+        x: Number(playerMesh.position.x.toFixed(2)),
+        y: Number(playerMesh.position.y.toFixed(2)),
+        z: Number(playerMesh.position.z.toFixed(2))
+      },
+      rotationY: Number(playerMesh.rotation.y.toFixed(2)),
+      actionState: playerAnimState.swingTime > 0 ? 'attack' : (isMoving ? 'walk' : 'idle'),
+      timestamp: Date.now()
+    };
+
+    // Calculate exact byte footprint via new Blob([JSON.stringify(payload)]).size
+    const byteSize = getPayloadByteSize(payload);
+    rtdbTotalBytes += byteSize;
+    rtdbTotalTx++;
+    rtdbTxSent++;
+    seenNodeIds.add(localNodeId);
+
+    // Broadcast across browser channels to all listening tabs
+    if (rtdbChannel) {
+      try {
+        rtdbChannel.postMessage(payload);
+      } catch(e) {}
+    }
+
+    // Make local copy representation of broadcast data
+    updateMetricsUI();
+  }
+
+  // Listener for incoming broadcasts from other connected nodes / tabs
+  function handleIncomingBroadcast(event) {
+    if (!event || !event.data || !isSessionActive) return;
+    const data = event.data;
+
+    // Ignore self-broadcasts
+    if (!data.nodeId || data.nodeId === localNodeId) return;
+
+    // Track incoming payload byte size
+    const byteSize = getPayloadByteSize(data);
+    rtdbTotalBytes += byteSize;
+    rtdbTotalTx++;
+    rtdbTxReceived++;
+    seenNodeIds.add(data.nodeId);
+
+    // Extract position data and render friendly character representation
+    updateOrCreateFriendlyCharacter(data);
+    updateMetricsUI();
+  }
+
+  // =========================================================================
+  // FRIENDLY CHARACTER 3D REPRESENTATION (FROM BROADCAST DATA)
+  // =========================================================================
+  function createFriendlyCharacterMesh(data) {
+    const root = new THREE.Group();
+
+    // Radiant Emerald & Cyan Celestial Ally Palette
+    const armorMat = new THREE.MeshStandardMaterial({
+      color: 0x059669,
+      roughness: 0.35,
+      metalness: 0.8,
+      emissive: 0x064e3b,
+      emissiveIntensity: 0.35
+    });
+    const trimMat = new THREE.MeshStandardMaterial({
+      color: 0xfbbf24,
+      roughness: 0.25,
+      metalness: 0.95
+    });
+    const crystalGlowMat = new THREE.MeshStandardMaterial({
+      color: 0x34d399,
+      emissive: 0x34d399,
+      emissiveIntensity: 0.85,
+      roughness: 0.1
+    });
+    const darkMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.6
+    });
+
+    // 1. Torso & Crest
+    const torsoGroup = new THREE.Group();
+    torsoGroup.position.y = 1.35;
+    const chest = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.95, 0.52), armorMat);
+    chest.castShadow = true;
+    torsoGroup.add(chest);
+
+    const crest = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.56), trimMat);
+    crest.position.z = 0.05;
+    torsoGroup.add(crest);
+
+    // 2. Head with Glowing Visor & Celestial Halo
+    const headGroup = new THREE.Group();
+    headGroup.position.y = 0.8;
+    const helm = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.55, 0.52), armorMat);
+    headGroup.add(helm);
+
+    const visor = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.14, 0.54), crystalGlowMat);
+    visor.position.set(0, 0.02, 0.06);
+    headGroup.add(visor);
+
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.04, 8, 24), crystalGlowMat);
+    halo.position.set(0, 0.42, 0);
+    halo.rotation.x = Math.PI / 2;
+    headGroup.add(halo);
+    torsoGroup.add(headGroup);
+    root.add(torsoGroup);
+
+    // 3. Left Arm with Shield
+    const leftArmPivot = new THREE.Group();
+    leftArmPivot.position.set(-0.62, 1.55, 0);
+    const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.7, 8), armorMat);
+    armL.position.y = -0.35;
+    leftArmPivot.add(armL);
+    const shield = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.0, 0.1), trimMat);
+    shield.position.set(-0.15, -0.6, 0.25);
+    shield.rotation.y = 0.35;
+    leftArmPivot.add(shield);
+    root.add(leftArmPivot);
+
+    // 4. Right Arm with Weapon
+    const rightArmPivot = new THREE.Group();
+    rightArmPivot.position.set(0.62, 1.55, 0);
+    const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.7, 8), armorMat);
+    armR.position.y = -0.35;
+    rightArmPivot.add(armR);
+
+    const weaponGroup = new THREE.Group();
+    weaponGroup.position.set(0, -0.65, 0.25);
+    weaponGroup.rotation.x = Math.PI / 3.5;
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 1.8, 8), darkMat);
+    weaponGroup.add(rod);
+    const crystalOrb = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), crystalGlowMat);
+    crystalOrb.position.y = 0.95;
+    weaponGroup.add(crystalOrb);
+    rightArmPivot.add(weaponGroup);
+    root.add(rightArmPivot);
+
+    // 5. Left Leg
+    const leftLegPivot = new THREE.Group();
+    leftLegPivot.position.set(-0.28, 0.8, 0);
+    const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.75, 8), darkMat);
+    legL.position.y = -0.38;
+    leftLegPivot.add(legL);
+    const bootL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.2, 0.4), armorMat);
+    bootL.position.set(0, -0.75, 0.08);
+    leftLegPivot.add(bootL);
+    root.add(leftLegPivot);
+
+    // 6. Right Leg
+    const rightLegPivot = new THREE.Group();
+    rightLegPivot.position.set(0.28, 0.8, 0);
+    const legR = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.75, 8), darkMat);
+    legR.position.y = -0.38;
+    rightLegPivot.add(legR);
+    const bootR = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.2, 0.4), armorMat);
+    bootR.position.set(0, -0.75, 0.08);
+    rightLegPivot.add(bootR);
+    root.add(rightLegPivot);
+
+    // 7. Base Pulsing Ground Ring (Aura)
+    const groundRing = new THREE.Mesh(
+      new THREE.RingGeometry(1.15, 1.4, 32),
+      new THREE.MeshBasicMaterial({ color: 0x34d399, side: THREE.DoubleSide, transparent: true, opacity: 0.65 })
+    );
+    groundRing.rotation.x = -Math.PI / 2;
+    groundRing.position.y = 0.05;
+    root.add(groundRing);
+
+    // 8. Overhead Floating 2D/3D Nameplate Tag
+    const tagEl = document.createElement('div');
+    tagEl.className = 'friendly-char-tag';
+    tagEl.innerHTML = `<span class="ally-dot"></span><span>[ALLY] ${data.name || 'Hero'} (${(data.nodeId || '').substring(0, 8)}) LVL ${data.level || 1}</span>`;
+    const hudContainer = document.getElementById('hud-container');
+    if (hudContainer) hudContainer.appendChild(tagEl);
+
+    root.userData = {
+      torso: torsoGroup,
+      head: headGroup,
+      leftArmPivot,
+      rightArmPivot,
+      leftLegPivot,
+      rightLegPivot,
+      groundRing,
+      tagElement: tagEl,
+      walkCycle: 0
+    };
+
+    return root;
+  }
+
+  function updateOrCreateFriendlyCharacter(data) {
+    if (!scene || !data || !data.position) return;
+
+    let remoteNode = connectedRemoteNodes.get(data.nodeId);
+    if (!remoteNode) {
+      // Create new 3D friendly character
+      const mesh = createFriendlyCharacterMesh(data);
+      const initialY = getTerrainHeight(data.position.x, data.position.z);
+      mesh.position.set(data.position.x, initialY, data.position.z);
+      mesh.rotation.y = data.rotationY || 0;
+      scene.add(mesh);
+
+      remoteNode = {
+        data: JSON.parse(JSON.stringify(data)),
+        mesh,
+        lastSeen: Date.now(),
+        targetPos: new THREE.Vector3(data.position.x, initialY, data.position.z),
+        targetRotY: data.rotationY || 0,
+        actionState: data.actionState || 'idle',
+        tagElement: mesh.userData.tagElement
+      };
+      connectedRemoteNodes.set(data.nodeId, remoteNode);
+
+      // Notification
+      showDamageNumber(data.position.x, initialY + 3.2, data.position.z, `ALLY CONNECTED! [${data.name || 'Hero'}]`, '#34d399');
+    } else {
+      // Update existing friendly character target position from broadcast data
+      remoteNode.lastSeen = Date.now();
+      remoteNode.targetPos.set(data.position.x, getTerrainHeight(data.position.x, data.position.z), data.position.z);
+      remoteNode.targetRotY = data.rotationY || 0;
+      remoteNode.actionState = data.actionState || 'idle';
+      remoteNode.data = JSON.parse(JSON.stringify(data));
+
+      if (remoteNode.tagElement) {
+        remoteNode.tagElement.innerHTML = `<span class="ally-dot"></span><span>[ALLY] ${data.name || 'Hero'} (${(data.nodeId || '').substring(0, 8)}) LVL ${data.level || 1}</span>`;
+      }
+    }
+  }
+
+  // =========================================================================
+  // SIMULATE COMPANION PEER NODE (EASY MULTI-NODE TESTING IN A SINGLE TAB)
+  // =========================================================================
+  function toggleSimulateCompanion() {
+    if (simCompanionActive) {
+      // Stop simulation
+      if (simCompanionTimer) clearInterval(simCompanionTimer);
+      simCompanionActive = false;
+      const simBtn = document.getElementById('btn-sim-node');
+      if (simBtn) simBtn.innerText = '🤖 Sim Ally';
+      return;
+    }
+
+    simCompanionActive = true;
+    simNodeId = 'node-peer-sim-' + Math.floor(100 + Math.random() * 900);
+    simAngle = 0;
+    const simBtn = document.getElementById('btn-sim-node');
+    if (simBtn) simBtn.innerText = '⏹️ Stop Sim';
+
+    // Broadcast friendly companion positions orbiting near the player
+    simCompanionTimer = setInterval(() => {
+      if (!isSessionActive || !playerMesh) return;
+      simAngle += 0.35;
+      const px = playerMesh.position.x + Math.cos(simAngle) * 7.5;
+      const pz = playerMesh.position.z + Math.sin(simAngle) * 7.5;
+      const rotY = -simAngle + Math.PI / 2;
+
+      const simPayload = {
+        nodeId: simNodeId,
+        name: 'Valkyrie_Sim',
+        classType: 'caster',
+        level: Math.max(1, gameState.level),
+        position: {
+          x: Number(px.toFixed(2)),
+          y: Number(getTerrainHeight(px, pz).toFixed(2)),
+          z: Number(pz.toFixed(2))
+        },
+        rotationY: Number(rotY.toFixed(2)),
+        actionState: 'walk',
+        timestamp: Date.now()
+      };
+
+      // Broadcast on channel and handle locally
+      const byteSize = getPayloadByteSize(simPayload);
+      rtdbTotalBytes += byteSize;
+      rtdbTotalTx++;
+      rtdbTxReceived++;
+      seenNodeIds.add(simPayload.nodeId);
+
+      if (rtdbChannel) {
+        try { rtdbChannel.postMessage(simPayload); } catch(e) {}
+      }
+
+      updateOrCreateFriendlyCharacter(simPayload);
+      updateMetricsUI();
+    }, 1200);
+  }
+
+  // =========================================================================
+  // END SESSION & ARCHIVE TO NATIVE INDEXEDDB (SIMULATING FIRESTORE)
+  // =========================================================================
+  async function endSessionAndArchive() {
+    if (!isSessionActive) {
+      // Already ended, just show modal of latest archive
+      showArchiveModal(latestArchivedSession);
+      return;
+    }
+
+    // Stop 2-second broadcast interval
+    isSessionActive = false;
+    sessionEndTime = Date.now();
+    if (broadcastInterval) clearInterval(broadcastInterval);
+    if (simCompanionTimer) clearInterval(simCompanionTimer);
+    simCompanionActive = false;
+
+    const elapsedMs = sessionEndTime - sessionStartTime;
+    const durationMin = Math.floor(elapsedMs / 60000);
+    const durationSec = Math.floor((elapsedMs % 60000) / 1000);
+    const formattedDuration = `${String(durationMin).padStart(2, '0')}:${String(durationSec).padStart(2, '0')}`;
+    const costData = calculateMonthlyCost();
+
+    // Compile final session record
+    const archiveRecord = {
+      sessionId: `session_${Date.now()}_${localNodeId}`,
+      localNodeId,
+      characterName: gameState.characterName || 'Hero',
+      classType: gameState.classType || 'melee',
+      heroLevel: gameState.level || 1,
+      currentArea: gameState.currentArea || 1,
+      totalKills: gameState.totalKills || 0,
+      essenceCollected: gameState.essence || 0,
+      startTimeISO: new Date(sessionStartTime).toISOString(),
+      endTimeISO: new Date(sessionEndTime).toISOString(),
+      totalDurationSeconds: Math.round(elapsedMs / 1000),
+      formattedDuration,
+      totalNodesSeen: Array.from(seenNodeIds),
+      totalNodesCount: seenNodeIds.size,
+      totalTransactions: rtdbTotalTx,
+      transactionsSent: rtdbTxSent,
+      transactionsReceived: rtdbTxReceived,
+      totalBytesTransferred: rtdbTotalBytes,
+      totalBandwidthKB: Number((rtdbTotalBytes / 1024).toFixed(3)),
+      estimatedMonthlyRTDBCost: costData,
+      storageEngine: 'IndexedDB (RealmChampions_FirestoreDB -> session_archives)',
+      archivedTimestamp: new Date().toISOString()
+    };
+
+    latestArchivedSession = archiveRecord;
+
+    // Write to native browser IndexedDB
+    await saveSessionToIndexedDB(archiveRecord);
+
+    // Audio & Visual notification
+    playSound('loot');
+    updateMetricsUI();
+    showArchiveModal(archiveRecord);
+  }
+
+  function showArchiveModal(record) {
+    if (!record) return;
+
+    const modalEl = document.getElementById('modal-archive');
+    if (!modalEl) return;
+
+    document.getElementById('arch-duration').innerText = record.formattedDuration || '00:00';
+    document.getElementById('arch-nodes-seen').innerText = `${record.totalNodesCount} (${record.totalNodesSeen.join(', ')})`;
+    document.getElementById('arch-bandwidth').innerText = `${record.totalBandwidthKB} KB (${record.totalBytesTransferred} B)`;
+    document.getElementById('arch-transactions').innerText = `${record.totalTransactions} TX`;
+    document.getElementById('arch-monthly-cost').innerText = record.estimatedMonthlyRTDBCost ? record.estimatedMonthlyRTDBCost.formattedArchiveCost : '$0.0000';
+    document.getElementById('arch-hero-prog').innerText = `LVL ${record.heroLevel} • Area ${record.currentArea}`;
+
+    const jsonViewEl = document.getElementById('arch-json-view');
+    if (jsonViewEl) {
+      jsonViewEl.innerText = JSON.stringify(record, null, 2);
+    }
+
+    modalEl.style.display = 'flex';
+  }
+
+  function restartSyncSession() {
+    // Restart session
+    const modalEl = document.getElementById('modal-archive');
+    if (modalEl) modalEl.style.display = 'none';
+
+    rtdbTotalTx = 0;
+    rtdbTotalBytes = 0;
+    rtdbTxSent = 0;
+    rtdbTxReceived = 0;
+    seenNodeIds.clear();
+    seenNodeIds.add(localNodeId);
+
+    // Clear remote characters
+    for (const [_, remoteNode] of connectedRemoteNodes.entries()) {
+      if (remoteNode.mesh && remoteNode.mesh.parent) scene.remove(remoteNode.mesh);
+      if (remoteNode.tagElement && remoteNode.tagElement.parentNode) remoteNode.tagElement.remove();
+    }
+    connectedRemoteNodes.clear();
+
+    initRealTimeSync();
+    showDamageNumber(playerMesh.position.x, playerMesh.position.y + 3, playerMesh.position.z, 'REAL-TIME BROADCAST RESTARTED!', '#38bdf8');
+  }
+
+  function toggleRtdbDetails() {
+    const bodyEl = document.getElementById('rtdb-body');
+    const toggleBtn = document.getElementById('rtdb-toggle-btn');
+    if (!bodyEl) return;
+    const isHidden = bodyEl.style.display === 'none';
+    bodyEl.style.display = isHidden ? 'flex' : 'none';
+    if (toggleBtn) toggleBtn.innerText = isHidden ? '▲' : '▼';
+  }
+  window.toggleRtdbDetails = toggleRtdbDetails;
+
   // --- INITIALIZATION HANDLERS ---
   function startGame(classType) {
     try {
@@ -5548,6 +6778,7 @@ const _vScreen = new THREE.Vector3();
       recalculateStats();
       renderGearUI();
       updateNearbyEnemiesList();
+      initRealTimeSync();
       animate();
 
       // Periodic auto-save to ensure game data persists to database
@@ -5612,6 +6843,32 @@ const _vScreen = new THREE.Vector3();
   document.getElementById('btn-close-essence').onclick = () => toggleModal('modal-essence');
 
   document.getElementById('btn-enter-portal').onclick = enterNextRealm;
+
+  // End Session & Archive Buttons
+  const btnEndSessionEl = document.getElementById('btn-end-session');
+  if (btnEndSessionEl) btnEndSessionEl.onclick = endSessionAndArchive;
+
+  const btnMenuEndSessionEl = document.getElementById('btn-menu-end-session');
+  if (btnMenuEndSessionEl) btnMenuEndSessionEl.onclick = endSessionAndArchive;
+
+  const btnSimNodeEl = document.getElementById('btn-sim-node');
+  if (btnSimNodeEl) btnSimNodeEl.onclick = toggleSimulateCompanion;
+
+  const btnCloseArchiveEl = document.getElementById('btn-close-archive');
+  if (btnCloseArchiveEl) btnCloseArchiveEl.onclick = () => {
+    document.getElementById('modal-archive').style.display = 'none';
+  };
+
+  const btnArchiveDoneEl = document.getElementById('btn-archive-done');
+  if (btnArchiveDoneEl) btnArchiveDoneEl.onclick = () => {
+    document.getElementById('modal-archive').style.display = 'none';
+  };
+
+  const btnRestartSyncEl = document.getElementById('btn-restart-sync');
+  if (btnRestartSyncEl) btnRestartSyncEl.onclick = restartSyncSession;
+
+  const rtdbHeaderToggleEl = document.getElementById('rtdb-header-toggle');
+  if (rtdbHeaderToggleEl) rtdbHeaderToggleEl.onclick = toggleRtdbDetails;
 
   document.getElementById('slot-attack').onclick = () => executeAttack('attack');
   document.getElementById('slot-ab1').onclick = () => executeAttack('ab1');

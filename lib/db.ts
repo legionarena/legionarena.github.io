@@ -88,6 +88,17 @@ export const THEMED_THREADS: IntelThread[] = [
     accentBorder: 'border-emerald-500/40'
   },
   {
+    id: 'texas-holdem-tactics',
+    title: "Texas Hold'em 3D",
+    callsignTag: '#POKER-06',
+    category: 'TACTICAL_RECON',
+    description: 'Progressive jackpot pool theory, AI strategy counters, diminishing card pool management, and Straight Flush triggers.',
+    briefing: 'Discuss pot odds calculations, lump sum reshuffle timing, and high-stakes heads up vs full table tactics.',
+    badge: 'Texas Hold\'em',
+    themeColor: 'text-amber-400',
+    accentBorder: 'border-amber-400/40'
+  },
+  {
     id: 'music-playlists-vibes',
     title: 'Music & Playlists',
     callsignTag: '#AUDIO-05',
@@ -317,6 +328,28 @@ const INITIAL_STATE: DbState = {
       score: 1980,
       details: '1,980 Credits • Triple Line Combos',
       createdAt: new Date(Date.now() - 216000000).toISOString()
+    },
+    {
+      id: 'hs-th-01',
+      gameId: 'texas-holdem',
+      gameName: "Texas Hold'em 3D",
+      userId: 'FS-3199-5520',
+      userCallsign: 'ShadowRecon',
+      userUid: 'FS-3199-5520',
+      score: 18500,
+      details: 'Chips: $18,500 • Progressive Won: 1x (Straight Flush) • 42 Hands',
+      createdAt: new Date(Date.now() - 28000000).toISOString()
+    },
+    {
+      id: 'hs-th-02',
+      gameId: 'texas-holdem',
+      gameName: "Texas Hold'em 3D",
+      userId: 'FS-9842-1204',
+      userCallsign: 'GhostRider',
+      userUid: 'FS-9842-1204',
+      score: 12400,
+      details: 'Chips: $12,400 • GTO Strategy Defense • 28 Hands',
+      createdAt: new Date(Date.now() - 62000000).toISOString()
     }
   ],
   playlists: [
