@@ -252,6 +252,30 @@
       background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
       transition: width 0.3s ease;
     }
+    .badge-sequential-step {
+      font-size: 8px;
+      font-weight: 800;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-sequential-dots {
+      font-size: 8.5px;
+      letter-spacing: 2px;
+      color: #38bdf8;
+      font-family: monospace;
+    }
+    .badge-last-stand-glow {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      color: #fbbf24;
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 8px;
+      font-weight: 800;
+      text-align: center;
+      margin-top: 2px;
+    }
 
     .top-action-buttons-stack {
       display: flex;
@@ -548,6 +572,12 @@
     /* =========================================================================
        2D SEAT OVERLAYS ON TABLE FELT WITH CURRENT BETS & PLACEHOLDER COLOR
        ========================================================================= */
+    #seats-overlay-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none !important;
+      z-index: var(--z-seats-overlay);
+    }
     .seat-badge {
       position: absolute;
       transform: translate(-50%, -50%);
@@ -561,7 +591,8 @@
       flex-direction: column;
       gap: 3px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.6);
-      pointer-events: none;
+      pointer-events: none !important;
+      user-select: none;
       transition: all 0.2s ease;
       z-index: var(--z-seats-overlay);
     }
@@ -616,6 +647,8 @@
        BOTTOM CONTROLS DOCK - PLAYER HOLE CARDS & ACTION BUTTONS
        ========================================================================= */
     .bottom-dock {
+      position: relative !important;
+      pointer-events: auto !important;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -623,7 +656,7 @@
       max-width: 460px;
       margin: 0 auto;
       width: 100%;
-      z-index: var(--z-bottom-dock);
+      z-index: 50 !important;
     }
 
     .player-cards-tray {
@@ -686,6 +719,8 @@
 
     /* ACTION CONTROLS PANEL */
     .action-controls-card {
+      position: relative !important;
+      pointer-events: auto !important;
       background: var(--panel-bg);
       backdrop-filter: blur(12px);
       border: 1px solid var(--panel-border);
@@ -696,7 +731,38 @@
       flex-direction: column;
       gap: 5px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+      z-index: 55 !important;
     }
+
+    .action-turn-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: #34d399;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+      animation: turn-pulse 1.8s infinite alternate;
+    }
+    .action-turn-status.waiting {
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      box-shadow: none;
+      animation: none;
+    }
+    @keyframes turn-pulse {
+      0% { box-shadow: 0 0 4px rgba(52, 211, 153, 0.2); }
+      100% { box-shadow: 0 0 14px rgba(52, 211, 153, 0.55); }
+    }
+
     .bet-slider-row {
       display: flex;
       align-items: center;
@@ -728,12 +794,17 @@
     }
 
     .main-actions-row {
+      position: relative !important;
+      pointer-events: auto !important;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 6px;
       width: 100%;
+      z-index: 60 !important;
     }
     .btn {
+      position: relative !important;
+      pointer-events: auto !important;
       background: #1e293b;
       border: 1px solid #334155;
       color: #f8fafc;
@@ -749,6 +820,8 @@
       gap: 4px;
       text-transform: uppercase;
       letter-spacing: 0.03em;
+      user-select: none;
+      z-index: 65 !important;
     }
     .btn:hover:not(:disabled) {
       background: #334155;
@@ -790,6 +863,39 @@
       padding: 7px 20px;
       box-shadow: 0 0 16px rgba(59, 130, 246, 0.4);
       width: 100%;
+    }
+    .btn-last-stand {
+      background: linear-gradient(135deg, #b91c1c, #d97706);
+      border-color: #f59e0b;
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 900;
+      padding: 7px 20px;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.65);
+      width: 100%;
+      letter-spacing: 0.05em;
+      animation: pulse-last-stand 1.4s infinite alternate ease-in-out;
+    }
+    @keyframes pulse-last-stand {
+      0% { transform: scale(1); box-shadow: 0 0 12px rgba(185, 28, 28, 0.6); }
+      100% { transform: scale(1.02); box-shadow: 0 0 26px rgba(245, 158, 11, 0.95); }
+    }
+    .btn-game-ended-reshuffle {
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      border-color: #f43f5e;
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 900;
+      padding: 8px 20px;
+      box-shadow: 0 0 22px rgba(219, 39, 119, 0.7);
+      width: 100%;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      animation: pulse-game-ended 1.3s infinite alternate ease-in-out;
+    }
+    @keyframes pulse-game-ended {
+      0% { transform: scale(1); box-shadow: 0 0 14px rgba(124, 58, 237, 0.7); }
+      100% { transform: scale(1.025); box-shadow: 0 0 28px rgba(244, 63, 94, 0.95); }
     }
 
     /* MODAL OVERLAYS */
@@ -1071,13 +1177,22 @@
       <!-- RIGHT: DIMINISHING DECK + VERTICALLY STACKED ACTION BUTTONS -->
       <div class="right-top-column interactive">
         <!-- Diminishing Deck Card Pool -->
-        <div class="hud-panel deck-pool-card">
+        <div class="hud-panel deck-pool-card" id="hud-deck-panel">
           <div class="deck-pool-header">
-            <span>Diminishing Deck</span>
+            <span id="hud-deck-title">Deck 1 of 3 (Diminishing)</span>
             <span id="hud-deck-count" style="color: #10b981;">52 / 52</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin: 1px 0;">
+            <span id="hud-sequential-step" class="badge-sequential-step">Deck 1 of 3</span>
+            <span id="hud-sequential-dots" class="badge-sequential-dots">● ○ ○</span>
           </div>
           <div class="deck-pool-bar-outer">
             <div id="hud-deck-fill" class="deck-pool-bar-fill" style="width: 100%;"></div>
+          </div>
+          <!-- Seperate Last Stand Pool Deck that starts with no cards -->
+          <div id="hud-last-stand-info" class="badge-last-stand-glow">
+            <span>🛡️ Last Stand Pool Deck: <strong id="hud-last-stand-count">0</strong> Cards</span>
+            <div style="font-size: 7.5px; opacity: 0.85; margin-top: 1px;">Leftover cards pooled here when a deck cannot complete a round</div>
           </div>
         </div>
 
@@ -1141,9 +1256,15 @@
 
       <!-- COMPACT ACTION CONTROLS PANEL -->
       <div class="action-controls-card interactive" id="action-controls-card">
+        <!-- Dynamic Turn Status Banner -->
+        <div id="action-turn-status" class="action-turn-status" style="display: none;">
+          <span id="action-turn-icon">🟢</span>
+          <span id="action-turn-text">YOUR TURN</span>
+        </div>
+
         <!-- Compact Bet / Raise Sizing Slider Row -->
         <div class="bet-slider-row" id="bet-slider-row" style="display: none;">
-          <span style="font-size: 9.5px; font-weight: 800; color: #94a3b8;">RAISE:</span>
+          <span id="bet-slider-label" style="font-size: 9.5px; font-weight: 800; color: #94a3b8;">RAISE:</span>
           <input type="range" id="bet-slider" class="bet-slider" min="20" max="500" step="10" value="20" oninput="updateBetSliderDisplay()">
           <span id="bet-slider-val" style="font-size: 12px; font-weight: 900; color: #fbbf24; font-family: monospace; min-width: 44px;">$20</span>
 
@@ -1156,23 +1277,23 @@
 
         <!-- Main Betting Buttons -->
         <div class="main-actions-row" id="main-actions-row">
-          <button id="btn-fold" class="btn btn-fold" onclick="playerAction('fold')">
-            <span>❌ Fold</span>
+          <button id="btn-fold" class="btn btn-fold" type="button">
+            <span id="fold-btn-content">❌ Fold</span>
           </button>
-          <button id="btn-check" class="btn btn-check" onclick="playerAction('check')">
-            <span>✋ Check</span>
+          <button id="btn-check" class="btn btn-check" type="button">
+            <span id="check-btn-content">✋ Check</span>
           </button>
-          <button id="btn-call" class="btn btn-call" onclick="playerAction('call')">
-            <span>💰 Call <span id="call-amount-label">$0</span></span>
+          <button id="btn-call" class="btn btn-call" type="button">
+            <span id="call-btn-content">💰 Call <span id="call-amount-label">$0</span></span>
           </button>
-          <button id="btn-raise" class="btn btn-raise" onclick="playerAction('raise')">
-            <span>⚡ Raise</span>
+          <button id="btn-raise" class="btn btn-raise" type="button">
+            <span id="raise-btn-content">⚡ Raise</span>
           </button>
         </div>
 
         <!-- Deal Next Hand Button -->
         <div id="deal-next-container" style="display: flex; justify-content: center; width: 100%;">
-          <button id="btn-deal-next" class="btn btn-deal-next" onclick="startNewHand()">
+          <button id="btn-deal-next" class="btn btn-deal-next" type="button">
             <span>♠️ DEAL HAND ♦️</span>
           </button>
         </div>
@@ -1281,9 +1402,13 @@
       </div>
 
       <div style="background: #1e293b; padding: 8px 10px; border-radius: 8px; border-left: 3px solid #10b981;">
-        <strong style="color: #34d399;">🔀 Diminishing Card Pool & Manual Reshuffle:</strong>
+        <strong style="color: #34d399;">🔀 3 Diminishing Decks &amp; Last Stand Pool Deck Rules:</strong>
         <p style="margin-top: 3px; line-height: 1.4;">
-          Cards do NOT automatically return or reshuffle. The deck diminishes continuously. If the card pool runs too low for a full round, the game pauses until the player buys a reshuffle ($600 + Big Blind) to continue.
+          <strong>1. 3 Diminishing Decks:</strong> The game plays through 3 successive 52-card diminishing decks (Deck 1 of 3, Deck 2 of 3, Deck 3 of 3).<br>
+          <strong>2. Complete Round Requirement:</strong> Cards are dealt <em>only</em> if the round can be completed successfully (enough cards for all active players' hole cards + 5 community cards).<br>
+          <strong>3. Separate Last Stand Pool Deck:</strong> If a round cannot be completed, the remaining cards from that deck are taken and placed into a separate <em>Last Stand Pool Deck</em> that starts with 0 cards.<br>
+          <strong>4. Last Stand Round:</strong> Once all 3 diminishing decks have been used, if the pooled Last Stand cards can complete a round, a high-stakes <strong>Last Stand Round</strong> begins using the pooled cards!<br>
+          <strong>5. Game End &amp; Reshuffle:</strong> Upon round conclusion, once Deck 3 of 3 and the Last Stand round have completed, the game ends unless the player purchases a new reshuffle.
         </p>
       </div>
     </div>
@@ -1291,6 +1416,34 @@
     <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
       <button class="btn btn-call" onclick="closeRulesModal()">
         <span>Got It!</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME ENDED / RESHUFFLE REQUIRED MODAL -->
+<div id="game-ended-modal" class="modal-backdrop" style="display: none;">
+  <div class="modal-box" style="text-align: center; border-color: #f43f5e; box-shadow: 0 0 45px rgba(244, 63, 94, 0.45); max-width: 460px;">
+    <div style="font-size: 38px; margin-bottom: 2px;">🏁 🃏 ⚔️</div>
+    <div class="modal-title" style="color: #f43f5e; font-size: 17px; justify-content: center; margin-bottom: 2px;">
+      <span>GAME CYCLE CONCLUDED</span>
+    </div>
+    
+    <div style="background: #1e293b; padding: 12px 14px; border-radius: 10px; border-left: 3px solid #f43f5e; text-align: left; font-size: 12px; color: #cbd5e1; line-height: 1.5;">
+      <p style="margin: 0 0 6px 0;">
+        <strong style="color: #fff;">Deck 3 of 3 &amp; Last Stand Round Completed:</strong>
+      </p>
+      <p style="margin: 0 0 6px 0;">
+        All 3 diminishing decks have been exhausted, and the final Last Stand round has concluded. The tournament game has ended.
+      </p>
+      <p style="margin: 0; color: #fbbf24; font-weight: 700;">
+        To reset the cycle and start with a fresh Deck 1 of 3, purchase a reshuffle ($<span id="game-ended-reshuffle-cost">620</span>) below!
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 8px; justify-content: center; margin-top: 6px;">
+      <button class="btn btn-game-ended-reshuffle" style="max-width: 320px;" onclick="purchaseReshuffleFromModal()">
+        <span>🔀 Purchase Reshuffle &amp; Restart ($<span id="modal-reshuffle-cost-btn">620</span>)</span>
       </button>
     </div>
   </div>
@@ -1665,6 +1818,53 @@ const RANK_VALUES = {
 };
 
 let cardDeck = [];
+let currentDeckNumber = 1; // 1, 2, or 3 (The 3 diminishing decks)
+let lastStandPoolDeck = []; // The separate Last Stand pool deck that starts with no cards
+let isLastStandRound = false; // Whether the current hand is the Last Stand round
+let lastStandStatus = 'none'; // 'none' | 'ready' | 'active' | 'completed' | 'insufficient_cards'
+let isGameCycleEnded = false; // Whether Deck 3 of 3 and Last Stand round have completed (game ended until reshuffle purchased)
+
+function openGameEndedModal() {
+  const modal = document.getElementById('game-ended-modal');
+  const cost = typeof getReshuffleCost === 'function' ? getReshuffleCost() : 620;
+  const costEl = document.getElementById('game-ended-reshuffle-cost');
+  const costBtnEl = document.getElementById('modal-reshuffle-cost-btn');
+  if (costEl) costEl.innerText = String(cost);
+  if (costBtnEl) costBtnEl.innerText = String(cost);
+  if (modal) modal.style.display = 'flex';
+}
+window.openGameEndedModal = openGameEndedModal;
+
+function closeGameEndedModal() {
+  const modal = document.getElementById('game-ended-modal');
+  if (modal) modal.style.display = 'none';
+}
+window.closeGameEndedModal = closeGameEndedModal;
+
+function purchaseReshuffleFromModal() {
+  closeGameEndedModal();
+  if (typeof requestShuffleDeck === 'function') {
+    requestShuffleDeck();
+  }
+}
+window.purchaseReshuffleFromModal = purchaseReshuffleFromModal;
+
+// Aliases for compatibility
+Object.defineProperty(window, 'sequentialHandNumber', {
+  get() { return currentDeckNumber; },
+  set(v) { currentDeckNumber = v; },
+  configurable: true
+});
+Object.defineProperty(window, 'lastStandDeck', {
+  get() { return lastStandPoolDeck; },
+  set(v) { lastStandPoolDeck = v; },
+  configurable: true
+});
+Object.defineProperty(window, 'isGameCycleEnded', {
+  get() { return isGameCycleEnded; },
+  set(v) { isGameCycleEnded = v; },
+  configurable: true
+});
 
 function generateFreshDeck() {
   const deck = [];
@@ -2147,15 +2347,26 @@ function update3DTableVisuals() {
     cardsInstancedMesh.setMatrixAt(i, _dummy.matrix);
   }
 
-  // Diminishing Deck Stack in Dealer Shoe
-  const remainingCardsCount = cardDeck.length;
-  const deckVisualHeight = Math.min(24, Math.ceil(remainingCardsCount / 2.2));
+  // 1. Active Diminishing Deck Stack in Dealer Shoe
+  const activeDeckCards = isLastStandRound ? cardDeck.length : cardDeck.length;
+  const deckVisualHeight = Math.min(24, Math.ceil(activeDeckCards / 2.2));
   for (let d = 0; d < deckVisualHeight; d++) {
     _dummy.position.set(8.5, 0.06 + d * 0.035, -4.5);
     _dummy.rotation.set(0, 0.12, 0);
     _dummy.scale.set(1, 1, 1);
     _dummy.updateMatrix();
     cardsInstancedMesh.setMatrixAt(10 + d, _dummy.matrix);
+  }
+
+  // 2. Separate Last Stand Pool Deck Stack on Table (Starts with 0 cards, grows as leftovers pool)
+  const poolCardsCount = isLastStandRound ? 0 : lastStandPoolDeck.length;
+  const poolVisualHeight = Math.min(20, Math.ceil(poolCardsCount / 2.2));
+  for (let p = 0; p < poolVisualHeight; p++) {
+    _dummy.position.set(6.6, 0.06 + p * 0.035, -4.5);
+    _dummy.rotation.set(0, -0.08, 0);
+    _dummy.scale.set(1, 1, 1);
+    _dummy.updateMatrix();
+    cardsInstancedMesh.setMatrixAt(65 + p, _dummy.matrix);
   }
 
   // Seated Players 3D Cards & Chips (Up to 10 players)
@@ -2343,9 +2554,15 @@ function updateSeatOverlays() {
     if (!el) {
       el = document.createElement('div');
       el.id = `seat-badge-${idx}`;
-      el.className = 'seat-badge interactive';
+      el.className = 'seat-badge';
       container.appendChild(el);
     }
+
+    if (p.isHuman || idx === 0) {
+      el.style.display = 'none';
+      return;
+    }
+    el.style.display = 'flex';
 
     const pos = p.tablePosition.clone().add(new THREE.Vector3(0, 1.4, 0));
     pos.project(camera);
@@ -2357,7 +2574,7 @@ function updateSeatOverlays() {
     el.style.top = `${y}px`;
     el.style.setProperty('--opp-color', p.color || '#3b82f6');
 
-    el.className = `seat-badge interactive ${activeTurnIndex === idx ? 'active-turn' : ''} ${p.isFolded ? 'folded' : ''}`;
+    el.className = `seat-badge ${activeTurnIndex === idx ? 'active-turn' : ''} ${p.isFolded ? 'folded' : ''}`;
 
     // Current Round Bet Text
     let betTagHtml = '';
@@ -2381,8 +2598,6 @@ function updateSeatOverlays() {
       </div>
     `;
   });
-
-  updateLeftOpponentsPanel();
 }
 
 function updateLeftOpponentsPanel() {
@@ -2617,29 +2832,145 @@ function setupSeats() {
   if (container) container.innerHTML = '';
 }
 
+// Broadcast a message payload to connected WebRTC peers
+function broadcastToPeers(payload) {
+  try {
+    const raw = typeof payload === 'string' ? payload : JSON.stringify(payload);
+    if (typeof remotePeers === 'object' && remotePeers !== null) {
+      Object.values(remotePeers).forEach(peer => {
+        if (peer && peer.channel && peer.channel.readyState === 'open') {
+          try {
+            peer.channel.send(raw);
+          } catch (e) {}
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('broadcastToPeers notice:', err);
+  }
+}
+window.broadcastToPeers = broadcastToPeers;
+
 // Reshuffle cost: 600 + bigBlind ($620)
 function getReshuffleCost() {
   return 600 + bigBlind;
 }
+window.getReshuffleCost = getReshuffleCost;
 
 // Calculate total cards needed for a complete Texas Hold'em hand
 function getCardsNeededForFullHand() {
-  const activeCount = seatedPlayers.filter(p => p.chips > 0 || !p.isFolded).length || seatedPlayers.length;
-  // 2 cards per active player + 3 flop + 1 turn + 1 river + burn cards (3)
-  return (activeCount * 2) + 5 + 3;
+  const activeCount = seatedPlayers.filter(p => p.chips >= bigBlind || (!p.isFolded && p.chips > 0)).length || seatedPlayers.length;
+  // 2 cards per active player + 3 flop + 1 turn + 1 river
+  return (activeCount * 2) + 5;
 }
+window.getCardsNeededForFullHand = getCardsNeededForFullHand;
 
-window.startNewHand = function () {
-  initAudio();
-  const neededCards = getCardsNeededForFullHand();
+// Evaluates whether the current deck can complete a round successfully.
+// If not, remaining cards are taken and placed into the separate lastStandPoolDeck.
+// Once all 3 diminishing decks have been used, if the last stand pool cards can complete a round, Last Stand round is made ready.
+function checkAndPrepareDeckForNextRound() {
+  if (isLastStandRound || lastStandStatus === 'ready') return;
 
-  // If cards are insufficient to play a whole round, PAUSE the game and DO NOT reshuffle automatically.
-  // The only thing that reshuffles the deck is the player purchasing a reshuffle.
-  if (cardDeck.length < neededCards) {
-    playSound('fold');
-    showToast(`⚠️ Card pool too low (${cardDeck.length} cards left, need ${neededCards}). Purchase a Reshuffle ($${getReshuffleCost()}) to continue!`);
-    updateHUD();
+  const cardsNeeded = getCardsNeededForFullHand();
+
+  // If card deck is not initialized, initialize Deck 1 of 3
+  if (!cardDeck || cardDeck.length === 0) {
+    currentDeckNumber = 1;
+    cardDeck = generateFreshDeck();
+    lastStandPoolDeck = [];
+    lastStandStatus = 'none';
     return;
+  }
+
+  // Cards are dealt only if the round can be completed successfully
+  if (cardDeck.length >= cardsNeeded) {
+    // Current deck can complete the round!
+    return;
+  }
+
+  // Round cannot be completed: remaining cards are placed into separate last stand pool deck
+  const leftoverCount = cardDeck.length;
+  if (leftoverCount > 0) {
+    lastStandPoolDeck.push(...cardDeck);
+    cardDeck = [];
+  }
+
+  // Check if any of the 3 diminishing decks remain
+  if (currentDeckNumber < 3) {
+    currentDeckNumber++;
+    cardDeck = generateFreshDeck();
+    showToast(`📦 Deck ${currentDeckNumber - 1} had ${leftoverCount} cards (needed ${cardsNeeded} to complete round). Remaining cards placed into Last Stand Pool Deck (${lastStandPoolDeck.length} pooled). Switched to Deck ${currentDeckNumber} of 3 (52 cards)!`);
+    playSound('shuffle');
+  } else {
+    // All 3 diminishing decks have now been used!
+    // Check if the last stand cards can also complete a round
+    if (lastStandPoolDeck.length >= cardsNeeded) {
+      lastStandStatus = 'ready';
+      isLastStandRound = true;
+      showToast(`🛡️ All 3 diminishing decks have been used! Last Stand Pool Deck has ${lastStandPoolDeck.length} cards (needed: ${cardsNeeded}). Ready for the Last Stand Round!`, 'jackpot-toast');
+      playSound('jackpot');
+    } else {
+      lastStandStatus = 'insufficient_cards';
+      isLastStandRound = false;
+      isGameCycleEnded = true;
+      cardDeck = [];
+      showToast(`🏁 All 3 diminishing decks used! Last Stand Pool Deck has only ${lastStandPoolDeck.length} cards (needed: ${cardsNeeded}). Game ended — Purchase a new reshuffle to start a new cycle!`, 'jackpot-toast');
+      playSound('fold');
+      setTimeout(openGameEndedModal, 800);
+    }
+  }
+}
+window.checkAndPrepareDeckForNextRound = checkAndPrepareDeckForNextRound;
+
+function startNewHand() {
+  initAudio();
+
+  // If cycle has completed and game has ended, require purchasing a reshuffle
+  if (isGameCycleEnded) {
+    showToast(`🏁 Game ended! Deck 3 of 3 & Last Stand round have concluded. Please purchase a new reshuffle ($${getReshuffleCost()}) to start a new 3-deck cycle!`, 'jackpot-toast');
+    openGameEndedModal();
+    return;
+  }
+
+  // Ensure human player always has chips to play
+  if (seatedPlayers[0] && seatedPlayers[0].chips <= 0) {
+    seatedPlayers[0].chips = 500;
+    holdemState.playerChips = 500;
+    showToast('🪙 Reload bonus: +$500 chips added to your bankroll!');
+  }
+  // Ensure AI opponents have chips
+  seatedPlayers.forEach(p => {
+    if (p.chips < bigBlind) p.chips = 500;
+  });
+
+  const cardsNeeded = getCardsNeededForFullHand();
+
+  // Check whether this is the Last Stand Round or normal diminishing deck play
+  if (isLastStandRound || lastStandStatus === 'ready') {
+    isLastStandRound = true;
+    lastStandStatus = 'active';
+    // Use the pooled Last Stand Deck!
+    cardDeck = [...lastStandPoolDeck];
+    lastStandPoolDeck = [];
+    playSound('jackpot');
+    showToast(`⚔️ LAST STAND ROUND COMMENCED! Dealing from ${cardDeck.length} pooled cards!`, 'jackpot-toast');
+  } else {
+    // If the active deck cannot complete a round, transfer leftovers to lastStandPoolDeck and switch deck
+    if (!cardDeck || cardDeck.length < cardsNeeded) {
+      checkAndPrepareDeckForNextRound();
+      if (isLastStandRound || lastStandStatus === 'ready') {
+        isLastStandRound = true;
+        lastStandStatus = 'active';
+        cardDeck = [...lastStandPoolDeck];
+        lastStandPoolDeck = [];
+        playSound('jackpot');
+        showToast(`⚔️ LAST STAND ROUND COMMENCED! Dealing from ${cardDeck.length} pooled cards!`, 'jackpot-toast');
+      }
+    }
+
+    if (!isLastStandRound) {
+      showToast(`♠️ Dealing from Deck ${currentDeckNumber} of 3 (${cardDeck.length} cards remaining)!`);
+    }
   }
 
   roundPhase = 'preflop';
@@ -2649,16 +2980,44 @@ window.startNewHand = function () {
 
   dealerSeatIndex = (dealerSeatIndex + 1) % seatedPlayers.length;
 
-  seatedPlayers.forEach((p) => {
+  // Determine eligible players based on available cards
+  const activeChipsPlayers = seatedPlayers.filter(p => p.chips >= bigBlind);
+  let maxPlayersCanPlay = activeChipsPlayers.length;
+  if (isLastStandRound) {
+    // In Last Stand, if pool has fewer cards than needed for all players, limit to max possible
+    maxPlayersCanPlay = Math.max(2, Math.min(activeChipsPlayers.length, Math.floor((cardDeck.length - 5) / 2)));
+  }
+
+  let playersSeatedInHand = 0;
+  seatedPlayers.forEach((p, idx) => {
     p.holeCards = [];
     p.currentBet = 0;
-    p.isFolded = p.chips <= 0;
-    p.isAllIn = false;
     p.hasActedThisRound = false;
-    p.actionText = p.isFolded ? 'Out of Chips' : 'In Hand';
-    p.actionClass = '';
+
+    let eligible = p.chips > 0;
+    if (isLastStandRound && eligible) {
+      if (p.isHuman) {
+        eligible = true;
+      } else {
+        eligible = playersSeatedInHand < maxPlayersCanPlay;
+      }
+    }
+
+    if (eligible && playersSeatedInHand < maxPlayersCanPlay) {
+      p.isFolded = false;
+      p.isAllIn = false;
+      p.actionText = isLastStandRound ? '⚔️ Last Stand' : 'In Hand';
+      p.actionClass = '';
+      playersSeatedInHand++;
+    } else {
+      p.isFolded = true;
+      p.isAllIn = false;
+      p.actionText = isLastStandRound ? 'Sitting Out' : (p.chips <= 0 ? 'Out of Chips' : 'Sitting Out');
+      p.actionClass = '';
+    }
   });
 
+  // Deal 2 hole cards to each participating player from the diminishing / pooled deck
   for (let c = 0; c < 2; c++) {
     for (const p of seatedPlayers) {
       if (!p.isFolded && cardDeck.length > 0) {
@@ -2670,6 +3029,12 @@ window.startNewHand = function () {
 
   holdemState.progressivePot += 10;
   holdemState.handsPlayed++;
+
+  // In Last Stand round, add an extra bounty bonus to the table pot!
+  if (isLastStandRound) {
+    mainPot += 100;
+    showToast(`💰 House added +$100 Last Stand Bounty Bonus to the pot!`, 'jackpot-toast');
+  }
 
   const sbSeat = (dealerSeatIndex + 1) % seatedPlayers.length;
   const bbSeat = (dealerSeatIndex + 2) % seatedPlayers.length;
@@ -2685,11 +3050,15 @@ window.startNewHand = function () {
   updateCardsUI();
   update3DTableVisuals();
 
-  document.getElementById('deal-next-container').style.display = 'none';
-  document.getElementById('main-actions-row').style.display = 'grid';
+  const dealContainer = document.getElementById('deal-next-container');
+  if (dealContainer) dealContainer.style.display = 'none';
+
+  const actionsRow = document.getElementById('main-actions-row');
+  if (actionsRow) actionsRow.style.display = 'grid';
 
   processNextTurn();
-};
+}
+window.startNewHand = startNewHand;
 
 function postBlind(player, amount, text) {
   const actual = Math.min(player.chips, amount);
@@ -2752,7 +3121,7 @@ function processNextTurn() {
     disableHumanControls();
     setTimeout(() => {
       runAiDecision(currentPlayer);
-    }, 550 + Math.random() * 450);
+    }, 280 + Math.random() * 200);
   }
 }
 
@@ -2864,6 +3233,7 @@ function executePlayerBet(player, action, raiseAmount = 0) {
 
   if (player.isHuman) {
     holdemState.playerChips = player.chips;
+    disableHumanControls();
   }
 
   updateHUD();
@@ -2885,29 +3255,27 @@ function advanceToNextBettingRound() {
   highestCurrentBet = 0;
 
   if (roundPhase === 'preflop') {
-    if (cardDeck.length >= 4) {
-      cardDeck.pop();
-      communityCards.push(cardDeck.pop(), cardDeck.pop(), cardDeck.pop());
-      roundPhase = 'flop';
-      showToast('♠️ Dealing the FLOP ♦️');
-      playSound('deal');
-    }
+    const f1 = cardDeck.pop();
+    const f2 = cardDeck.pop();
+    const f3 = cardDeck.pop();
+    if (f1) communityCards.push(f1);
+    if (f2) communityCards.push(f2);
+    if (f3) communityCards.push(f3);
+    roundPhase = 'flop';
+    showToast('♠️ Dealing the FLOP ♦️');
+    playSound('deal');
   } else if (roundPhase === 'flop') {
-    if (cardDeck.length >= 2) {
-      cardDeck.pop();
-      communityCards.push(cardDeck.pop());
-      roundPhase = 'turn';
-      showToast('♣️ Dealing the TURN ♥️');
-      playSound('deal');
-    }
+    const t = cardDeck.pop();
+    if (t) communityCards.push(t);
+    roundPhase = 'turn';
+    showToast('♣️ Dealing the TURN ♥️');
+    playSound('deal');
   } else if (roundPhase === 'turn') {
-    if (cardDeck.length >= 2) {
-      cardDeck.pop();
-      communityCards.push(cardDeck.pop());
-      roundPhase = 'river';
-      showToast('🔥 Dealing the RIVER 🔥');
-      playSound('deal');
-    }
+    const r = cardDeck.pop();
+    if (r) communityCards.push(r);
+    roundPhase = 'river';
+    showToast('🔥 Dealing the RIVER 🔥');
+    playSound('deal');
   } else if (roundPhase === 'river') {
     roundPhase = 'showdown';
     performShowdown();
@@ -2945,7 +3313,7 @@ function awardPotToWinner(winners, handDesc, bestHandCards = []) {
   const splitPot = Math.floor(mainPot / winners.length);
   winners.forEach(w => {
     w.chips += splitPot;
-    w.actionText = `WINNER (+$${splitPot})`;
+    w.actionText = isLastStandRound ? `⚔️ LAST STAND WINNER (+$${splitPot})` : `WINNER (+$${splitPot})`;
     w.actionClass = 'raise';
     if (w.isHuman) {
       holdemState.playerChips = w.chips;
@@ -2957,8 +3325,13 @@ function awardPotToWinner(winners, handDesc, bestHandCards = []) {
   });
 
   const winnerNames = winners.map(w => w.name).join(' & ');
-  showToast(`🏆 ${winnerNames} won $${mainPot} with ${handDesc}!`, 'jackpot-toast');
-  playSound('win');
+  if (isLastStandRound) {
+    showToast(`👑 LAST STAND CONQUERED! ${winnerNames} won $${mainPot} with ${handDesc}!`, 'jackpot-toast');
+    playSound('jackpot');
+  } else {
+    showToast(`🏆 ${winnerNames} won $${mainPot} with ${handDesc}!`, 'jackpot-toast');
+    playSound('win');
+  }
 
   mainPot = 0;
   roundPhase = 'hand_ended';
@@ -2966,10 +3339,32 @@ function awardPotToWinner(winners, handDesc, bestHandCards = []) {
     onRoundEndedP2PCheck();
   }
 
+  // 3 DIMINISHING DECKS & LAST STAND POOL TRANSITION LOGIC
+  if (isLastStandRound) {
+    // The Last Stand round has completed!
+    isLastStandRound = false;
+    lastStandStatus = 'completed';
+    lastStandPoolDeck = [];
+    isGameCycleEnded = true;
+    cardDeck = [];
+    showToast(`🏁 Last Stand Round complete! Deck 3 of 3 & Last Stand cycle finished. Game ended — Purchase a new reshuffle to start a new cycle!`, 'jackpot-toast');
+    playSound('jackpot');
+    setTimeout(openGameEndedModal, 800);
+  } else {
+    // Check if the current deck can complete another round, or if leftovers should be transferred to lastStandPoolDeck
+    checkAndPrepareDeckForNextRound();
+    if (!isLastStandRound && lastStandStatus !== 'ready' && !isGameCycleEnded) {
+      showToast(`♠️ Hand completed! Deck ${currentDeckNumber} of 3 has ${cardDeck.length} cards remaining.`);
+    }
+  }
+
   document.getElementById('main-actions-row').style.display = 'none';
   document.getElementById('bet-slider-row').style.display = 'none';
   document.getElementById('deal-next-container').style.display = 'flex';
+  const statusEl = document.getElementById('action-turn-status');
+  if (statusEl) statusEl.style.display = 'none';
 
+  updateDealButtonState();
   saveHoldemData();
   updateHUD();
   updateCardsUI(bestHandCards);
@@ -3008,89 +3403,241 @@ function triggerProgressiveJackpot(winner, evaluation) {
 /* -------------------------------------------------------------
    11. HUMAN CONTROLS & HUD UPDATES
    ------------------------------------------------------------- */
-window.playerAction = function (action) {
-  initAudio();
-  const human = seatedPlayers[0];
-  if (!human || activeTurnIndex !== 0) return;
+let isProcessingPlayerAction = false;
 
-  if (action === 'raise') {
-    const sliderVal = Number(document.getElementById('bet-slider').value);
-    executePlayerBet(human, 'raise', sliderVal);
-  } else {
-    executePlayerBet(human, action);
+function updateBetSliderDisplay() {
+  const slider = document.getElementById('bet-slider');
+  if (!slider) return;
+  const val = Number(slider.value);
+  const valEl = document.getElementById('bet-slider-val');
+  if (valEl) valEl.innerText = `$${val.toLocaleString()}`;
+}
+window.updateBetSliderDisplay = updateBetSliderDisplay;
+
+function setBetFraction(fraction) {
+  const human = seatedPlayers[0];
+  if (!human) return;
+  const toCall = Math.max(0, highestCurrentBet - human.currentBet);
+  const chipsAfterCall = human.chips - toCall;
+  if (chipsAfterCall <= 0) return;
+  const amount = Math.max(10, Math.min(chipsAfterCall, Math.floor(mainPot * fraction)));
+  const slider = document.getElementById('bet-slider');
+  if (slider) {
+    slider.value = String(amount);
+    updateBetSliderDisplay();
   }
-};
+}
+window.setBetFraction = setBetFraction;
+
+function setBetAllIn() {
+  const human = seatedPlayers[0];
+  if (!human) return;
+  const toCall = Math.max(0, highestCurrentBet - human.currentBet);
+  const chipsAfterCall = human.chips - toCall;
+  const slider = document.getElementById('bet-slider');
+  if (slider && chipsAfterCall > 0) {
+    slider.value = String(chipsAfterCall);
+    updateBetSliderDisplay();
+  }
+}
+window.setBetAllIn = setBetAllIn;
+
+function playerAction(action) {
+  initAudio();
+  if (isProcessingPlayerAction) return;
+
+  const human = seatedPlayers[0];
+  if (!human) return;
+
+  if (roundPhase === 'hand_ended' || roundPhase === 'showdown') {
+    showToast('Hand completed. Starting next hand...', 'jackpot-toast');
+    startNewHand();
+    return;
+  }
+
+  if (activeTurnIndex !== 0) {
+    const activeP = seatedPlayers[activeTurnIndex];
+    showToast(`⏳ Opponent ${activeP ? activeP.name : ''} is acting. Please wait for your turn.`);
+    playSound('fold');
+    return;
+  }
+
+  if (human.isFolded) {
+    showToast('⚠️ You have folded this hand. Waiting for next deal.');
+    return;
+  }
+
+  isProcessingPlayerAction = true;
+  try {
+    const toCall = Math.max(0, highestCurrentBet - human.currentBet);
+
+    if (action === 'fold') {
+      executePlayerBet(human, 'fold');
+    } else if (action === 'check') {
+      if (toCall === 0) {
+        executePlayerBet(human, 'check');
+      } else {
+        showToast(`⚠️ Facing bet of $${toCall} — calling $${toCall} to stay in hand.`);
+        executePlayerBet(human, 'call');
+      }
+    } else if (action === 'call') {
+      if (toCall === 0) {
+        executePlayerBet(human, 'check');
+      } else {
+        executePlayerBet(human, 'call');
+      }
+    } else if (action === 'raise') {
+      const slider = document.getElementById('bet-slider');
+      let sliderVal = Number(slider ? slider.value : 0);
+      const chipsAfterCall = human.chips - toCall;
+      if (chipsAfterCall <= 0) {
+        executePlayerBet(human, 'call');
+        return;
+      }
+      if (isNaN(sliderVal) || sliderVal <= 0) {
+        sliderVal = Math.min(chipsAfterCall, Math.max(bigBlind * 2, 20));
+      }
+      executePlayerBet(human, 'raise', Math.min(chipsAfterCall, Math.max(10, sliderVal)));
+    }
+  } finally {
+    setTimeout(() => {
+      isProcessingPlayerAction = false;
+    }, 200);
+  }
+}
+window.playerAction = playerAction;
 
 function enableHumanControls() {
   const human = seatedPlayers[0];
-  const toCall = highestCurrentBet - human.currentBet;
+  if (!human) return;
+  const toCall = Math.max(0, highestCurrentBet - human.currentBet);
 
+  const statusEl = document.getElementById('action-turn-status');
   const btnFold = document.getElementById('btn-fold');
   const btnCheck = document.getElementById('btn-check');
   const btnCall = document.getElementById('btn-call');
   const btnRaise = document.getElementById('btn-raise');
-  const callLabel = document.getElementById('call-amount-label');
+  const callBtnContent = document.getElementById('call-btn-content');
+  const checkBtnContent = document.getElementById('check-btn-content');
+  const raiseBtnContent = document.getElementById('raise-btn-content');
   const betSliderRow = document.getElementById('bet-slider-row');
   const betSlider = document.getElementById('bet-slider');
+  const betSliderLabel = document.getElementById('bet-slider-label');
 
-  btnFold.disabled = false;
-  btnCheck.disabled = toCall > 0;
-  btnCall.disabled = toCall === 0 || human.chips <= 0;
-  btnRaise.disabled = human.chips <= toCall;
+  if (statusEl) {
+    statusEl.style.display = 'flex';
+    statusEl.className = 'action-turn-status';
+    statusEl.innerHTML = `<span>🟢</span><span>YOUR TURN ${toCall > 0 ? `(To Call: $${toCall})` : '(Free to Check)'}</span>`;
+  }
 
-  callLabel.innerText = toCall > 0 ? `$${toCall}` : '$0';
+  if (btnFold) {
+    btnFold.disabled = false;
+    btnFold.style.opacity = '1';
+    btnFold.style.cursor = 'pointer';
+  }
 
-  if (human.chips > toCall) {
-    betSliderRow.style.display = 'flex';
-    betSlider.min = String(bigBlind);
-    betSlider.max = String(human.chips - toCall);
-    betSlider.value = String(Math.min(bigBlind * 2, human.chips - toCall));
-    updateBetSliderDisplay();
+  if (toCall === 0) {
+    if (btnCheck) {
+      btnCheck.disabled = false;
+      btnCheck.style.opacity = '1';
+      btnCheck.style.cursor = 'pointer';
+    }
+    if (checkBtnContent) checkBtnContent.innerHTML = '✋ Check ($0)';
+
+    if (btnCall) {
+      btnCall.disabled = false;
+      btnCall.style.opacity = '1';
+      btnCall.style.cursor = 'pointer';
+    }
+    if (callBtnContent) callBtnContent.innerHTML = '💰 Check / Call ($0)';
+
+    if (raiseBtnContent) raiseBtnContent.innerHTML = '⚡ Bet';
+    if (betSliderLabel) betSliderLabel.innerText = 'BET:';
   } else {
+    if (btnCheck) {
+      btnCheck.disabled = false;
+      btnCheck.style.opacity = '0.7';
+      btnCheck.style.cursor = 'pointer';
+    }
+    if (checkBtnContent) checkBtnContent.innerHTML = `✋ Check / Call $${Math.min(human.chips, toCall)}`;
+
+    if (btnCall) {
+      btnCall.disabled = human.chips <= 0;
+      btnCall.style.opacity = '1';
+      btnCall.style.cursor = 'pointer';
+    }
+    const actualCall = Math.min(human.chips, toCall);
+    const allInTag = human.chips <= toCall ? ' (ALL-IN)' : '';
+    if (callBtnContent) callBtnContent.innerHTML = `💰 Call $${actualCall}${allInTag}`;
+
+    if (raiseBtnContent) raiseBtnContent.innerHTML = '⚡ Raise';
+    if (betSliderLabel) betSliderLabel.innerText = 'RAISE:';
+  }
+
+  const chipsAfterCall = human.chips - toCall;
+  if (btnRaise) {
+    btnRaise.disabled = chipsAfterCall <= 0;
+    btnRaise.style.opacity = chipsAfterCall > 0 ? '1' : '0.4';
+    btnRaise.style.cursor = chipsAfterCall > 0 ? 'pointer' : 'not-allowed';
+  }
+
+  if (chipsAfterCall > 0 && betSliderRow && betSlider) {
+    betSliderRow.style.display = 'flex';
+    const minBet = Math.min(bigBlind, chipsAfterCall);
+    betSlider.min = String(minBet);
+    betSlider.max = String(chipsAfterCall);
+    betSlider.step = '10';
+    betSlider.value = String(Math.min(bigBlind * 2, chipsAfterCall));
+    updateBetSliderDisplay();
+  } else if (betSliderRow) {
     betSliderRow.style.display = 'none';
   }
 }
 
 function disableHumanControls() {
-  document.getElementById('btn-fold').disabled = true;
-  document.getElementById('btn-check').disabled = true;
-  document.getElementById('btn-call').disabled = true;
-  document.getElementById('btn-raise').disabled = true;
-  document.getElementById('bet-slider-row').style.display = 'none';
+  const statusEl = document.getElementById('action-turn-status');
+  if (statusEl) {
+    if (roundPhase === 'hand_ended' || roundPhase === 'showdown') {
+      statusEl.style.display = 'none';
+    } else {
+      const activeP = seatedPlayers[activeTurnIndex];
+      statusEl.style.display = 'flex';
+      statusEl.className = 'action-turn-status waiting';
+      statusEl.innerHTML = `<span>⏳</span><span>Opponent Turn: ${activeP ? activeP.name : 'Opponent'} is deciding...</span>`;
+    }
+  }
+
+  const btnFold = document.getElementById('btn-fold');
+  const btnCheck = document.getElementById('btn-check');
+  const btnCall = document.getElementById('btn-call');
+  const btnRaise = document.getElementById('btn-raise');
+  const betSliderRow = document.getElementById('bet-slider-row');
+
+  if (btnFold) { btnFold.disabled = true; btnFold.style.opacity = '0.4'; btnFold.style.cursor = 'not-allowed'; }
+  if (btnCheck) { btnCheck.disabled = true; btnCheck.style.opacity = '0.4'; btnCheck.style.cursor = 'not-allowed'; }
+  if (btnCall) { btnCall.disabled = true; btnCall.style.opacity = '0.4'; btnCall.style.cursor = 'not-allowed'; }
+  if (btnRaise) { btnRaise.disabled = true; btnRaise.style.opacity = '0.4'; btnRaise.style.cursor = 'not-allowed'; }
+  if (betSliderRow) betSliderRow.style.display = 'none';
 }
 
-window.updateBetSliderDisplay = function () {
-  const slider = document.getElementById('bet-slider');
-  const val = Number(slider.value);
-  document.getElementById('bet-slider-val').innerText = `$${val.toLocaleString()}`;
-};
-
-window.setBetFraction = function (fraction) {
-  const human = seatedPlayers[0];
-  const toCall = highestCurrentBet - human.currentBet;
-  const amount = Math.max(bigBlind, Math.min(human.chips - toCall, Math.floor(mainPot * fraction)));
-  const slider = document.getElementById('bet-slider');
-  slider.value = String(amount);
-  window.updateBetSliderDisplay();
-};
-
-window.setBetAllIn = function () {
-  const human = seatedPlayers[0];
-  const toCall = highestCurrentBet - human.currentBet;
-  const slider = document.getElementById('bet-slider');
-  slider.value = String(human.chips - toCall);
-  window.updateBetSliderDisplay();
-};
-
 // Reshuffle fee is 600 + bigBlind ($620). Only the player can purchase a reshuffle.
-window.requestShuffleDeck = function () {
+function requestShuffleDeck() {
   initAudio();
   const shuffleFee = getReshuffleCost();
   const human = seatedPlayers[0];
   if (!human) return;
+
   if (human.chips < shuffleFee) {
-    showToast(`⚠️ Insufficient chips to buy reshuffle ($${shuffleFee} needed). You have $${human.chips}.`);
-    return;
+    if (isGameCycleEnded) {
+      // Reload bankroll so player can always purchase a reshuffle and restart the tournament cycle
+      const reloadAmount = Math.max(1000, shuffleFee + 500);
+      human.chips += reloadAmount;
+      holdemState.playerChips = human.chips;
+      showToast(`🪙 Bankroll reload bonus: +$${reloadAmount} chips added to purchase reshuffle and restart!`);
+    } else {
+      showToast(`⚠️ Insufficient chips to buy reshuffle ($${shuffleFee} needed). You have $${human.chips}.`);
+      return;
+    }
   }
 
   human.chips -= shuffleFee;
@@ -3098,16 +3645,25 @@ window.requestShuffleDeck = function () {
   holdemState.progressivePot += 100;
 
   cardDeck = generateFreshDeck();
+  currentDeckNumber = 1;
+  isLastStandRound = false;
+  lastStandPoolDeck = [];
+  lastStandStatus = 'none';
+  isGameCycleEnded = false;
+
+  closeGameEndedModal();
   playSound('shuffle');
-  showToast(`🔀 Fresh 52-card deck purchased and shuffled! ($${shuffleFee} paid)`);
+  showToast(`🔀 Fresh 52-card deck purchased and shuffled! Starting with Deck 1 of 3 (Diminishing). ($${shuffleFee} paid)`);
 
   updateHUD();
   updateCardsUI();
   update3DTableVisuals();
+  updateDealButtonState();
   saveHoldemData();
-};
+}
+window.requestShuffleDeck = requestShuffleDeck;
 
-window.resetGameData = function () {
+function resetGameData() {
   initAudio();
   holdemState = {
     playerChips: 500,
@@ -3123,37 +3679,161 @@ window.resetGameData = function () {
   communityCards = [];
   roundPhase = 'hand_ended';
   cardDeck = generateFreshDeck();
+  currentDeckNumber = 1;
+  isLastStandRound = false;
+  lastStandPoolDeck = [];
+  lastStandStatus = 'none';
+  isGameCycleEnded = false;
 
+  closeGameEndedModal();
   saveHoldemData();
   setupSeats();
   updateHUD();
   updateCardsUI();
   update3DTableVisuals();
 
-  document.getElementById('deal-next-container').style.display = 'flex';
-  document.getElementById('main-actions-row').style.display = 'none';
-  document.getElementById('bet-slider-row').style.display = 'none';
+  const dealNext = document.getElementById('deal-next-container');
+  if (dealNext) dealNext.style.display = 'flex';
+
+  const actionsRow = document.getElementById('main-actions-row');
+  if (actionsRow) actionsRow.style.display = 'none';
+
+  const sliderRow = document.getElementById('bet-slider-row');
+  if (sliderRow) sliderRow.style.display = 'none';
 
   closeSettingsModal();
   playSound('win');
-  showToast('🔄 Game reset successfully! Chips reset to $500, pot cleared, fresh deck ready.');
-};
+  showToast('🔄 Game reset successfully! Chips reset to $500, pot cleared, ready for Deck 1 of 3.');
+}
+window.resetGameData = resetGameData;
 
 function updateHUD() {
-  document.getElementById('hud-player-chips').innerText = `$${holdemState.playerChips.toLocaleString()}`;
-  document.getElementById('hud-main-pot').innerText = `$${mainPot.toLocaleString()}`;
-  document.getElementById('hud-progressive-pot').innerText = `$${holdemState.progressivePot.toLocaleString()}`;
-  document.getElementById('hud-deck-count').innerText = `${cardDeck.length} / 52`;
+  const playerChipsEl = document.getElementById('hud-player-chips');
+  if (playerChipsEl) playerChipsEl.innerText = `$${holdemState.playerChips.toLocaleString()}`;
 
-  const fillPct = (cardDeck.length / 52) * 100;
-  document.getElementById('hud-deck-fill').style.width = `${fillPct}%`;
+  const mainPotEl = document.getElementById('hud-main-pot');
+  if (mainPotEl) mainPotEl.innerText = `$${mainPot.toLocaleString()}`;
+
+  const progPotEl = document.getElementById('hud-progressive-pot');
+  if (progPotEl) progPotEl.innerText = `$${holdemState.progressivePot.toLocaleString()}`;
+
+  // Diminishing Deck & 3-Deck Steps
+  const deckCountEl = document.getElementById('hud-deck-count');
+  const deckTitleEl = document.getElementById('hud-deck-title');
+  const seqStepEl = document.getElementById('hud-sequential-step');
+  const seqDotsEl = document.getElementById('hud-sequential-dots');
+  const deckFillEl = document.getElementById('hud-deck-fill');
+  const lastStandInfoEl = document.getElementById('hud-last-stand-info');
+  const lastStandCountEl = document.getElementById('hud-last-stand-count');
+
+  if (lastStandCountEl) {
+    lastStandCountEl.innerText = String(lastStandPoolDeck.length);
+  }
+
+  if (isGameCycleEnded) {
+    if (deckTitleEl) deckTitleEl.innerText = 'Game Ended (Cycle Complete)';
+    if (deckCountEl) {
+      deckCountEl.innerText = '0 / 52 Cards';
+      deckCountEl.style.color = '#f43f5e';
+    }
+    if (seqStepEl) {
+      seqStepEl.innerText = '🏁 Deck 3 & Last Stand Finished';
+      seqStepEl.style.color = '#f43f5e';
+    }
+    if (seqDotsEl) {
+      seqDotsEl.innerText = '🏁 GAME OVER — RESHUFFLE REQUIRED 🏁';
+      seqDotsEl.style.color = '#f43f5e';
+    }
+    if (deckFillEl) {
+      deckFillEl.style.width = '0%';
+      deckFillEl.style.background = '#f43f5e';
+    }
+  } else if (isLastStandRound || lastStandStatus === 'ready') {
+    const displayCount = isLastStandRound ? cardDeck.length : lastStandPoolDeck.length;
+    if (deckTitleEl) deckTitleEl.innerText = 'Last Stand Pool Deck';
+    if (deckCountEl) {
+      deckCountEl.innerText = `${displayCount} Cards`;
+      deckCountEl.style.color = '#fbbf24';
+    }
+    if (seqStepEl) {
+      seqStepEl.innerText = '⚔️ Last Stand Round';
+      seqStepEl.style.color = '#fbbf24';
+    }
+    if (seqDotsEl) {
+      seqDotsEl.innerText = `⚔️ ${displayCount} Pooled Cards ⚔️`;
+      seqDotsEl.style.color = '#fbbf24';
+    }
+    if (deckFillEl) {
+      deckFillEl.style.width = '100%';
+      deckFillEl.style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
+    }
+  } else {
+    if (deckTitleEl) deckTitleEl.innerText = `Deck ${currentDeckNumber} of 3 (Diminishing)`;
+    if (deckCountEl) {
+      deckCountEl.innerText = `${cardDeck.length} / 52`;
+      deckCountEl.style.color = cardDeck.length >= 20 ? '#10b981' : '#f59e0b';
+    }
+    if (seqStepEl) {
+      seqStepEl.innerText = `Deck ${currentDeckNumber} of 3 (${cardDeck.length} left)`;
+      seqStepEl.style.color = '#38bdf8';
+    }
+    if (seqDotsEl) {
+      if (currentDeckNumber === 1) seqDotsEl.innerText = 'Deck 1 [●] Deck 2 [○] Deck 3 [○]';
+      else if (currentDeckNumber === 2) seqDotsEl.innerText = 'Deck 1 [✔] Deck 2 [●] Deck 3 [○]';
+      else if (currentDeckNumber === 3) seqDotsEl.innerText = 'Deck 1 [✔] Deck 2 [✔] Deck 3 [●]';
+      seqDotsEl.style.color = '#38bdf8';
+    }
+    if (deckFillEl) {
+      const fillPct = Math.max(0, Math.min(100, (cardDeck.length / 52) * 100));
+      deckFillEl.style.width = `${fillPct}%`;
+      deckFillEl.style.background = 'linear-gradient(90deg, #10b981, #06b6d4)';
+    }
+  }
 
   const reshuffleCost = getReshuffleCost();
   const reshuffleLabel = document.getElementById('reshuffle-btn-label');
   if (reshuffleLabel) {
     reshuffleLabel.innerText = `🔀 Reshuffle ($${reshuffleCost})`;
   }
+
+  const btnShuffle = document.getElementById('btn-shuffle-deck');
+  if (btnShuffle) {
+    if (isGameCycleEnded) {
+      btnShuffle.style.border = '2px solid #f43f5e';
+      btnShuffle.style.boxShadow = '0 0 16px rgba(244, 63, 94, 0.85)';
+      btnShuffle.style.animation = 'pulse-game-ended 1.3s infinite alternate ease-in-out';
+    } else {
+      btnShuffle.style.border = '';
+      btnShuffle.style.boxShadow = '';
+      btnShuffle.style.animation = '';
+    }
+  }
+
+  updateLeftOpponentsPanel();
+  updateDealButtonState();
 }
+
+function updateDealButtonState() {
+  const dealBtn = document.getElementById('btn-deal-next');
+  if (!dealBtn) return;
+
+  const reshuffleCost = getReshuffleCost();
+  if (isGameCycleEnded) {
+    dealBtn.className = 'btn btn-game-ended-reshuffle';
+    dealBtn.innerHTML = `<span>🏁 GAME ENDED • PURCHASE RESHUFFLE ($${reshuffleCost}) 🔀</span>`;
+  } else if (isLastStandRound || lastStandStatus === 'ready') {
+    const pooledCount = isLastStandRound ? cardDeck.length : lastStandPoolDeck.length;
+    dealBtn.className = 'btn btn-last-stand';
+    dealBtn.innerHTML = `<span>⚔️ BEGIN LAST STAND ROUND (${pooledCount} POOLED CARDS) ⚔️</span>`;
+  } else if (lastStandStatus === 'insufficient_cards') {
+    dealBtn.className = 'btn btn-game-ended-reshuffle';
+    dealBtn.innerHTML = `<span>🏁 GAME ENDED • PURCHASE RESHUFFLE ($${reshuffleCost}) 🔀</span>`;
+  } else {
+    dealBtn.className = 'btn btn-deal-next';
+    dealBtn.innerHTML = `<span>♠️ DEAL HAND (DECK ${currentDeckNumber}/3 • ${cardDeck.length} CARDS LEFT) ♦️</span>`;
+  }
+}
+window.updateDealButtonState = updateDealButtonState;
 
 function showToast(msg, extraClass = '') {
   const container = document.getElementById('toast-container');
@@ -3173,7 +3853,7 @@ function showToast(msg, extraClass = '') {
 /* -------------------------------------------------------------
    12. SETTINGS, OPPONENT SELECTION & MODALS
    ------------------------------------------------------------- */
-window.setAiOpponentsCount = function (count) {
+function setAiOpponentsCount(count) {
   aiOpponentsCount = count;
   [1, 2, 3, 4].forEach(i => {
     const btn = document.getElementById(`ai-count-${i}`);
@@ -3183,13 +3863,21 @@ window.setAiOpponentsCount = function (count) {
     }
   });
   setupSeats();
+  cardDeck = generateFreshDeck();
+  currentDeckNumber = 1;
+  isLastStandRound = false;
+  lastStandPoolDeck = [];
+  lastStandStatus = 'none';
+  isGameCycleEnded = false;
+  closeGameEndedModal();
   updateCardsUI();
   update3DTableVisuals();
   updateHUD();
-  showToast(`👥 Table configured for ${count} AI Opponent${count > 1 ? 's' : ''} (5p Table)`);
-};
+  showToast(`👥 Table configured for ${count} AI Opponent${count > 1 ? 's' : ''}. Starting with Deck 1 of 3 (52 cards).`);
+}
+window.setAiOpponentsCount = setAiOpponentsCount;
 
-window.setTableFeltColor = function (colorName) {
+function setTableFeltColor(colorName) {
   if (!tableFeltMesh) return;
   const hexMap = {
     emerald: 0x059669,
@@ -3206,28 +3894,44 @@ window.setTableFeltColor = function (colorName) {
     } catch (e) {}
   }
   showToast(`🎨 Table felt changed to ${colorName.toUpperCase()}`);
-};
+}
+window.setTableFeltColor = setTableFeltColor;
 
-window.toggleSfx = function () {
+function toggleSfx() {
   sfxEnabled = !sfxEnabled;
   document.getElementById('btn-toggle-sfx').innerText = `🔊 Sound FX: ${sfxEnabled ? 'ON' : 'MUTED'}`;
-};
+}
+window.toggleSfx = toggleSfx;
 
-window.openSettingsModal = function () {
-  document.getElementById('settings-modal').style.display = 'flex';
-};
-window.closeSettingsModal = function () {
-  document.getElementById('settings-modal').style.display = 'none';
-};
-window.openRulesModal = function () {
-  document.getElementById('rules-modal').style.display = 'flex';
-};
-window.closeRulesModal = function () {
-  document.getElementById('rules-modal').style.display = 'none';
-};
-window.closeJackpotModal = function () {
-  document.getElementById('jackpot-modal').style.display = 'none';
-};
+function openSettingsModal() {
+  const m = document.getElementById('settings-modal');
+  if (m) m.style.display = 'flex';
+}
+window.openSettingsModal = openSettingsModal;
+
+function closeSettingsModal() {
+  const m = document.getElementById('settings-modal');
+  if (m) m.style.display = 'none';
+}
+window.closeSettingsModal = closeSettingsModal;
+
+function openRulesModal() {
+  const m = document.getElementById('rules-modal');
+  if (m) m.style.display = 'flex';
+}
+window.openRulesModal = openRulesModal;
+
+function closeRulesModal() {
+  const m = document.getElementById('rules-modal');
+  if (m) m.style.display = 'none';
+}
+window.closeRulesModal = closeRulesModal;
+
+function closeJackpotModal() {
+  const m = document.getElementById('jackpot-modal');
+  if (m) m.style.display = 'none';
+}
+window.closeJackpotModal = closeJackpotModal;
 
 /* -------------------------------------------------------------
    14. DECOUPLED WEB WORKER SIMULATION ENGINE (INLINE BLOB)
@@ -4154,16 +4858,54 @@ async function startApp() {
     loadHoldemData();
     cardDeck = generateFreshDeck();
     setupSeats();
+
+    // Attach robust click & touch event listeners to guarantee 100% responsive action buttons
+    const bindAction = (id, action) => {
+      const el = document.getElementById(id);
+      if (el) {
+        const handler = (e) => {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          playerAction(action);
+        };
+        el.onclick = handler;
+        el.onpointerdown = (e) => e.stopPropagation();
+      }
+    };
+
+    bindAction('btn-fold', 'fold');
+    bindAction('btn-check', 'check');
+    bindAction('btn-call', 'call');
+    bindAction('btn-raise', 'raise');
+
+    const dealBtn = document.getElementById('btn-deal-next');
+    if (dealBtn) {
+      const handleDeal = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        startNewHand();
+      };
+      dealBtn.onclick = handleDeal;
+      dealBtn.onpointerdown = (e) => e.stopPropagation();
+    }
+
     await initThreeWebGPU();
     updateHUD();
     updateCardsUI();
 
-    document.getElementById('deal-next-container').style.display = 'flex';
-    document.getElementById('main-actions-row').style.display = 'none';
-    showToast('♠️ Welcome to 3D Texas Hold\'em! Click Deal to begin. ♦️');
+    // Automatically deal the first hand so the player can immediately jump into action!
+    startNewHand();
+    showToast('♠️ Welcome to 3D Texas Hold\'em! Cards dealt. ♦️');
   } catch (err) {
     console.error('startApp initialization caught error:', err);
     showToast('Notice: Initialized Texas Hold\'em 3D.');
+    try {
+      startNewHand();
+    } catch (e) {}
   }
 }
 
