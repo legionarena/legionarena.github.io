@@ -1,7 +1,11 @@
 {
   "name": "Firestorm Tournaments",
   "description": "Clean, accessible gaming tournament platform created with Google Gemini AI Studio, featuring player registration, email verification, high score leaderboards, games including Block Drop Matrix (scalable 5-block pentominoes), music player, and community posts with image sharing.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
-
