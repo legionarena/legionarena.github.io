@@ -72,6 +72,13 @@
       .chat-panel { width: 100%; height: 250px; border-left: none; border-top: 1px solid var(--border); }
       #video-grid.count-3, #video-grid.count-4, #video-grid.count-5, #video-grid.count-6 { grid-template-columns: 1fr 1fr; }
     }
+  
+    #perms-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; text-align: left; }
+    .perms-modal-content { background: var(--panel); border: 1px solid var(--border); padding: 25px; border-radius: 12px; max-width: 400px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+    .perms-modal-content h2 { color: #f87171; font-size: 1.2rem; margin-bottom: 15px; }
+    .perms-modal-content p { color: #cbd5e1; font-size: 0.9rem; margin-bottom: 10px; line-height: 1.5; }
+    .perms-modal-content ul { color: #cbd5e1; font-size: 0.9rem; margin-bottom: 20px; padding-left: 20px; }
+    .perms-modal-content li { margin-bottom: 5px; }
   </style>
 </head>
 <body>
@@ -94,6 +101,7 @@
             <span id="perm-mic" style="color: #94a3b8;">Checking...</span>
           </div>
         </div>
+        <button id="btn-fix-perms" class="btn" style="margin-top: 12px; margin-bottom: 0; padding: 8px; font-size: 0.85rem; background: #3b82f6;">Request / Fix Permissions</button>
       </div>
       <div id="error-msg"></div>
 
@@ -143,6 +151,20 @@
           <button type="submit" class="btn" id="btn-send-chat" disabled>Send</button>
         </form>
       </div>
+    </div>
+  </div>
+
+
+  <div id="perms-modal">
+    <div class="perms-modal-content">
+      <h2>Permissions Denied</h2>
+      <p>Your browser is blocking camera or microphone access. To fix this:</p>
+      <ul>
+        <li>Click the <strong>padlock icon (🔒)</strong> or <strong>tune icon (🚥)</strong> on the left side of your browser's address bar.</li>
+        <li>Find <strong>Camera</strong> and <strong>Microphone</strong> and change them to <strong>Allow</strong>.</li>
+        <li>Refresh the page.</li>
+      </ul>
+      <button class="btn" id="btn-close-perms-modal" style="margin-bottom: 0;">Got it</button>
     </div>
   </div>
 
@@ -233,6 +255,30 @@
       checkPerm('microphone', elMic);
     }
     checkPermissions();
+
+    
+    const btnFixPerms = document.getElementById('btn-fix-perms');
+    const permsModal = document.getElementById('perms-modal');
+    const btnClosePermsModal = document.getElementById('btn-close-perms-modal');
+
+    btnClosePermsModal.addEventListener('click', () => {
+      permsModal.style.display = 'none';
+    });
+
+    btnFixPerms.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        stream.getTracks().forEach(track => track.stop());
+        checkPermissions();
+      } catch (err) {
+        if (err.name === 'NotAllowedError') {
+          permsModal.style.display = 'flex';
+        } else {
+          showError('Cannot access media devices: ' + err.message);
+        }
+        checkPermissions();
+      }
+    });
 
     // Init UI Listeners
     inputRoomId.addEventListener('input', () => {
