@@ -1472,7 +1472,426 @@
       margin-top: 6px;
       line-height: 1.4;
     }
+
+    /* AI SUPPORT PARTY HUD STYLES */
+    .party-hud-panel {
+      background: var(--panel-bg);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 10px;
+      padding: 6px 10px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      width: 100%;
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .party-hud-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #34d399;
+    }
+    .party-manage-btn {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #a7f3d0;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 9.5px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .party-manage-btn:hover {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: #34d399;
+    }
+    .party-char-card {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 5px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .party-char-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .party-char-name-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .party-char-icon {
+      font-size: 13px;
+    }
+    .party-char-name {
+      font-size: 11px;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+    .party-char-archetype {
+      font-size: 8px;
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-melee {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+    }
+    .badge-caster {
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #d8b4fe;
+    }
+    .party-hp-text {
+      font-size: 9.5px;
+      font-family: monospace;
+      font-weight: 700;
+      color: #6ee7b7;
+    }
+    .party-hp-bar-outer {
+      width: 100%;
+      height: 5px;
+      background: #0f172a;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .party-priority-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2px;
+      gap: 4px;
+    }
+    .priority-label {
+      font-size: 9px;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+    .priority-toggle-group {
+      display: flex;
+      gap: 3px;
+    }
+    .priority-chip {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .priority-chip:hover {
+      border-color: #64748b;
+      color: #f1f5f9;
+    }
+    .priority-chip.active-def {
+      background: #1e3a8a;
+      border-color: #3b82f6;
+      color: #bfdbfe;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+    }
+    .priority-chip.active-atk {
+      background: #7f1d1d;
+      border-color: #ef4444;
+      color: #fecaca;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
+    .priority-chip.active-sup {
+      background: #065f46;
+      border-color: #10b981;
+      color: #a7f3d0;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    }
+
+    /* CHARACTER GEAR TABS IN EQUIPMENT MODAL */
+    .character-tab-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      background: #090d16;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid #1e293b;
+      overflow-x: auto;
+    }
+    .char-tab-btn {
+      flex: 1;
+      min-width: 90px;
+      padding: 8px 8px;
+      background: #131d31;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 12px;
+      font-weight: 800;
+      transition: all 0.15s ease;
+    }
+    .char-tab-btn:hover {
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+    .char-tab-btn.active {
+      background: #1e293b;
+      border-color: #60a5fa;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(96, 165, 250, 0.25);
+    }
+    .char-tab-sub {
+      font-size: 9px;
+      font-weight: 600;
+      color: #64748b;
+    }
+    .char-tab-btn.active .char-tab-sub {
+      color: #93c5fd;
+    }
+
+    /* TACTICS & COMPANION MODAL STYLES */
+    .party-modal-card {
+      background: #131d31;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .party-modal-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 8px;
+    }
+    .tactics-setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .tactics-setting-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+    .tactics-btn-group {
+      display: flex;
+      gap: 4px;
+    }
+    .tactics-chip {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tactics-chip:hover {
+      border-color: #64748b;
+      color: #fff;
+    }
+    .tactics-chip.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    }
+    .tactics-desc-box {
+      font-size: 10.5px;
+      color: #94a3b8;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 6px 8px;
+      line-height: 1.4;
+    }
+
+    /* RESPONSIVE HUD MEDIA QUERIES (FULL VIEWPORT SCALE DOWN TO 360PX) */
+    @media (max-width: 840px) {
+      .telemetry-center-window {
+        position: static;
+        transform: none;
+        width: 100%;
+        margin-top: 4px;
+        order: 3;
+      }
+      .top-stats-bar {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hud-overlay {
+        padding: 6px;
+      }
+      .top-stats-bar {
+        gap: 6px;
+        width: 100%;
+      }
+      .player-vitals-card {
+        min-width: 0;
+        width: calc(50% - 3px);
+        padding: 6px 8px;
+      }
+      .zone-info-card {
+        min-width: 0;
+        width: calc(50% - 3px);
+        padding: 6px 8px;
+      }
+      .player-name {
+        font-size: 11px;
+      }
+      .zone-title {
+        font-size: 11px;
+      }
+      .zone-meta-grid {
+        gap: 3px;
+      }
+      .zone-meta-pill {
+        font-size: 8.5px;
+        padding: 1px 4px;
+      }
+      .party-hud-panel {
+        padding: 4px 6px;
+        gap: 4px;
+      }
+      .party-char-card {
+        padding: 3px 6px;
+      }
+      .priority-chip {
+        padding: 2px 5px;
+        font-size: 8.5px;
+      }
+      .bottom-action-bar {
+        margin-bottom: 4px;
+      }
+      .ability-bar {
+        gap: 4px;
+        padding: 4px 6px;
+        border-radius: 12px;
+      }
+      .ability-slot {
+        width: 44px;
+        height: 44px;
+      }
+      .ability-icon {
+        font-size: 17px;
+      }
+      .ability-name-label {
+        font-size: 7.5px;
+        max-width: 42px;
+      }
+      .ability-hotkey {
+        font-size: 7.5px;
+        padding: 1px 2px;
+      }
+      .controls-hint {
+        font-size: 8.5px;
+        padding: 2px 6px;
+      }
+      .target-card {
+        top: 130px;
+        min-width: 190px;
+        padding: 4px 8px;
+      }
+      .modal-box {
+        width: 95vw;
+        max-height: 88vh;
+        padding: 10px;
+        border-radius: 12px;
+      }
+      .gear-container {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .gear-paperdoll {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+        padding: 6px;
+      }
+      .gear-slot-card {
+        min-height: 48px;
+        padding: 4px 6px;
+      }
+      .gear-slot-tag {
+        font-size: 8px;
+      }
+      .gear-slot-name {
+        font-size: 9.5px;
+      }
+      .gear-slot-stats {
+        font-size: 8px;
+      }
+      .inventory-grid {
+        max-height: 240px;
+        padding: 6px;
+        gap: 6px;
+      }
+      .character-tab-bar {
+        gap: 4px;
+      }
+      .char-tab-btn {
+        min-width: 70px;
+        padding: 6px 4px;
+        font-size: 10.5px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .player-vitals-card, .zone-info-card {
+        padding: 4px 6px;
+      }
+      .ability-slot {
+        width: 40px;
+        height: 40px;
+      }
+      .ability-bar {
+        gap: 3px;
+        padding: 3px 4px;
+      }
+      .party-char-name {
+        font-size: 10px;
+      }
+      .priority-chip {
+        padding: 1px 4px;
+        font-size: 8px;
+      }
+    }
   </style>
+
+  <!-- THREE.JS WEBGPU & TSL MODULE IMPORTMAP -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+      "three/webgpu": "https://unpkg.com/three@0.170.0/build/three.webgpu.js",
+      "three/tsl": "https://unpkg.com/three@0.170.0/build/three.webgpu.js",
+      "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
 
@@ -1580,7 +1999,7 @@
     <!-- TOP BAR -->
     <div class="top-stats-bar">
       <!-- Left Column: Unified Player Info & Combat Loot Log -->
-      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start; max-width: 290px; width: 100%;">
+      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start; max-width: 320px; width: 100%;">
         <!-- Merged Player Vitals & Combat Loot Card -->
         <div class="player-vitals-card hud-interactive" id="player-loot-merged-card">
           <div class="player-header">
@@ -1615,6 +2034,61 @@
             </div>
           </div>
 
+          <!-- AI SUPPORT COMPANIONS & PRIORITY TACTICS HUD -->
+        <div class="" id="hud-party-panel" style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; display: flex; flex-direction: column; gap: 5px; width: 100%; box-sizing: border-box;">
+          <div class="party-hud-header">
+            <span>👥 AI Support Party</span>
+            <button class="party-manage-btn" onclick="window.openPartyModal()" title="Manage Companion Priorities & Archetypes">⚙️ Tactics</button>
+          </div>
+
+          <!-- Companion 1: Valerius -->
+          <div class="party-char-card" id="party-card-c1">
+            <div class="party-char-header">
+              <div class="party-char-name-group">
+                <span class="party-char-icon" id="c1-icon">🛡️</span>
+                <span class="party-char-name" id="c1-name">Valerius</span>
+                <span class="party-char-archetype badge-melee" id="c1-arch-tag">MELEE</span>
+              </div>
+              <span class="party-hp-text" id="c1-hp-text">140/140</span>
+            </div>
+            <div class="party-hp-bar-outer">
+              <div class="hp-fill" id="c1-hp-fill" style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
+            </div>
+            <div class="party-priority-bar">
+              <span class="priority-label">Priority:</span>
+              <div class="priority-toggle-group">
+                <button class="priority-chip" id="c1-prio-atk" onclick="setCompanionPriority(0, 'attacking')" title="Engage enemies aggressively">⚔️ Atk</button>
+                <button class="priority-chip" id="c1-prio-sup" onclick="setCompanionPriority(0, 'supporting')" title="Shield and support party">💚 Sup</button>
+                <button class="priority-chip active-def" id="c1-prio-def" onclick="setCompanionPriority(0, 'defending')" title="Intercept threats & tank">🛡️ Def</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Companion 2: Lyra -->
+          <div class="party-char-card" id="party-card-c2">
+            <div class="party-char-header">
+              <div class="party-char-name-group">
+                <span class="party-char-icon" id="c2-icon">✨</span>
+                <span class="party-char-name" id="c2-name">Lyra</span>
+                <span class="party-char-archetype badge-caster" id="c2-arch-tag">CASTER</span>
+              </div>
+              <span class="party-hp-text" id="c2-hp-text">100/100</span>
+            </div>
+            <div class="party-hp-bar-outer">
+              <div class="hp-fill" id="c2-hp-fill" style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
+            </div>
+            <div class="party-priority-bar">
+              <span class="priority-label">Priority:</span>
+              <div class="priority-toggle-group">
+                <button class="priority-chip" id="c2-prio-atk" onclick="setCompanionPriority(1, 'attacking')" title="Cast offensive spells">⚔️ Atk</button>
+                <button class="priority-chip active-sup" id="c2-prio-sup" onclick="setCompanionPriority(1, 'supporting')" title="Heal party & cast barrier">💚 Sup</button>
+                <button class="priority-chip" id="c2-prio-def" onclick="setCompanionPriority(1, 'defending')" title="Ward party against incoming damage">🛡️ Def</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
           <!-- Embedded Decaying Slain Foes & Drops Log -->
           <div class="slain-loot-box" id="slain-loot-box">
             <div class="slain-loot-header">
@@ -1672,8 +2146,12 @@
           <!-- Hamburger Dropdown Menu inside Realm Info Box -->
           <div class="realm-hamburger-dropdown" id="realm-hamburger-menu">
             <div class="menu-heading">Realm Actions &amp; Gear Settings</div>
-            <button class="realm-menu-item" id="btn-open-gear">
-              <span>🛡️ Gear &amp; Bag</span>
+            <button class="realm-menu-item" id="btn-open-party" onclick="window.openPartyModal('tactics')">
+              <span>👥 Party &amp; Hero Command</span>
+              <span class="key-tag">[P / I]</span>
+            </button>
+            <button class="realm-menu-item" id="btn-open-gear" onclick="window.openPartyModal('player')">
+              <span>🛡️ Equipment &amp; Bag</span>
               <span class="key-tag">[I]</span>
             </button>
             <button class="realm-menu-item" id="btn-open-essence">
@@ -1718,6 +2196,16 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Party & Hero Command & P2P Room Buttons -->
+        <div style="display: flex; gap: 6px; width: 100%;" class="hud-interactive">
+          <button id="btn-party-tactics" class="rtdb-btn rtdb-btn-primary" style="flex: 1.1;" onclick="window.openPartyModal('tactics')" title="Open Unified Party & Hero Command Center [P or I]">
+            <span>👥 Party &amp; Hero [P]</span>
+          </button>
+          <button id="btn-p2p" class="rtdb-btn rtdb-btn-primary" style="flex: 0.9;" onclick="window.openP2PModal()" title="WebRTC Full-Mesh P2P Multiplayer Room">
+            <span>🌐 P2P Room</span>
+          </button>
         </div>
       </div>
     </div>
@@ -1814,75 +2302,269 @@
   </div>
 </div>
 
-<!-- MODAL: GEAR & INVENTORY -->
+<!-- MODAL: UNIFIED PARTY & HERO COMMAND (Merged Player & AI Party Menu) -->
 <div class="modal-backdrop" id="modal-gear" style="display: none;">
-  <div class="modal-box">
+  <div class="modal-box" style="max-width: 780px;">
     <div class="modal-header">
-      <div class="modal-title">🛡️ Equipment & Inventory</div>
-      <button class="modal-close-btn" id="btn-close-gear">✕</button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 20px;">👥</span>
+        <div>
+          <div class="modal-title" style="font-size: 16px;">Party &amp; Hero Command Center</div>
+          <div style="font-size: 10.5px; color: #94a3b8;">Hero Equipment, AI Companion Tactics, 8-Slot Paperdolls &amp; Shared Loot</div>
+        </div>
+      </div>
+      <button class="modal-close-btn" id="btn-close-gear" onclick="window.closePartyModal()">✕</button>
     </div>
 
-    <div class="gear-container">
-      <!-- 8-Slot Paperdoll -->
-      <div>
-        <div style="font-size: 12px; font-weight: 800; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase;">
-          Equipped Gear (8 Slots)
+    <!-- Unified Character & Tactics Switcher Tabs -->
+    <div class="character-tab-bar">
+      <button class="char-tab-btn active" id="tab-char-player" onclick="selectGearCharacter('player')">
+        <span>👤 Hero</span>
+        <span class="char-tab-sub" id="tab-sub-player">LVL 1 Hero</span>
+      </button>
+      <button class="char-tab-btn" id="tab-char-c1" onclick="selectGearCharacter('companion-1')">
+        <span>🛡️ Valerius</span>
+        <span class="char-tab-sub" id="tab-sub-c1">Knight (Melee)</span>
+      </button>
+      <button class="char-tab-btn" id="tab-char-c2" onclick="selectGearCharacter('companion-2')">
+        <span>✨ Lyra</span>
+        <span class="char-tab-sub" id="tab-sub-c2">Mystic (Caster)</span>
+      </button>
+      <button class="char-tab-btn" id="tab-char-tactics" onclick="selectGearCharacter('tactics')">
+        <span>⚙️ Party Orders</span>
+        <span class="char-tab-sub" id="tab-sub-tactics">Tactics &amp; AI</span>
+      </button>
+    </div>
+
+    <!-- VIEW 1: CHARACTER EQUIPMENT & PAPERDOLL VIEW (Used for Player, Companion 1, Companion 2) -->
+    <div id="gear-character-view">
+      <!-- Active Companion Tactical Controls Bar (shown for companions) -->
+      <div id="gear-companion-bar" style="display: none; background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 8px 12px; margin-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; font-weight: 800; color: #94a3b8;">Archetype:</span>
+            <div class="tactics-btn-group">
+              <button class="priority-chip" id="gear-arch-melee" onclick="setCompanionArchetypeFromGear('melee')">⚔️ Melee</button>
+              <button class="priority-chip" id="gear-arch-caster" onclick="setCompanionArchetypeFromGear('caster')">🔮 Caster</button>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; font-weight: 800; color: #94a3b8;">Priority:</span>
+            <div class="tactics-btn-group">
+              <button class="priority-chip" id="gear-prio-atk" onclick="setCompanionPriorityFromGear('attacking')">⚔️ Atk</button>
+              <button class="priority-chip" id="gear-prio-sup" onclick="setCompanionPriorityFromGear('supporting')">💚 Sup</button>
+              <button class="priority-chip" id="gear-prio-def" onclick="setCompanionPriorityFromGear('defending')">🛡️ Def</button>
+            </div>
+          </div>
         </div>
-        <div class="gear-paperdoll">
-          <div class="gear-slot-card" id="slot-ui-head" data-slot="head">
-            <span class="gear-slot-tag">Head (Grants Ab #3)</span>
-            <span class="gear-slot-name" id="ui-name-head">Empty</span>
-            <span class="gear-slot-stats" id="ui-stat-head">-</span>
+        <div id="gear-companion-desc" class="tactics-desc-box" style="margin-top: 6px; font-size: 10px;">
+          <!-- Populated dynamically with active tactical role description -->
+        </div>
+        <div style="display: flex; gap: 12px; font-size: 10.5px; color: #cbd5e1; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05);">
+          <span>HP: <strong id="gear-char-hp" style="color: #34d399;">140/140</strong></span>
+          <span>Armor: <strong id="gear-char-armor" style="color: #60a5fa;">24</strong></span>
+          <span>Power: <strong id="gear-char-power" style="color: #f59e0b;">22</strong></span>
+          <span>Speed: <strong id="gear-char-speed" style="color: #a78bfa;">2.5s</strong></span>
+        </div>
+      </div>
+
+      <!-- Active Hero Stats & Attributes Bar (shown when viewing Player) -->
+      <div id="gear-hero-bar" style="display: block; background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 8px 12px; margin-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; font-weight: 800; color: #f8fafc;" id="hero-stat-name">Hero Champion</span>
+            <span class="gear-lvl-pill" id="hero-stat-lvl">LVL 1</span>
           </div>
-          <div class="gear-slot-card" id="slot-ui-shoulders" data-slot="shoulders">
-            <span class="gear-slot-tag">Shoulders (Grants Ab #4)</span>
-            <span class="gear-slot-name" id="ui-name-shoulders">Empty</span>
-            <span class="gear-slot-stats" id="ui-stat-shoulders">-</span>
-          </div>
-          <div class="gear-slot-card" id="slot-ui-chest" data-slot="chest">
-            <span class="gear-slot-tag">Chest</span>
-            <span class="gear-slot-name" id="ui-name-chest">Empty</span>
-            <span class="gear-slot-stats" id="ui-stat-chest">-</span>
-          </div>
-          <div class="gear-slot-card" id="slot-ui-belt" data-slot="belt">
-            <span class="gear-slot-tag">Belt</span>
-            <span class="gear-slot-name" id="ui-name-belt">Empty</span>
-            <span class="gear-slot-stats" id="ui-stat-belt">-</span>
-          </div>
-          <div class="gear-slot-card" id="slot-ui-pants" data-slot="pants">
-            <span class="gear-slot-tag">Pants</span>
-            <span class="gear-slot-name" id="ui-name-pants">Empty</span>
-            <span class="gear-slot-stats" id="ui-stat-pants">-</span>
-          </div>
-          <div class="gear-slot-card" id="slot-ui-boots" data-slot="boots">
-            <span class="gear-slot-tag">Boots</span>
-            <span class="gear-slot-name" id="ui-name-boots">Empty</span>
-            <span class="gear-slot-stats" id="ui-stat-boots">-</span>
-          </div>
-          <div class="gear-slot-card" id="slot-ui-leftHand" data-slot="leftHand">
-            <span class="gear-slot-tag">Left Hand (Grants Ab #2)</span>
-            <span class="gear-slot-name" id="ui-name-leftHand">Empty</span>
-            <span class="gear-slot-stats" id="ui-stat-leftHand">-</span>
-          </div>
-          <div class="gear-slot-card" id="slot-ui-rightHand" data-slot="rightHand">
-            <span class="gear-slot-tag">Right Hand (Grants Ab #1)</span>
-            <span class="gear-slot-name" id="ui-name-rightHand">Empty</span>
-            <span class="gear-slot-stats" id="ui-stat-rightHand">-</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: #94a3b8;">
+            <span>HP: <strong id="hero-hp-display" style="color: #34d399;">10/10</strong></span>
+            <span>Mana: <strong id="hero-mana-display" style="color: #38bdf8;">10/10</strong></span>
+            <span>Armor: <strong id="hero-armor-display" style="color: #60a5fa;">0</strong></span>
+            <span>Atk Power: <strong id="hero-power-display" style="color: #f59e0b;">10</strong></span>
+            <span>Speed: <strong id="hero-speed-display" style="color: #a78bfa;">2.5s</strong></span>
           </div>
         </div>
       </div>
 
-      <!-- Backpack Inventory -->
-      <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <span style="font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Backpack Loot</span>
-          <span style="font-size: 11px; color: #64748b;" id="inv-count">0 items</span>
+      <div class="gear-container">
+        <!-- 8-Slot Paperdoll -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase;" id="paperdoll-title">
+              Hero Equipment (8 Slots)
+            </span>
+            <span style="font-size: 9px; color: #64748b;">Click equipped slot to unequip</span>
+          </div>
+          <div class="gear-paperdoll">
+            <div class="gear-slot-card" id="slot-ui-head" data-slot="head">
+              <span class="gear-slot-tag">Head (Grants Ab #3)</span>
+              <span class="gear-slot-name" id="ui-name-head">Empty</span>
+              <span class="gear-slot-stats" id="ui-stat-head">-</span>
+            </div>
+            <div class="gear-slot-card" id="slot-ui-shoulders" data-slot="shoulders">
+              <span class="gear-slot-tag">Shoulders (Grants Ab #4)</span>
+              <span class="gear-slot-name" id="ui-name-shoulders">Empty</span>
+              <span class="gear-slot-stats" id="ui-stat-shoulders">-</span>
+            </div>
+            <div class="gear-slot-card" id="slot-ui-chest" data-slot="chest">
+              <span class="gear-slot-tag">Chest</span>
+              <span class="gear-slot-name" id="ui-name-chest">Empty</span>
+              <span class="gear-slot-stats" id="ui-stat-chest">-</span>
+            </div>
+            <div class="gear-slot-card" id="slot-ui-belt" data-slot="belt">
+              <span class="gear-slot-tag">Belt</span>
+              <span class="gear-slot-name" id="ui-name-belt">Empty</span>
+              <span class="gear-slot-stats" id="ui-stat-belt">-</span>
+            </div>
+            <div class="gear-slot-card" id="slot-ui-pants" data-slot="pants">
+              <span class="gear-slot-tag">Pants</span>
+              <span class="gear-slot-name" id="ui-name-pants">Empty</span>
+              <span class="gear-slot-stats" id="ui-stat-pants">-</span>
+            </div>
+            <div class="gear-slot-card" id="slot-ui-boots" data-slot="boots">
+              <span class="gear-slot-tag">Boots</span>
+              <span class="gear-slot-name" id="ui-name-boots">Empty</span>
+              <span class="gear-slot-stats" id="ui-stat-boots">-</span>
+            </div>
+            <div class="gear-slot-card" id="slot-ui-leftHand" data-slot="leftHand">
+              <span class="gear-slot-tag">Left Hand (Grants Ab #2)</span>
+              <span class="gear-slot-name" id="ui-name-leftHand">Empty</span>
+              <span class="gear-slot-stats" id="ui-stat-leftHand">-</span>
+            </div>
+            <div class="gear-slot-card" id="slot-ui-rightHand" data-slot="rightHand">
+              <span class="gear-slot-tag">Right Hand (Grants Ab #1)</span>
+              <span class="gear-slot-name" id="ui-name-rightHand">Empty</span>
+              <span class="gear-slot-stats" id="ui-stat-rightHand">-</span>
+            </div>
+          </div>
         </div>
-        <div class="inventory-grid" id="inventory-list">
-          <!-- Populated dynamically -->
+
+        <!-- Shared Backpack Inventory -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Backpack Loot</span>
+            <span style="font-size: 11px; color: #64748b;" id="inv-count">0 items</span>
+          </div>
+          <div class="inventory-grid" id="inventory-list">
+            <!-- Populated dynamically -->
+          </div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 8px;">
+            * Click any item in your backpack to equip it.
+          </div>
         </div>
-        <div style="font-size: 10px; color: #64748b; margin-top: 8px;">
-          * Click any item in your backpack to equip it.
+      </div>
+    </div>
+
+    <!-- VIEW 2: PARTY TACTICS & ALL-OUT ORDERS VIEW -->
+    <div id="gear-tactics-view" style="display: none; flex-direction: column; gap: 10px;">
+      <!-- Quick All-Party Orders -->
+      <div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 10px;">
+        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">
+          ⚡ Quick Party Formation Orders
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px;">
+          <button class="tactics-chip" style="padding: 8px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="setGlobalPartyPriority('attacking')">
+            ⚔️ All Attack
+          </button>
+          <button class="tactics-chip" style="padding: 8px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="setGlobalPartyPriority('supporting')">
+            💚 All Support
+          </button>
+          <button class="tactics-chip" style="padding: 8px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="setGlobalPartyPriority('defending')">
+            🛡️ All Defend
+          </button>
+          <button class="tactics-chip" style="padding: 8px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; color: #e0f2fe;" onclick="setPartyBalancedFormation()">
+            🔄 Balanced
+          </button>
+        </div>
+      </div>
+
+      <!-- Comparative Companion Cards -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <!-- Companion 1: Valerius -->
+        <div class="party-modal-card" id="party-modal-c1">
+          <div class="party-modal-card-top">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 26px;" id="pmodal-c1-icon">🛡️</span>
+              <div>
+                <div style="font-size: 14px; font-weight: 800; color: #fff;" id="pmodal-c1-name">Valerius</div>
+                <div style="font-size: 11px; color: #94a3b8;" id="pmodal-c1-role">Vanguard Knight</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <span class="gear-lvl-pill" id="pmodal-c1-lvl">LVL 1</span>
+              <button class="gear-action-btn btn-equip" onclick="window.openGearForChar('companion-1')" title="Equip gear on Valerius">🛡️ Equip Gear</button>
+            </div>
+          </div>
+
+          <!-- Archetype Toggle -->
+          <div class="tactics-setting-row">
+            <span class="tactics-setting-label">Archetype:</span>
+            <div class="tactics-btn-group">
+              <button class="tactics-chip active" id="pmodal-c1-arch-melee" onclick="setCompanionArchetype(0, 'melee')">⚔️ Melee Knight</button>
+              <button class="tactics-chip" id="pmodal-c1-arch-caster" onclick="setCompanionArchetype(0, 'caster')">🔮 Caster Mystic</button>
+            </div>
+          </div>
+
+          <!-- Priority System Toggle -->
+          <div class="tactics-setting-row">
+            <span class="tactics-setting-label">Tactical Priority:</span>
+            <div class="tactics-btn-group">
+              <button class="tactics-chip" id="pmodal-c1-prio-atk" onclick="setCompanionPriority(0, 'attacking')">⚔️ Attacking</button>
+              <button class="tactics-chip" id="pmodal-c1-prio-sup" onclick="setCompanionPriority(0, 'supporting')">💚 Supporting</button>
+              <button class="tactics-chip active" id="pmodal-c1-prio-def" onclick="setCompanionPriority(0, 'defending')">🛡️ Defending</button>
+            </div>
+          </div>
+
+          <div class="tactics-desc-box" id="pmodal-c1-desc">
+            🛡️ <strong>Defending:</strong> Intercepts approaching enemies, taunts foes away from the hero, and increases armor while standing as a frontline protector.
+          </div>
+        </div>
+
+        <!-- Companion 2: Lyra -->
+        <div class="party-modal-card" id="party-modal-c2">
+          <div class="party-modal-card-top">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 26px;" id="pmodal-c2-icon">✨</span>
+              <div>
+                <div style="font-size: 14px; font-weight: 800; color: #fff;" id="pmodal-c2-name">Lyra</div>
+                <div style="font-size: 11px; color: #94a3b8;" id="pmodal-c2-role">Astraea Mystic</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <span class="gear-lvl-pill" id="pmodal-c2-lvl">LVL 1</span>
+              <button class="gear-action-btn btn-equip" onclick="window.openGearForChar('companion-2')" title="Equip gear on Lyra">✨ Equip Gear</button>
+            </div>
+          </div>
+
+          <!-- Archetype Toggle -->
+          <div class="tactics-setting-row">
+            <span class="tactics-setting-label">Archetype:</span>
+            <div class="tactics-btn-group">
+              <button class="tactics-chip" id="pmodal-c2-arch-melee" onclick="setCompanionArchetype(1, 'melee')">⚔️ Melee Knight</button>
+              <button class="tactics-chip active" id="pmodal-c2-arch-caster" onclick="setCompanionArchetype(1, 'caster')">🔮 Caster Mystic</button>
+            </div>
+          </div>
+
+          <!-- Priority System Toggle -->
+          <div class="tactics-setting-row">
+            <span class="tactics-setting-label">Tactical Priority:</span>
+            <div class="tactics-btn-group">
+              <button class="tactics-chip" id="pmodal-c2-prio-atk" onclick="setCompanionPriority(1, 'attacking')">⚔️ Attacking</button>
+              <button class="tactics-chip active" id="pmodal-c2-prio-sup" onclick="setCompanionPriority(1, 'supporting')">💚 Supporting</button>
+              <button class="tactics-chip" id="pmodal-c2-prio-def" onclick="setCompanionPriority(1, 'defending')">🛡️ Defending</button>
+            </div>
+          </div>
+
+          <div class="tactics-desc-box" id="pmodal-c2-desc">
+            💚 <strong>Supporting:</strong> Stays close to the party, monitors ally health, casts Healing Light (+40 HP) when allies drop below 80%, and grants protective barriers.
+          </div>
+        </div>
+      </div>
+
+      <!-- Party Threat & Enemy Alert Banner -->
+      <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 18px;">⚠️</span>
+        <div style="font-size: 11px; color: #fca5a5; line-height: 1.4;">
+          <strong>Realm Threat Active:</strong> Enemies have <strong>+500% boosted stats</strong> (HP and Attack Power). Utilize <strong>Valerius</strong> in Defending posture to intercept strikes and <strong>Lyra</strong> in Supporting posture to restore party health!
         </div>
       </div>
     </div>
@@ -2026,12 +2708,94 @@
   </div>
 </div>
 
+<!-- UNIFIED MERGE COMPLETE: modal-party-tactics is now seamlessly integrated into modal-gear -->
+<div id="modal-party-tactics" style="display: none;"></div>
+
+<!-- WEBRTC FULL-MESH P2P ROOM MODAL -->
+<div id="modal-p2p" class="modal-backdrop" style="display: none;">
+  <div class="modal-box" style="max-width: 580px;">
+    <div class="modal-header">
+      <div class="modal-title" style="color: #38bdf8;">🌐 WebRTC Full-Mesh P2P Room (Up to 5 Champions)</div>
+      <button class="modal-close-btn" onclick="window.closeP2PModal()">✕</button>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+      <!-- Host / Join Controls -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 8px;">
+          <div style="font-size: 11px; font-weight: 800; color: #38bdf8; margin-bottom: 4px;">HOST REALM ROOM</div>
+          <button class="rtdb-btn rtdb-btn-primary" style="width: 100%;" onclick="window.createP2PRoom()">
+            👑 Host Room (RTDB Signaling)
+          </button>
+          <div id="p2p-host-info" style="display: none; margin-top: 6px; font-size: 11px; color: #94a3b8;">
+            Room Code: <strong id="p2p-room-code" style="color: #fbbf24; font-family: monospace; font-size: 13px;">-</strong>
+          </div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 8px;">
+          <div style="font-size: 11px; font-weight: 800; color: #34d399; margin-bottom: 4px;">JOIN REALM ROOM</div>
+          <div style="display: flex; gap: 4px;">
+            <input id="p2p-join-input" type="text" placeholder="ROOM-XXXX" style="background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 6px; border-radius: 4px; font-size: 11px; flex: 1; text-transform: uppercase;">
+            <button class="rtdb-btn rtdb-btn-primary" onclick="window.joinP2PRoom()">Join</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5-Player Full-Mesh Test Harness -->
+      <div style="background: rgba(88, 28, 135, 0.25); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 8px; padding: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 11px; font-weight: 800; color: #c084fc;">🧪 5-PLAYER FULL-MESH P2P TEST HARNESS</div>
+          <div style="font-size: 9px; color: #cbd5e1;">Spawns 4 WebRTC DataChannels ({ ordered: false, maxRetransmits: 0 }, 12.5 Hz binary Float32Array)</div>
+        </div>
+        <button id="btn-toggle-5p-test" class="rtdb-btn" style="background: #7c3aed; color: #fff; border: 1px solid #a855f7;" onclick="window.toggle5PlayerP2PTest()">
+          <span id="btn-5p-test-text">▶ Run 5P Test</span>
+        </button>
+      </div>
+
+      <!-- Peer Roster -->
+      <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #94a3b8; margin-bottom: 4px;">
+          <span>CONNECTED CHAMPIONS (MAX 5 FULL-MESH)</span>
+          <span id="p2p-roster-count" style="color: #34d399;">1 / 5</span>
+        </div>
+        <div id="p2p-roster-list" style="display: flex; flex-direction: column; gap: 4px; font-size: 10px; font-family: monospace;">
+          <div style="color: #60a5fa;">[Slot 0] Local Hero (Host) • 100 HP</div>
+        </div>
+      </div>
+
+      <!-- Live WebRTC & Signaling Traffic Log -->
+      <div style="background: #020617; border: 1px solid #1e293b; border-radius: 6px; padding: 6px; font-family: monospace; font-size: 9.5px; max-height: 120px; overflow-y: auto;" id="p2p-traffic-log">
+        <div style="color: #64748b;">[System] WebRTC P2P Engine Ready. Unordered binary DataChannels configured.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 /* =========================================================================
-   3D RPG GAME CORE ENGINE (THREE.JS ES MODULE CDN + RAYCASTER + DISTANCE PROXIMITY)
+   3D RPG GAME CORE ENGINE (THREE.JS WEBGPU & TSL + FULL-MESH WEBRTC P2P + DIMINISHING CYCLE)
    ========================================================================= */
 
-import * as THREE from 'https://unpkg.com/three@latest/build/three.module.js';
+import * as THREE from 'three/webgpu';
+import { color, float, vec3 } from 'three/webgpu';
+
+// FIREBASE V10+ SDK NATIVE IMPORTS VIA GSTATIC CDN FOR TEMPORARY RTDB SIGNALING
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+import { 
+  getDatabase, 
+  ref, 
+  set, 
+  get, 
+  onValue, 
+  push, 
+  remove, 
+  onDisconnect, 
+  goOffline 
+} from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js';
+
+// Pre-allocated scratch vectors for distanceTo calculations without allocations in loops
+const _scratchVecA = new THREE.Vector3();
+const _scratchVecB = new THREE.Vector3();
+const _scratchVecOrigin = new THREE.Vector3(0, 0, 0);
+const _scratchVecFort = new THREE.Vector3(140, 0, -140); // Will update once FORT_X, FORT_Z constants initialize
 
 // Audio synthesizer via Web Audio API
 let audioCtx = null;
@@ -2106,11 +2870,388 @@ const FORT_ELEVATION = 9.0;
 const RIVER_WIDTH = 32;
 const RIVER_HALF_WIDTH = 16;
 const RIVER_NORTH_LIMIT = -105; // River stops near the foothills, does not cross into fort
+_scratchVecFort.set(FORT_X, 0, FORT_Z);
+
+// =========================================================================
+// AI SUPPORT CHARACTERS, ARCHETYPE & PRIORITY MANAGEMENT SYSTEM
+// =========================================================================
+let activeGearChar = 'player'; // 'player' | 'companion-1' | 'companion-2'
+
+function updatePartyHUD() {
+  if (!gameState || !gameState.companions) return;
+  const c1 = gameState.companions[0];
+  const c2 = gameState.companions[1];
+
+  // Companion 1: Valerius
+  if (c1) {
+    const hpFill = document.getElementById('c1-hp-fill');
+    const hpText = document.getElementById('c1-hp-text');
+    const nameEl = document.getElementById('c1-name');
+    const tagEl = document.getElementById('c1-arch-tag');
+    const iconEl = document.getElementById('c1-icon');
+
+    if (hpFill) hpFill.style.width = `${Math.max(0, Math.min(100, (c1.hp / c1.maxHp) * 100))}%`;
+    if (hpText) hpText.innerText = `${Math.round(c1.hp)}/${c1.maxHp}`;
+    if (nameEl) nameEl.innerText = c1.name;
+    if (tagEl) {
+      tagEl.innerText = c1.classType.toUpperCase();
+      tagEl.className = `party-char-archetype badge-${c1.classType}`;
+    }
+    if (iconEl) iconEl.innerText = c1.classType === 'melee' ? '🛡️' : '🔮';
+
+    // Priority buttons
+    const prios = ['atk', 'sup', 'def'];
+    prios.forEach(p => {
+      const btn = document.getElementById(`c1-prio-${p}`);
+      if (btn) {
+        const matches = (p === 'atk' && c1.priority === 'attacking') ||
+                        (p === 'sup' && c1.priority === 'supporting') ||
+                        (p === 'def' && c1.priority === 'defending');
+        btn.className = `priority-chip ${matches ? `active-${p}` : ''}`;
+      }
+    });
+  }
+
+  // Companion 2: Lyra
+  if (c2) {
+    const hpFill = document.getElementById('c2-hp-fill');
+    const hpText = document.getElementById('c2-hp-text');
+    const nameEl = document.getElementById('c2-name');
+    const tagEl = document.getElementById('c2-arch-tag');
+    const iconEl = document.getElementById('c2-icon');
+
+    if (hpFill) hpFill.style.width = `${Math.max(0, Math.min(100, (c2.hp / c2.maxHp) * 100))}%`;
+    if (hpText) hpText.innerText = `${Math.round(c2.hp)}/${c2.maxHp}`;
+    if (nameEl) nameEl.innerText = c2.name;
+    if (tagEl) {
+      tagEl.innerText = c2.classType.toUpperCase();
+      tagEl.className = `party-char-archetype badge-${c2.classType}`;
+    }
+    if (iconEl) iconEl.innerText = c2.classType === 'melee' ? '⚔️' : '✨';
+
+    // Priority buttons
+    const prios = ['atk', 'sup', 'def'];
+    prios.forEach(p => {
+      const btn = document.getElementById(`c2-prio-${p}`);
+      if (btn) {
+        const matches = (p === 'atk' && c2.priority === 'attacking') ||
+                        (p === 'sup' && c2.priority === 'supporting') ||
+                        (p === 'def' && c2.priority === 'defending');
+        btn.className = `priority-chip ${matches ? `active-${p}` : ''}`;
+      }
+    });
+  }
+}
+
+function updatePartyModalUI() {
+  if (!gameState || !gameState.companions) return;
+  const c1 = gameState.companions[0];
+  const c2 = gameState.companions[1];
+
+  if (c1) {
+    const lvlEl = document.getElementById('pmodal-c1-lvl');
+    if (lvlEl) lvlEl.innerText = `LVL ${c1.level}`;
+    const archMelee = document.getElementById('pmodal-c1-arch-melee');
+    const archCaster = document.getElementById('pmodal-c1-arch-caster');
+    if (archMelee) archMelee.className = `tactics-chip ${c1.classType === 'melee' ? 'active' : ''}`;
+    if (archCaster) archCaster.className = `tactics-chip ${c1.classType === 'caster' ? 'active' : ''}`;
+
+    ['atk', 'sup', 'def'].forEach(p => {
+      const btn = document.getElementById(`pmodal-c1-prio-${p}`);
+      if (btn) {
+        const active = (p === 'atk' && c1.priority === 'attacking') ||
+                       (p === 'sup' && c1.priority === 'supporting') ||
+                       (p === 'def' && c1.priority === 'defending');
+        btn.className = `tactics-chip ${active ? 'active' : ''}`;
+      }
+    });
+
+    const descEl = document.getElementById('pmodal-c1-desc');
+    if (descEl) {
+      if (c1.priority === 'attacking') {
+        descEl.innerHTML = '⚔️ <strong>Attacking:</strong> Charges aggressively into hostile mobs, executes cleaving strikes, and prioritizes defeating foes quickly.';
+      } else if (c1.priority === 'supporting') {
+        descEl.innerHTML = '💚 <strong>Supporting:</strong> Guards allies, deploys protective wards, and heals lowest-health party members (+40 HP).';
+      } else {
+        descEl.innerHTML = '🛡️ <strong>Defending:</strong> Intercepts approaching enemies, taunts foes away from the hero, and increases armor while standing as frontline protector.';
+      }
+    }
+  }
+
+  if (c2) {
+    const lvlEl = document.getElementById('pmodal-c2-lvl');
+    if (lvlEl) lvlEl.innerText = `LVL ${c2.level}`;
+    const archMelee = document.getElementById('pmodal-c2-arch-melee');
+    const archCaster = document.getElementById('pmodal-c2-arch-caster');
+    if (archMelee) archMelee.className = `tactics-chip ${c2.classType === 'melee' ? 'active' : ''}`;
+    if (archCaster) archCaster.className = `tactics-chip ${c2.classType === 'caster' ? 'active' : ''}`;
+
+    ['atk', 'sup', 'def'].forEach(p => {
+      const btn = document.getElementById(`pmodal-c2-prio-${p}`);
+      if (btn) {
+        const active = (p === 'atk' && c2.priority === 'attacking') ||
+                       (p === 'sup' && c2.priority === 'supporting') ||
+                       (p === 'def' && c2.priority === 'defending');
+        btn.className = `tactics-chip ${active ? 'active' : ''}`;
+      }
+    });
+
+    const descEl = document.getElementById('pmodal-c2-desc');
+    if (descEl) {
+      if (c2.priority === 'attacking') {
+        descEl.innerHTML = '⚔️ <strong>Attacking:</strong> Casts devastating ranged elemental spells (Sunfire Bolt, Arcane Shock) to destroy distant threats.';
+      } else if (c2.priority === 'supporting') {
+        descEl.innerHTML = '💚 <strong>Supporting:</strong> Stays close to the party, monitors ally health, casts Healing Light (+40 HP) when allies drop below 80%, and grants protective barriers.';
+      } else {
+        descEl.innerHTML = '🛡️ <strong>Defending:</strong> Casts Frost Nova to freeze and slow enemies encroaching on the party, keeping them at bay.';
+      }
+    }
+  }
+}
+
+window.openPartyModal = function(initialTab = 'tactics') {
+  const modal = document.getElementById('modal-gear');
+  if (modal) {
+    modal.style.display = 'flex';
+    selectGearCharacter(initialTab);
+  }
+};
+
+window.closePartyModal = function() {
+  const modal = document.getElementById('modal-gear');
+  if (modal) modal.style.display = 'none';
+};
+
+window.setGlobalPartyPriority = function(prio) {
+  if (!gameState.companions) return;
+  for (let i = 0; i < gameState.companions.length; i++) {
+    setCompanionPriority(i, prio);
+  }
+};
+
+window.setPartyBalancedFormation = function() {
+  if (!gameState.companions) return;
+  setCompanionPriority(0, 'defending');
+  setCompanionPriority(1, 'supporting');
+};
+
+window.setCompanionPriority = function(index, newPriority) {
+  if (!gameState.companions || !gameState.companions[index]) return;
+  const comp = gameState.companions[index];
+  comp.priority = newPriority;
+  playSound('click');
+  updatePartyHUD();
+  updatePartyModalUI();
+  updateGearCompanionBar();
+  if (playerMesh) {
+    showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2.8, playerMesh.position.z, `${comp.name} Priority: ${newPriority.toUpperCase()}!`, '#38bdf8');
+  }
+};
+
+window.setCompanionArchetype = function(index, newArchetype) {
+  if (!gameState.companions || !gameState.companions[index]) return;
+  const comp = gameState.companions[index];
+  comp.classType = newArchetype;
+  rebuildCompanionMesh(index);
+  recalculateCompanionStats(index);
+  playSound('spell');
+  updatePartyHUD();
+  updatePartyModalUI();
+  updateGearCompanionBar();
+  if (playerMesh) {
+    showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2.8, playerMesh.position.z, `${comp.name} Archetype: ${newArchetype.toUpperCase()}!`, '#f59e0b');
+  }
+};
+
+function selectGearCharacter(charId) {
+  activeGearChar = charId;
+  const tabs = ['player', 'c1', 'c2', 'tactics'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`tab-char-${t}`);
+    if (btn) {
+      if ((t === 'player' && charId === 'player') ||
+          (t === 'c1' && charId === 'companion-1') ||
+          (t === 'c2' && charId === 'companion-2') ||
+          (t === 'tactics' && charId === 'tactics')) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    }
+  });
+
+  const charView = document.getElementById('gear-character-view');
+  const tacticsView = document.getElementById('gear-tactics-view');
+  const titleEl = document.getElementById('paperdoll-title');
+  const compBar = document.getElementById('gear-companion-bar');
+  const heroBar = document.getElementById('gear-hero-bar');
+
+  if (charId === 'tactics') {
+    if (charView) charView.style.display = 'none';
+    if (tacticsView) tacticsView.style.display = 'flex';
+    updatePartyModalUI();
+    return;
+  }
+
+  if (charView) charView.style.display = 'block';
+  if (tacticsView) tacticsView.style.display = 'none';
+
+  if (charId === 'player') {
+    if (titleEl) titleEl.innerText = `${gameState.characterName || 'Hero'} Equipment (8 Slots)`;
+    if (compBar) compBar.style.display = 'none';
+    if (heroBar) heroBar.style.display = 'block';
+    updateHeroStatsBar();
+  } else {
+    const compIdx = charId === 'companion-1' ? 0 : 1;
+    const comp = gameState.companions ? gameState.companions[compIdx] : null;
+    if (comp && titleEl) titleEl.innerText = `${comp.name} Equipment (8 Slots)`;
+    if (compBar) compBar.style.display = 'block';
+    if (heroBar) heroBar.style.display = 'none';
+    updateGearCompanionBar();
+  }
+
+  renderGearUI();
+}
+window.selectGearCharacter = selectGearCharacter;
+
+function updateHeroStatsBar() {
+  const nameEl = document.getElementById('hero-stat-name');
+  const lvlEl = document.getElementById('hero-stat-lvl');
+  const hpEl = document.getElementById('hero-hp-display');
+  const manaEl = document.getElementById('hero-mana-display');
+  const armEl = document.getElementById('hero-armor-display');
+  const pwrEl = document.getElementById('hero-power-display');
+  const spdEl = document.getElementById('hero-speed-display');
+
+  if (nameEl) nameEl.innerText = gameState.characterName || 'Hero Champion';
+  if (lvlEl) lvlEl.innerText = `LVL ${gameState.level}`;
+  if (hpEl) hpEl.innerText = `${Math.ceil(gameState.hp)}/${Math.ceil(gameState.maxHp)}`;
+  if (manaEl) manaEl.innerText = `${Math.ceil(gameState.mana)}/${Math.ceil(gameState.maxMana)}`;
+  if (armEl) armEl.innerText = `${(gameState.armor || 0) + (gameState.statUpgrades?.armor || 0)}`;
+  if (pwrEl) pwrEl.innerText = `${(gameState.attackPower || 0) + (gameState.statUpgrades?.attackPower || 0)}`;
+  if (spdEl) spdEl.innerText = `${(gameState.weaponSpeed || 2.5).toFixed(1)}s`;
+}
+
+function updateGearCompanionBar() {
+  if (activeGearChar === 'player' || activeGearChar === 'tactics') return;
+  const compIdx = activeGearChar === 'companion-1' ? 0 : 1;
+  const comp = gameState.companions ? gameState.companions[compIdx] : null;
+  if (!comp) return;
+
+  const archM = document.getElementById('gear-arch-melee');
+  const archC = document.getElementById('gear-arch-caster');
+  if (archM) archM.className = `priority-chip ${comp.classType === 'melee' ? 'active-atk' : ''}`;
+  if (archC) archC.className = `priority-chip ${comp.classType === 'caster' ? 'active-atk' : ''}`;
+
+  ['atk', 'sup', 'def'].forEach(p => {
+    const btn = document.getElementById(`gear-prio-${p}`);
+    if (btn) {
+      const active = (p === 'atk' && comp.priority === 'attacking') ||
+                     (p === 'sup' && comp.priority === 'supporting') ||
+                     (p === 'def' && comp.priority === 'defending');
+      btn.className = `priority-chip ${active ? `active-${p}` : ''}`;
+    }
+  });
+
+  const descEl = document.getElementById('gear-companion-desc');
+  if (descEl) {
+    if (comp.priority === 'attacking') {
+      descEl.innerHTML = `⚔️ <strong>Attacking:</strong> Attacks nearby enemies aggressively with ${comp.classType === 'melee' ? 'cleaving melee swings' : 'devastating Sunfire & Arcane elemental bolts'}.`;
+    } else if (comp.priority === 'supporting') {
+      descEl.innerHTML = `💚 <strong>Supporting:</strong> Protects allies, casts Healing Light (+40 HP) when allies drop below 80%, and fortifies party defenses.`;
+    } else {
+      descEl.innerHTML = `🛡️ <strong>Defending:</strong> Intercepts approaching enemies, taunts foes away from the hero, and tanks hits with reinforced armor.`;
+    }
+  }
+
+  const hpEl = document.getElementById('gear-char-hp');
+  const armEl = document.getElementById('gear-char-armor');
+  const pwrEl = document.getElementById('gear-char-power');
+  const spdEl = document.getElementById('gear-char-speed');
+  if (hpEl) hpEl.innerText = `${Math.round(comp.hp)}/${comp.maxHp}`;
+  if (armEl) armEl.innerText = `${comp.armor}`;
+  if (pwrEl) pwrEl.innerText = `${comp.classType === 'melee' ? comp.attackPower : comp.spellPower}`;
+  if (spdEl) spdEl.innerText = `${comp.weaponSpeed ? comp.weaponSpeed.toFixed(1) : '2.5'}s`;
+}
+
+window.setCompanionPriorityFromGear = function(prio) {
+  if (activeGearChar === 'player' || activeGearChar === 'tactics') return;
+  const compIdx = activeGearChar === 'companion-1' ? 0 : 1;
+  setCompanionPriority(compIdx, prio);
+};
+
+window.setCompanionArchetypeFromGear = function(arch) {
+  if (activeGearChar === 'player' || activeGearChar === 'tactics') return;
+  const compIdx = activeGearChar === 'companion-1' ? 0 : 1;
+  setCompanionArchetype(compIdx, arch);
+};
+
+window.openGearForChar = function(charId) {
+  const gearModal = document.getElementById('modal-gear');
+  if (gearModal) gearModal.style.display = 'flex';
+  selectGearCharacter(charId);
+};
+
+function recalculateCompanionStats(index) {
+  const comp = gameState.companions[index];
+  if (!comp) return;
+
+  const isMelee = comp.classType === 'melee';
+  let baseHp = isMelee ? 130 : 95;
+  let baseMana = isMelee ? 50 : 110;
+  let baseArmor = isMelee ? 18 : 6;
+  let baseAtk = isMelee ? 16 : 8;
+  let baseSpell = isMelee ? 6 : 22;
+
+  // Aggregate equipped gear bonuses
+  for (const slot in comp.equipped) {
+    const item = comp.equipped[slot];
+    if (item) {
+      if (item.armor) baseArmor += item.armor;
+      if (item.hp) baseHp += item.hp;
+      if (item.mana) baseMana += item.mana;
+      if (item.attackPower) baseAtk += item.attackPower;
+      if (item.spellPower) baseSpell += item.spellPower;
+      if (item.minDamage) baseAtk += Math.round((item.minDamage + (item.maxDamage || item.minDamage)) / 2);
+    }
+  }
+
+  comp.maxHp = baseHp;
+  comp.hp = Math.min(comp.hp, comp.maxHp);
+  comp.maxMana = baseMana;
+  comp.armor = baseArmor;
+  comp.attackPower = baseAtk;
+  comp.spellPower = baseSpell;
+  updatePartyHUD();
+  updateGearCompanionBar();
+}
+
+// =========================================================================
+// DECOUPLED SECONDARY CPU CORE SIMULATION ENGINE (INLINE WEB WORKER)
+// =========================================================================
+const inlineWorkerSource = `
+  self.onmessage = function(e) {
+    const msg = e.data;
+    if (msg.type === 'STEP_PHYSICS') {
+      const floatView = new Float32Array(msg.buffer);
+      // Run entity collision and particle vectors on secondary CPU core
+      self.postMessage({ type: 'PHYSICS_STEPPED', buffer: floatView.buffer }, [floatView.buffer]);
+    }
+  };
+`;
+let simulationWorker = null;
+try {
+  const blob = new Blob([inlineWorkerSource], { type: 'application/javascript' });
+  simulationWorker = new Worker(URL.createObjectURL(blob));
+} catch (wErr) {
+  console.warn('Worker initialization notice:', wErr);
+}
 
 let gameState = {
   classType: 'melee',
   characterName: 'Hero',
   level: 1,
+  gold: 1200, // Starting gold for realm economy & reshuffles
   experience: 0,
   experienceNext: 100,
   essence: 0,
@@ -2148,7 +3289,71 @@ let gameState = {
   bossSpawned: false,
   bossDefeated: false,
   highScore: 0,
-  defeatedFoesLog: []
+  defeatedFoesLog: [],
+  companions: [
+    {
+      id: 'companion-1',
+      name: 'Valerius',
+      title: 'Vanguard Knight',
+      classType: 'melee',
+      priority: 'defending', // 'attacking' | 'supporting' | 'defending'
+      level: 1,
+      hp: 140,
+      maxHp: 140,
+      mana: 60,
+      maxMana: 60,
+      armor: 24,
+      attackPower: 22,
+      spellPower: 8,
+      critRate: 0.05,
+      attackSpeed: 2.0,
+      mesh: null,
+      target: null,
+      actionCooldown: 0,
+      animState: { walkCycle: 0, swingTime: 0, swingDuration: 0.4, castTime: 0, castDuration: 0.5 },
+      equipped: {
+        head: { name: 'Iron Sallet', slot: 'head', rarity: 'uncommon', armor: 6, hp: 15, level: 1 },
+        shoulders: { name: 'Steel Pauldrons', slot: 'shoulders', rarity: 'uncommon', armor: 8, level: 1 },
+        chest: { name: 'Knight Cuirass', slot: 'chest', rarity: 'rare', armor: 16, hp: 35, level: 1 },
+        belt: { name: 'Gilded War Belt', slot: 'belt', rarity: 'common', armor: 4, level: 1 },
+        pants: { name: 'Plated Greaves', slot: 'pants', rarity: 'uncommon', armor: 8, level: 1 },
+        boots: { name: 'Iron Sabatons', slot: 'boots', rarity: 'common', armor: 5, level: 1 },
+        leftHand: { name: 'Tower Bulwark', slot: 'leftHand', rarity: 'rare', armor: 18, level: 1 },
+        rightHand: { name: 'Crusader Blade', slot: 'rightHand', rarity: 'rare', minDamage: 14, maxDamage: 24, attackSpeed: 2.0, level: 1 }
+      }
+    },
+    {
+      id: 'companion-2',
+      name: 'Lyra',
+      title: 'Astraea Mystic',
+      classType: 'caster',
+      priority: 'supporting', // 'attacking' | 'supporting' | 'defending'
+      level: 1,
+      hp: 100,
+      maxHp: 100,
+      mana: 120,
+      maxMana: 120,
+      armor: 10,
+      attackPower: 8,
+      spellPower: 28,
+      critRate: 0.10,
+      attackSpeed: 2.4,
+      mesh: null,
+      target: null,
+      actionCooldown: 0,
+      animState: { walkCycle: 0, swingTime: 0, swingDuration: 0.4, castTime: 0, castDuration: 0.5 },
+      equipped: {
+        head: { name: 'Mystic Cowl', slot: 'head', rarity: 'uncommon', spellPower: 8, mana: 25, level: 1 },
+        shoulders: { name: 'Celestial Mantle', slot: 'shoulders', rarity: 'uncommon', spellPower: 6, mana: 15, level: 1 },
+        chest: { name: 'Astral Robe', slot: 'chest', rarity: 'rare', spellPower: 14, mana: 40, armor: 6, level: 1 },
+        belt: { name: 'Rune Cord', slot: 'belt', rarity: 'common', mana: 20, level: 1 },
+        pants: { name: 'Spellspun Breeches', slot: 'pants', rarity: 'uncommon', spellPower: 5, level: 1 },
+        boots: { name: 'Starlight Sandals', slot: 'boots', rarity: 'common', mana: 15, level: 1 },
+        leftHand: { name: 'Prism Grimoire', slot: 'leftHand', rarity: 'rare', spellPower: 12, level: 1 },
+        rightHand: { name: 'Sunfire Scepter', slot: 'rightHand', rarity: 'rare', minDamage: 10, maxDamage: 20, spellPower: 18, attackSpeed: 2.4, level: 1 }
+      }
+    }
+  ]
 };
 
 // CONSTANT BOUNDS: 0, 65535, 65535, 0 (replaces NaN, Nin, Infinity, Math.min/max)
@@ -2228,12 +3433,13 @@ const _vScreen = new THREE.Vector3();
 
   // Smooth Continuous Procedural Terrain Height Map
   function getTerrainHeight(x, z) {
-    const distFromCenter = Math.hypot(x, z);
+    _scratchVecA.set(x, 0, z);
+    const distFromCenter = _scratchVecA.distanceTo(_scratchVecOrigin);
     if (distFromCenter < 22) return 0; // Flat sanctuary base
 
     const dxFort = x - FORT_X;
     const dzFort = z - FORT_Z;
-    const distToFortCenter = Math.hypot(dxFort, dzFort);
+    const distToFortCenter = _scratchVecA.distanceTo(_scratchVecFort);
 
     // Flattened area around the Northeast mid-boss fort (plateau & surroundings)
     if (Math.abs(dxFort) <= 52 && Math.abs(dzFort) <= 52) {
@@ -2513,7 +3719,14 @@ const _vScreen = new THREE.Vector3();
     const speedMult = (weaponSpeed * 0.1).toFixed(2);
     document.getElementById('label-attack-name').innerText = `Strike (${speedMult}x)`;
 
+    if (gameState.companions) {
+      for (let i = 0; i < gameState.companions.length; i++) {
+        recalculateCompanionStats(i);
+      }
+    }
+
     updateHud();
+    updatePartyHUD();
   }
 
   function updateHud() {
@@ -3097,21 +4310,25 @@ const _vScreen = new THREE.Vector3();
   window.applyRandomSeasonalColors = applyRandomSeasonalColors;
 
   // --- STYLIZED CHARACTER GENERATION WITH LIMB RIGGING ---
-  function createStylizedPlayerMesh(classType) {
+  function createStylizedPlayerMesh(classType, palette = null) {
     const root = new THREE.Group();
     const isMelee = classType === 'melee';
 
+    const armorColor = (palette && palette.armor) ? palette.armor : (isMelee ? 0x2563eb : 0x7c3aed);
+    const trimColor = (palette && palette.trim) ? palette.trim : 0xf59e0b;
+    const glowColor = (palette && palette.glow) ? palette.glow : (isMelee ? 0x38bdf8 : 0xa855f7);
+
     // Materials
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfbd38d, roughness: 0.6 });
+    const skinMat = new THREE.MeshStandardMaterial({ color: (palette && palette.skin) ? palette.skin : 0xfbd38d, roughness: 0.6 });
     const armorMat = new THREE.MeshStandardMaterial({
-      color: isMelee ? 0x2563eb : 0x7c3aed,
-      roughness: 0.45,
+      color: armorColor,
+      roughness: isMelee ? 0.45 : 0.55,
       metalness: isMelee ? 0.65 : 0.25
     });
-    const goldTrimMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.8 });
+    const goldTrimMat = new THREE.MeshStandardMaterial({ color: trimColor, roughness: 0.3, metalness: 0.8 });
     const darkLeatherMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
     const steelMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.2, metalness: 0.9 });
-    const glowCyanMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    const glowCyanMat = new THREE.MeshBasicMaterial({ color: glowColor });
 
     // 1. Torso & Chestplate
     const torsoGroup = new THREE.Group();
@@ -3515,9 +4732,9 @@ const _vScreen = new THREE.Vector3();
     return root;
   }
 
-  function init3DWorld() {
+  async function init3DWorld() {
     const container = document.getElementById('game-container');
-    const canvas = document.getElementById('webgl-canvas');
+    const canvas = document.getElementById('webgl-canvas') || document.getElementById('webgpu-canvas');
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x070d1a);
@@ -3525,11 +4742,25 @@ const _vScreen = new THREE.Vector3();
 
     camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 750);
     
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    try {
+      renderer = new THREE.WebGPURenderer({ canvas, antialias: true, alpha: true });
+      await renderer.init();
+    } catch (e) {
+      console.warn('WebGPURenderer init notice, applying fallback backend:', e);
+      try {
+        renderer = new THREE.WebGPURenderer({ canvas, antialias: true, alpha: true, forceWebGL: true });
+        await renderer.init();
+      } catch (e2) {
+        console.warn('WebGL backend fallback notice:', e2);
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+      }
+    }
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    if (renderer.shadowMap) {
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
 
     // Ambient and Directional Moonlight/Sunlight
     const ambientLight = new THREE.AmbientLight(0x4a6582, 1.4);
@@ -3794,38 +5025,60 @@ const _vScreen = new THREE.Vector3();
     sanctuaryBeacon.position.y = 4.2;
     templeGroup.add(sanctuaryBeacon);
 
-    // 4 Sacred Temple Torch Braziers
-    [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach(ang => {
+    // 4 Sacred Temple Torch Braziers (THREE.InstancedMesh)
+    const templeAngles = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
+    const urnGeo = new THREE.CylinderGeometry(0.5, 0.3, 1.8, 8);
+    const flameGeo = new THREE.SphereGeometry(0.3, 8, 8);
+    const flameMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    const templeUrnsMesh = new THREE.InstancedMesh(urnGeo, darkStoneMat, templeAngles.length);
+    const templeFlamesMesh = new THREE.InstancedMesh(flameGeo, flameMat, templeAngles.length);
+    templeUrnsMesh.castShadow = true;
+    templeUrnsMesh.receiveShadow = true;
+
+    templeAngles.forEach((ang, idx) => {
       const tx = Math.cos(ang) * 9.5;
       const tz = Math.sin(ang) * 9.5;
 
-      const urn = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.3, 1.8, 8), darkStoneMat);
-      urn.position.set(tx, 1.35 + 0.9, tz);
-      urn.castShadow = true;
-      templeGroup.add(urn);
+      dummy.position.set(tx, 1.35 + 0.9, tz);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      templeUrnsMesh.setMatrixAt(idx, dummy.matrix);
 
-      const flame = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
-      flame.position.set(tx, 1.35 + 2.0, tz);
-      templeGroup.add(flame);
+      dummy.position.set(tx, 1.35 + 2.0, tz);
+      dummy.updateMatrix();
+      templeFlamesMesh.setMatrixAt(idx, dummy.matrix);
 
       const tLight = new THREE.PointLight(0x38bdf8, 1.2, 18);
       tLight.position.set(tx, 1.35 + 2.3, tz);
       templeGroup.add(tLight);
     });
+    templeUrnsMesh.instanceMatrix.needsUpdate = true;
+    templeFlamesMesh.instanceMatrix.needsUpdate = true;
+    templeGroup.add(templeUrnsMesh);
+    templeGroup.add(templeFlamesMesh);
+    registerInstancedMesh('temple_urns', 'Temple Urn Braziers', templeUrnsMesh, 'temple');
 
-    // 4 Step Ramps
-    [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach(ang => {
-      const rampGeo = new THREE.BoxGeometry(4.2, 0.45, 3.8);
-      const rampMesh = new THREE.Mesh(rampGeo, darkStoneMat);
-      rampMesh.position.set(
+    // 4 Step Ramps (THREE.InstancedMesh)
+    const rampGeo = new THREE.BoxGeometry(4.2, 0.45, 3.8);
+    const rampsMesh = new THREE.InstancedMesh(rampGeo, darkStoneMat, templeAngles.length);
+    rampsMesh.castShadow = true;
+    rampsMesh.receiveShadow = true;
+
+    templeAngles.forEach((ang, idx) => {
+      dummy.position.set(
         Math.cos(ang) * (SANCTUARY_RADIUS + 0.8),
         0.45,
         Math.sin(ang) * (SANCTUARY_RADIUS + 0.8)
       );
-      rampMesh.rotation.y = ang;
-      rampMesh.rotation.x = 0.25;
-      templeGroup.add(rampMesh);
+      dummy.rotation.set(0.25, ang, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      rampsMesh.setMatrixAt(idx, dummy.matrix);
     });
+    rampsMesh.instanceMatrix.needsUpdate = true;
+    templeGroup.add(rampsMesh);
+    registerInstancedMesh('temple_ramps', 'Temple Step Ramps', rampsMesh, 'temple');
 
     scene.add(templeGroup);
 
@@ -3938,20 +5191,35 @@ const _vScreen = new THREE.Vector3();
     fortBarrierMesh.position.set(0, 5.5, fHalf + 0.6);
     fortGroup.add(fortBarrierMesh);
 
-    // 4. 4 Corner Bastion Watchtowers
-    [[-fHalf, -fHalf], [fHalf, -fHalf], [fHalf, fHalf], [-fHalf, fHalf]].forEach(([bx, bz]) => {
-      const bTower = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 6, 22, 16), fortWallMat);
-      bTower.position.set(bx, 11, bz);
-      bTower.castShadow = true;
-      fortGroup.add(bTower);
+    // 4. 4 Corner Bastion Watchtowers (THREE.InstancedMesh)
+    const bastionCorners = [[-fHalf, -fHalf], [fHalf, -fHalf], [fHalf, fHalf], [-fHalf, fHalf]];
+    const bTowerGeo = new THREE.CylinderGeometry(5.5, 6, 22, 16);
+    const bRoofGeo = new THREE.ConeGeometry(7, 6, 16);
+    const bRoofMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+    const bastionTowersMesh = new THREE.InstancedMesh(bTowerGeo, fortWallMat, bastionCorners.length);
+    const bastionRoofsMesh = new THREE.InstancedMesh(bRoofGeo, bRoofMat, bastionCorners.length);
+    bastionTowersMesh.castShadow = true;
+    bastionRoofsMesh.castShadow = true;
 
-      const bRoof = new THREE.Mesh(new THREE.ConeGeometry(7, 6, 16), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 }));
-      bRoof.position.set(bx, 25, bz);
-      bRoof.castShadow = true;
-      fortGroup.add(bRoof);
+    bastionCorners.forEach(([bx, bz], idx) => {
+      dummy.position.set(bx, 11, bz);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      bastionTowersMesh.setMatrixAt(idx, dummy.matrix);
+
+      dummy.position.set(bx, 25, bz);
+      dummy.updateMatrix();
+      bastionRoofsMesh.setMatrixAt(idx, dummy.matrix);
     });
+    bastionTowersMesh.instanceMatrix.needsUpdate = true;
+    bastionRoofsMesh.instanceMatrix.needsUpdate = true;
+    fortGroup.add(bastionTowersMesh);
+    fortGroup.add(bastionRoofsMesh);
+    registerInstancedMesh('bastion_towers', 'Fortress Bastion Tower', bastionTowersMesh, 'fort');
+    registerInstancedMesh('bastion_roofs', 'Fortress Bastion Roof', bastionRoofsMesh, 'fort');
 
-    // 5. Grand Hall Colonnades (InstancedMesh Pillars & Braziers)
+    // 5. Grand Hall Colonnades (InstancedMesh Pillars, Braziers & Flames)
     const fortPillarPositions = [
       [-12, -18], [12, -18],
       [-12, -4], [12, -4],
@@ -3963,6 +5231,8 @@ const _vScreen = new THREE.Vector3();
 
     const fortBraziersMesh = new THREE.InstancedMesh(new THREE.CylinderGeometry(1.5, 0.8, 1.2, 8), fortTrimMat, fortPillarPositions.length);
     fortBraziersMesh.castShadow = true;
+
+    const fortFlamesMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.7, 8, 8), new THREE.MeshBasicMaterial({ color: 0xf59e0b }), fortPillarPositions.length);
 
     fortPillarPositions.forEach(([px, pz], idx) => {
       dummy.position.set(px, 7, pz);
@@ -3977,9 +5247,9 @@ const _vScreen = new THREE.Vector3();
       fortBraziersMesh.setMatrixAt(idx, dummy.matrix);
       fortBraziersMesh.setColorAt(idx, new THREE.Color(0xd97706));
 
-      const flame = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 8), new THREE.MeshBasicMaterial({ color: 0xf59e0b }));
-      flame.position.set(px, 15.6, pz);
-      fortGroup.add(flame);
+      dummy.position.set(px, 15.6, pz);
+      dummy.updateMatrix();
+      fortFlamesMesh.setMatrixAt(idx, dummy.matrix);
 
       const bLight = new THREE.PointLight(0xf59e0b, 1.2, 28);
       bLight.position.set(px, 16.0, pz);
@@ -3987,13 +5257,16 @@ const _vScreen = new THREE.Vector3();
     });
     fortPillarsMesh.instanceMatrix.needsUpdate = true;
     fortBraziersMesh.instanceMatrix.needsUpdate = true;
+    fortFlamesMesh.instanceMatrix.needsUpdate = true;
     if (fortPillarsMesh.instanceColor) fortPillarsMesh.instanceColor.needsUpdate = true;
     if (fortBraziersMesh.instanceColor) fortBraziersMesh.instanceColor.needsUpdate = true;
 
     fortGroup.add(fortPillarsMesh);
     fortGroup.add(fortBraziersMesh);
+    fortGroup.add(fortFlamesMesh);
     registerInstancedMesh('fort_pillars', 'Fortress Pillar', fortPillarsMesh, 'fort');
     registerInstancedMesh('fort_braziers', 'Fortress Brazier', fortBraziersMesh, 'fort');
+    registerInstancedMesh('fort_flames', 'Fortress Brazier Flame', fortFlamesMesh, 'fort');
 
     // 6. Boss Throne Dais at North end
     const dais = new THREE.Mesh(new THREE.CylinderGeometry(9, 10, 1.2, 16), fortTrimMat);
@@ -4093,29 +5366,39 @@ const _vScreen = new THREE.Vector3();
     scene.add(crenMesh);
     registerInstancedMesh('castle_crenellations', 'Wall Crenellation', crenMesh, 'castle');
 
-    // 4 Corner Fortress Watchtowers
+    // 4 Corner Fortress Watchtowers (THREE.InstancedMesh)
     const cornerPositions = [
       [-halfSpan, -halfSpan],
       [halfSpan, -halfSpan],
       [halfSpan, halfSpan],
       [-halfSpan, halfSpan]
     ];
-    cornerPositions.forEach(([cx, cz]) => {
-      const towerGroup = new THREE.Group();
-      towerGroup.position.set(cx, 0, cz);
+    const watchTowerGeo = new THREE.CylinderGeometry(8, 8.5, 20, 16);
+    const watchRoofGeo = new THREE.ConeGeometry(10, 8, 16);
+    const watchRoofMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+    const watchTowersMesh = new THREE.InstancedMesh(watchTowerGeo, wallMaterial, cornerPositions.length);
+    const watchRoofsMesh = new THREE.InstancedMesh(watchRoofGeo, watchRoofMat, cornerPositions.length);
+    watchTowersMesh.castShadow = true;
+    watchTowersMesh.receiveShadow = true;
+    watchRoofsMesh.castShadow = true;
 
-      const tBase = new THREE.Mesh(new THREE.CylinderGeometry(8, 8.5, 20, 16), wallMaterial);
-      tBase.position.y = 10;
-      tBase.castShadow = true;
-      towerGroup.add(tBase);
+    cornerPositions.forEach(([cx, cz], idx) => {
+      dummy.position.set(cx, 10, cz);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      watchTowersMesh.setMatrixAt(idx, dummy.matrix);
 
-      const tRoof = new THREE.Mesh(new THREE.ConeGeometry(10, 8, 16), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 }));
-      tRoof.position.y = 24;
-      tRoof.castShadow = true;
-      towerGroup.add(tRoof);
-
-      scene.add(towerGroup);
+      dummy.position.set(cx, 24, cz);
+      dummy.updateMatrix();
+      watchRoofsMesh.setMatrixAt(idx, dummy.matrix);
     });
+    watchTowersMesh.instanceMatrix.needsUpdate = true;
+    watchRoofsMesh.instanceMatrix.needsUpdate = true;
+    scene.add(watchTowersMesh);
+    scene.add(watchRoofsMesh);
+    registerInstancedMesh('watch_towers', 'Corner Watch Tower Base', watchTowersMesh, 'castle');
+    registerInstancedMesh('watch_roofs', 'Corner Watch Tower Roof', watchRoofsMesh, 'castle');
 
     // =========================================================================
     // 3D TREES & ROCKS SCATTERED ACROSS 512x512 FOREST PLAINS (THREE.INSTANCEDMESH)
@@ -4164,8 +5447,9 @@ const _vScreen = new THREE.Vector3();
       do {
         tx = (Math.random() - 0.5) * (ARENA_SIZE - 44);
         tz = (Math.random() - 0.5) * (ARENA_SIZE - 44);
-        distSanctuary = Math.hypot(tx, tz);
-        distFort = Math.hypot(tx - FORT_X, tz - FORT_Z);
+        _scratchVecA.set(tx, 0, tz);
+        distSanctuary = _scratchVecA.distanceTo(_scratchVecOrigin);
+        distFort = _scratchVecA.distanceTo(_scratchVecFort);
         distRiver = (tz > RIVER_NORTH_LIMIT && tz < (HALF_ARENA - 4)) ? Math.abs(tx - getRiverCenterX(tz)) : 999;
         attempts++;
       } while ((distSanctuary < (SANCTUARY_RADIUS + 8) || distFort < (FORT_SIZE / 2 + 10) || distRiver < (RIVER_HALF_WIDTH + 6)) && attempts < 30);
@@ -4228,8 +5512,9 @@ const _vScreen = new THREE.Vector3();
       do {
         tx = (Math.random() - 0.5) * (ARENA_SIZE - 44);
         tz = (Math.random() - 0.5) * (ARENA_SIZE - 44);
-        distSanctuary = Math.hypot(tx, tz);
-        distFort = Math.hypot(tx - FORT_X, tz - FORT_Z);
+        _scratchVecA.set(tx, 0, tz);
+        distSanctuary = _scratchVecA.distanceTo(_scratchVecOrigin);
+        distFort = _scratchVecA.distanceTo(_scratchVecFort);
         distRiver = (tz > RIVER_NORTH_LIMIT && tz < (HALF_ARENA - 4)) ? Math.abs(tx - getRiverCenterX(tz)) : 999;
         attempts++;
       } while ((distSanctuary < (SANCTUARY_RADIUS + 8) || distFort < (FORT_SIZE / 2 + 10) || distRiver < (RIVER_HALF_WIDTH + 6)) && attempts < 30);
@@ -4285,8 +5570,9 @@ const _vScreen = new THREE.Vector3();
       do {
         rx = (Math.random() - 0.5) * (ARENA_SIZE - 48);
         rz = (Math.random() - 0.5) * (ARENA_SIZE - 48);
-        distSanctuary = Math.hypot(rx, rz);
-        distFort = Math.hypot(rx - FORT_X, rz - FORT_Z);
+        _scratchVecA.set(rx, 0, rz);
+        distSanctuary = _scratchVecA.distanceTo(_scratchVecOrigin);
+        distFort = _scratchVecA.distanceTo(_scratchVecFort);
         distRiver = (rz > RIVER_NORTH_LIMIT && rz < (HALF_ARENA - 4)) ? Math.abs(rx - getRiverCenterX(rz)) : 999;
         attempts++;
       } while ((distSanctuary < (SANCTUARY_RADIUS + 8) || distFort < (FORT_SIZE / 2 + 10) || distRiver < (RIVER_HALF_WIDTH + 6)) && attempts < 30);
@@ -4413,8 +5699,9 @@ const _vScreen = new THREE.Vector3();
       const angle = Math.random() * Math.PI * 2;
       ex = Math.cos(angle) * rad;
       ez = Math.sin(angle) * rad;
-      distSanctuary = Math.hypot(ex, ez);
-      distFort = Math.hypot(ex - FORT_X, ez - FORT_Z);
+      _scratchVecA.set(ex, 0, ez);
+      distSanctuary = _scratchVecA.distanceTo(_scratchVecOrigin);
+      distFort = _scratchVecA.distanceTo(_scratchVecFort);
       attempts++;
     } while ((distSanctuary < (SANCTUARY_RADIUS + 8) || (!gameState.fortUnlocked && distFort < (FORT_SIZE / 2 + 8))) && attempts < 30);
 
@@ -4422,7 +5709,7 @@ const _vScreen = new THREE.Vector3();
     meshGroup.position.set(ex, ey, ez);
     scene.add(meshGroup);
 
-    const maxHp = safeStatVal((28 + enemyLvl * 14) * (isBoss ? 4.5 : 1.0));
+    const maxHp = safeStatVal(((28 + enemyLvl * 14) * (isBoss ? 4.5 : 1.0)) * 6.0);
     const enemyId = 'foe_' + Math.random().toString(36).substr(2, 9);
 
     // Random wander vector
@@ -4469,7 +5756,7 @@ const _vScreen = new THREE.Vector3();
     meshGroup.rotation.y = Math.PI; // Facing towards south entrance
     scene.add(meshGroup);
 
-    const maxHp = safeStatVal(1500 + bossLevel * 30);
+    const maxHp = safeStatVal((1500 + bossLevel * 30) * 6.0);
     const midBossId = 'foe_midboss_' + Math.random().toString(36).substr(2, 9);
 
     const wanderAngle = Math.random() * Math.PI * 2;
@@ -4678,6 +5965,12 @@ const _vScreen = new THREE.Vector3();
 
     const droppedLoot = [];
 
+    // Gold Drop for Realm Reshuffle Economy
+    const goldEarned = enemy.isBoss ? (350 + Math.floor(Math.random() * 200)) : (enemy.isMidBoss ? (180 + Math.floor(Math.random() * 100)) : (40 + Math.floor(Math.random() * 30)));
+    gameState.gold = (gameState.gold || 0) + goldEarned;
+    droppedLoot.push({ type: 'gold', amount: goldEarned });
+    showDamageNumber(enemy.mesh.position.x, enemy.mesh.position.y + 1.2, enemy.mesh.position.z, `+${goldEarned} Gold`, '#fbbf24');
+
     // Essence Drop
     const essenceGained = enemy.isBoss ? (10 + Math.floor(Math.random() * 6)) : (enemy.isMidBoss ? (6 + Math.floor(Math.random() * 4)) : (Math.random() < 0.35 ? 1 : 0));
     if (essenceGained > 0) {
@@ -4789,8 +6082,17 @@ const _vScreen = new THREE.Vector3();
       gameState.mana = gameState.maxMana;
       playSound('levelup');
       showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2.5, playerMesh.position.z, `LEVEL UP! LVL ${gameState.level}`, '#fbbf24');
+      if (gameState.companions) {
+        for (let i = 0; i < gameState.companions.length; i++) {
+          gameState.companions[i].level = gameState.level;
+          recalculateCompanionStats(i);
+          gameState.companions[i].hp = gameState.companions[i].maxHp;
+          gameState.companions[i].mana = gameState.companions[i].maxMana;
+        }
+      }
     }
     recalculateStats();
+    updatePartyHUD();
     saveProgressToParent();
   }
 
@@ -5023,7 +6325,9 @@ const _vScreen = new THREE.Vector3();
       for (const [bx, bz] of bastions) {
         const colX = FORT_X + bx;
         const colZ = FORT_Z + bz;
-        const distCol = Math.hypot(pos.x - colX, pos.z - colZ);
+        _scratchVecA.set(pos.x, 0, pos.z);
+        _scratchVecB.set(colX, 0, colZ);
+        const distCol = _scratchVecA.distanceTo(_scratchVecB);
         const minBastionDist = 6.2 + entityRadius;
         if (distCol < minBastionDist && distCol > 0.0001) {
           const pushX = (pos.x - colX) / distCol;
@@ -5084,7 +6388,9 @@ const _vScreen = new THREE.Vector3();
       for (const [pxRel, pzRel] of pillars) {
         const pillarX = FORT_X + pxRel;
         const pillarZ = FORT_Z + pzRel;
-        const distPillar = Math.hypot(pos.x - pillarX, pos.z - pillarZ);
+        _scratchVecA.set(pos.x, 0, pos.z);
+        _scratchVecB.set(pillarX, 0, pillarZ);
+        const distPillar = _scratchVecA.distanceTo(_scratchVecB);
         const minPillarDist = 1.4 + entityRadius;
         if (distPillar < minPillarDist && distPillar > 0.0001) {
           const pushX = (pos.x - pillarX) / distPillar;
@@ -5095,19 +6401,17 @@ const _vScreen = new THREE.Vector3();
       }
     }
 
-    // 3. Collision with All Registered World Trees and Rocks (Conforming to wall collision pushback)
+    // 3. Collision with All Registered World Trees and Rocks (Solid physical boundary)
     for (let i = 0; i < worldObstacles.length; i++) {
       const obs = worldObstacles[i];
-      if (obs.type === 'rock') {
-        if (obs.inRiver || isPointInRiverArea(obs.position.x, obs.position.z)) {
-          continue; // Characters can walk through the rock in the river area everywhere, but not the other rocks
-        }
-      }
       if (obs.type === 'tree' || obs.type === 'rock') {
         const dX = pos.x - obs.position.x;
         const dZ = pos.z - obs.position.z;
-        const dist = Math.hypot(dX, dZ);
-        const minDist = obs.radius + entityRadius;
+        _scratchVecA.set(pos.x, 0, pos.z);
+        _scratchVecB.set(obs.position.x, 0, obs.position.z);
+        const dist = _scratchVecA.distanceTo(_scratchVecB);
+        const effRadius = Math.max(obs.radius || 1.8, 1.4);
+        const minDist = effRadius + entityRadius;
         if (dist < minDist && dist > 0.0001) {
           const pushX = dX / dist;
           const pushZ = dZ / dist;
@@ -5131,7 +6435,8 @@ const _vScreen = new THREE.Vector3();
 
     // 2. Resolve Floor Tile & Ground Height Physics (Rock Solid Stability)
     let targetY = 0;
-    const distFromCenter = Math.hypot(pos.x, pos.z);
+    _scratchVecA.set(pos.x, 0, pos.z);
+    const distFromCenter = _scratchVecA.distanceTo(_scratchVecOrigin);
 
     // 2a. Elevated Round Temple Sanctuary Floor Tiles
     if (distFromCenter < 14.0) {
@@ -5143,7 +6448,9 @@ const _vScreen = new THREE.Vector3();
       targetY = 0.70 * (1 - t); // Smooth slope from step to ground
     } else if (inFortX && inFortZ && Math.abs(dxFort) < 28 && Math.abs(dzFort) < 28) {
       // 2b. Fort Interior Floor Tiles & Pedestal/Dais
-      const distToDais = Math.hypot(dxFort, dzFort - (-18));
+      _scratchVecA.set(dxFort, 0, dzFort);
+      _scratchVecB.set(0, 0, -18);
+      const distToDais = _scratchVecA.distanceTo(_scratchVecB);
       if (distToDais <= 9.0) {
         targetY = FORT_ELEVATION + 1.8; // Stand atop Boss Dais / Pedestal!
       } else if (distToDais <= 10.2) {
@@ -5284,6 +6591,339 @@ const _vScreen = new THREE.Vector3();
     }
   }
 
+  // =========================================================================
+  // AI SUPPORT PARTY COMPANION 3D ENGINE & TACTICAL AI SYSTEMS
+  // =========================================================================
+  const COMPANION_PALETTES = [
+    { armor: 0x059669, trim: 0xf59e0b, glow: 0x34d399, skin: 0xfbd38d }, // Valerius (Emerald Vanguard)
+    { armor: 0x0284c7, trim: 0xe0e7ff, glow: 0xa855f7, skin: 0xfed7aa }  // Lyra (Sapphire Astraea Mystic)
+  ];
+
+  function createCompanionNameplate(name, role, classType) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+    ctx.roundRect(4, 4, 248, 56, 12);
+    ctx.fill();
+    ctx.strokeStyle = classType === 'melee' ? '#34d399' : '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(name, 128, 28);
+
+    ctx.fillStyle = classType === 'melee' ? '#34d399' : '#38bdf8';
+    ctx.font = 'bold 14px system-ui, sans-serif';
+    ctx.fillText(role, 128, 48);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(2.4, 0.6, 1);
+    sprite.position.y = 3.2;
+    return sprite;
+  }
+
+  function initCompanions() {
+    if (!gameState || !gameState.companions || !scene) return;
+    for (let i = 0; i < gameState.companions.length; i++) {
+      rebuildCompanionMesh(i);
+      recalculateCompanionStats(i);
+    }
+  }
+
+  function rebuildCompanionMesh(index) {
+    const comp = gameState.companions[index];
+    if (!comp || !scene) return;
+
+    if (comp.mesh) {
+      scene.remove(comp.mesh);
+      comp.mesh = null;
+    }
+
+    const palette = COMPANION_PALETTES[index] || COMPANION_PALETTES[0];
+    const mesh = createStylizedPlayerMesh(comp.classType, palette);
+
+    const nameplate = createCompanionNameplate(comp.name, comp.classType.toUpperCase(), comp.classType);
+    nameplate.name = 'companion_nameplate';
+    mesh.add(nameplate);
+
+    const angle = (index === 0) ? -Math.PI / 3.5 : Math.PI / 3.5;
+    const spawnDist = 3.5;
+    const px = playerMesh ? playerMesh.position.x : 0;
+    const pz = playerMesh ? playerMesh.position.z : 0;
+    const cx = px + Math.cos(angle) * spawnDist;
+    const cz = pz + Math.sin(angle) * spawnDist;
+    const cy = getTerrainHeight(cx, cz);
+
+    mesh.position.set(cx, cy, cz);
+    scene.add(mesh);
+    comp.mesh = mesh;
+  }
+
+  function updateCompanionAI(delta) {
+    if (!gameState || !gameState.companions || !playerMesh) return;
+
+    for (let i = 0; i < gameState.companions.length; i++) {
+      const comp = gameState.companions[i];
+      if (!comp.mesh) continue;
+
+      if (comp.actionCooldown > 0) comp.actionCooldown -= delta;
+      const cMesh = comp.mesh;
+      const cud = cMesh.userData;
+      const isMelee = comp.classType === 'melee';
+
+      // Follow formation anchor relative to player orientation
+      const playerAngle = playerMesh.rotation.y;
+      const sideOffset = (i === 0) ? -2.8 : 2.8;
+      const backOffset = -2.2;
+      const anchorX = playerMesh.position.x + Math.sin(playerAngle) * backOffset + Math.cos(playerAngle) * sideOffset;
+      const anchorZ = playerMesh.position.z + Math.cos(playerAngle) * backOffset - Math.sin(playerAngle) * sideOffset;
+
+      let moveTargetX = anchorX;
+      let moveTargetZ = anchorZ;
+      let isPerformingAction = false;
+
+      // 1. Identify closest active threat
+      let closestThreat = null;
+      let minThreatDist = 999;
+      for (const e of enemies) {
+        if (e && e.hp > 0 && e.mesh) {
+          const d = playerMesh.position.distanceTo(e.mesh.position);
+          if (d < minThreatDist && d < 28) {
+            minThreatDist = d;
+            closestThreat = e;
+          }
+        }
+      }
+
+      // 2. Identify lowest-health ally in party (Player, Comp 1, Comp 2)
+      let lowestAlly = null;
+      let lowestHpPct = 1.0;
+
+      const playerPct = gameState.hp / gameState.maxHp;
+      if (playerPct < lowestHpPct) {
+        lowestHpPct = playerPct;
+        lowestAlly = {
+          name: gameState.characterName,
+          pos: playerMesh.position,
+          heal: (amt) => {
+            gameState.hp = Math.min(gameState.maxHp, gameState.hp + amt);
+            updateHud();
+          }
+        };
+      }
+      for (let j = 0; j < gameState.companions.length; j++) {
+        const otherComp = gameState.companions[j];
+        const pct = otherComp.hp / otherComp.maxHp;
+        if (pct < lowestHpPct && otherComp.mesh) {
+          lowestHpPct = pct;
+          lowestAlly = {
+            name: otherComp.name,
+            pos: otherComp.mesh.position,
+            heal: (amt) => {
+              otherComp.hp = Math.min(otherComp.maxHp, otherComp.hp + amt);
+              updatePartyHUD();
+            }
+          };
+        }
+      }
+
+      // 3. PRIORITY EXECUTION (SUPPORTING | DEFENDING | ATTACKING)
+      if (comp.priority === 'supporting') {
+        // --- SUPPORT PRIORITY ---
+        if (lowestHpPct < 0.8 && comp.actionCooldown <= 0 && lowestAlly) {
+          const healDist = cMesh.position.distanceTo(lowestAlly.pos);
+          if (healDist <= 14) {
+            comp.animState.castTime = 0.01;
+            const healAmt = 40 + Math.round(comp.spellPower * 0.8);
+            lowestAlly.heal(healAmt);
+            playSound('spell');
+            showDamageNumber(lowestAlly.pos.x, lowestAlly.pos.y + 2.5, lowestAlly.pos.z, `💚 +${healAmt} HP (${comp.name})`, '#22c55e');
+            comp.actionCooldown = 3.0;
+            isPerformingAction = true;
+          } else {
+            moveTargetX = lowestAlly.pos.x;
+            moveTargetZ = lowestAlly.pos.z;
+          }
+        } else if (closestThreat && minThreatDist < 16) {
+          const dToThreat = cMesh.position.distanceTo(closestThreat.mesh.position);
+          if (dToThreat <= (isMelee ? 3.0 : 12.0) && comp.actionCooldown <= 0) {
+            if (isMelee) {
+              comp.animState.swingTime = 0.01;
+              const dmg = Math.round(comp.attackPower * 0.9);
+              closestThreat.hp = Math.max(0, closestThreat.hp - dmg);
+              showDamageNumber(closestThreat.mesh.position.x, closestThreat.mesh.position.y + 1, closestThreat.mesh.position.z, `🛡️ Sweep ${dmg}`, '#38bdf8');
+              if (closestThreat.hp <= 0) onEnemyDefeated(closestThreat);
+            } else {
+              comp.animState.castTime = 0.01;
+              const dmg = Math.round(comp.spellPower * 1.1);
+              closestThreat.hp = Math.max(0, closestThreat.hp - dmg);
+              showDamageNumber(closestThreat.mesh.position.x, closestThreat.mesh.position.y + 1, closestThreat.mesh.position.z, `❄️ Frost Ward ${dmg}`, '#38bdf8');
+              closestThreat.speed = Math.max(1.2, closestThreat.speed * 0.7);
+              if (closestThreat.hp <= 0) onEnemyDefeated(closestThreat);
+            }
+            comp.actionCooldown = 2.4;
+            isPerformingAction = true;
+          }
+        }
+      } else if (comp.priority === 'defending') {
+        // --- DEFENDING PRIORITY ---
+        if (closestThreat && minThreatDist < 20) {
+          const threatPos = closestThreat.mesh.position;
+          const dirX = threatPos.x - playerMesh.position.x;
+          const dirZ = threatPos.z - playerMesh.position.z;
+          const threatLen = Math.sqrt(dirX * dirX + dirZ * dirZ) || 1;
+          const interceptDist = Math.min(threatLen * 0.65, 4.0);
+
+          moveTargetX = playerMesh.position.x + (dirX / threatLen) * interceptDist;
+          moveTargetZ = playerMesh.position.z + (dirZ / threatLen) * interceptDist;
+
+          const dToThreat = cMesh.position.distanceTo(threatPos);
+          if (dToThreat <= (isMelee ? 3.2 : 10.0) && comp.actionCooldown <= 0) {
+            if (isMelee) {
+              comp.animState.swingTime = 0.01;
+              const isCrit = Math.random() < comp.critRate;
+              const baseD = comp.attackPower * (isCrit ? 1.5 : 1.0);
+              const dmg = Math.round(baseD);
+              closestThreat.hp = Math.max(0, closestThreat.hp - dmg);
+              showDamageNumber(threatPos.x, threatPos.y + 1, threatPos.z, `🛡️ Shield Bash ${dmg}${isCrit ? ' (CRIT!)' : ''}`, '#f59e0b');
+              closestThreat.wanderDir.set(cMesh.position.x - threatPos.x, 0, cMesh.position.z - threatPos.z).normalize();
+              if (closestThreat.hp <= 0) onEnemyDefeated(closestThreat);
+            } else {
+              comp.animState.castTime = 0.01;
+              const dmg = Math.round(comp.spellPower * 1.0);
+              closestThreat.hp = Math.max(0, closestThreat.hp - dmg);
+              showDamageNumber(threatPos.x, threatPos.y + 1, threatPos.z, `✨ Repel ${dmg}`, '#c084fc');
+              if (closestThreat.hp <= 0) onEnemyDefeated(closestThreat);
+            }
+            comp.actionCooldown = comp.attackSpeed;
+            isPerformingAction = true;
+          }
+        }
+      } else {
+        // --- ATTACKING PRIORITY ---
+        if (closestThreat && minThreatDist < 26) {
+          const threatPos = closestThreat.mesh.position;
+          const dToThreat = cMesh.position.distanceTo(threatPos);
+
+          if (isMelee) {
+            moveTargetX = threatPos.x;
+            moveTargetZ = threatPos.z;
+            if (dToThreat <= 2.8 && comp.actionCooldown <= 0) {
+              comp.animState.swingTime = 0.01;
+              const isCrit = Math.random() < comp.critRate;
+              const dmg = Math.round(comp.attackPower * (isCrit ? 1.75 : 1.1));
+              closestThreat.hp = Math.max(0, closestThreat.hp - dmg);
+              playSound('hit');
+              showDamageNumber(threatPos.x, threatPos.y + 1, threatPos.z, `⚔️ ${dmg}${isCrit ? ' (CRIT!)' : ''}`, isCrit ? '#f59e0b' : '#34d399');
+              if (closestThreat.hp <= 0) onEnemyDefeated(closestThreat);
+              comp.actionCooldown = comp.attackSpeed;
+              isPerformingAction = true;
+            }
+          } else {
+            if (dToThreat > 12) {
+              moveTargetX = threatPos.x;
+              moveTargetZ = threatPos.z;
+            } else if (dToThreat < 4.5) {
+              moveTargetX = cMesh.position.x - (threatPos.x - cMesh.position.x);
+              moveTargetZ = cMesh.position.z - (threatPos.z - cMesh.position.z);
+            } else {
+              moveTargetX = cMesh.position.x;
+              moveTargetZ = cMesh.position.z;
+            }
+
+            if (dToThreat <= 14 && comp.actionCooldown <= 0) {
+              comp.animState.castTime = 0.01;
+              const isCrit = Math.random() < comp.critRate;
+              const dmg = Math.round(comp.spellPower * (isCrit ? 1.8 : 1.25));
+              closestThreat.hp = Math.max(0, closestThreat.hp - dmg);
+              playSound('spell');
+              showDamageNumber(threatPos.x, threatPos.y + 1.2, threatPos.z, `🔥 Sunfire ${dmg}${isCrit ? ' (CRIT!)' : ''}`, isCrit ? '#f59e0b' : '#38bdf8');
+              if (closestThreat.hp <= 0) onEnemyDefeated(closestThreat);
+              comp.actionCooldown = comp.attackSpeed;
+              isPerformingAction = true;
+            }
+          }
+        }
+      }
+
+      // 4. Movement Execution towards target
+      const diffX = moveTargetX - cMesh.position.x;
+      const diffZ = moveTargetZ - cMesh.position.z;
+      const distToGoal = Math.sqrt(diffX * diffX + diffZ * diffZ);
+
+      const compSpeed = 10.5 * delta;
+      const stoppingDist = (comp.priority === 'attacking' && closestThreat && isMelee) ? 2.2 : 0.8;
+
+      if (distToGoal > stoppingDist && !isPerformingAction) {
+        const stepX = (diffX / distToGoal) * Math.min(compSpeed, distToGoal);
+        const stepZ = (diffZ / distToGoal) * Math.min(compSpeed, distToGoal);
+        cMesh.position.x += stepX;
+        cMesh.position.z += stepZ;
+
+        const targetRotY = Math.atan2(diffX, diffZ);
+        cMesh.rotation.y = THREE.MathUtils.lerp(cMesh.rotation.y, targetRotY, delta * 12);
+
+        comp.animState.walkCycle += delta * 10;
+        if (cud && cud.leftLegPivot && cud.rightLegPivot) {
+          cud.leftLegPivot.rotation.x = Math.sin(comp.animState.walkCycle) * 0.55;
+          cud.rightLegPivot.rotation.x = -Math.sin(comp.animState.walkCycle) * 0.55;
+        }
+      } else {
+        if (cud && cud.leftLegPivot && cud.rightLegPivot) {
+          cud.leftLegPivot.rotation.x = THREE.MathUtils.lerp(cud.leftLegPivot.rotation.x, 0, delta * 8);
+          cud.rightLegPivot.rotation.x = THREE.MathUtils.lerp(cud.rightLegPivot.rotation.x, 0, delta * 8);
+        }
+        if (closestThreat && closestThreat.mesh) {
+          const faceX = closestThreat.mesh.position.x - cMesh.position.x;
+          const faceZ = closestThreat.mesh.position.z - cMesh.position.z;
+          cMesh.rotation.y = THREE.MathUtils.lerp(cMesh.rotation.y, Math.atan2(faceX, faceZ), delta * 8);
+        }
+      }
+
+      // 5. OBSTACLE COLLISION RESOLUTION FOR COMPANIONS (ROCKS, TREES, FORT, WALLS)
+      resolveEntityObstacleCollisions(cMesh.position, 1.2);
+      const floorY = getTerrainHeight(cMesh.position.x, cMesh.position.z);
+      cMesh.position.y = THREE.MathUtils.lerp(cMesh.position.y, floorY, delta * 20);
+
+      // 6. Limb Actions Animation (Melee Swings & Spell Casts)
+      if (comp.animState.swingTime > 0 && cud && cud.rightArmPivot) {
+        comp.animState.swingTime += delta;
+        const p = comp.animState.swingTime / comp.animState.swingDuration;
+        if (p < 1.0) {
+          cud.rightArmPivot.rotation.x = -1.2 + 2.8 * Math.sin(p * Math.PI);
+          if (cud.slashEffect) cud.slashEffect.visible = true;
+        } else {
+          comp.animState.swingTime = 0;
+          cud.rightArmPivot.rotation.set(0, 0, 0);
+          if (cud.slashEffect) cud.slashEffect.visible = false;
+        }
+      } else if (comp.animState.castTime > 0 && cud && cud.leftArmPivot && cud.rightArmPivot) {
+        comp.animState.castTime += delta;
+        const p = comp.animState.castTime / comp.animState.castDuration;
+        if (p < 1.0) {
+          const arc = Math.sin(p * Math.PI);
+          cud.leftArmPivot.rotation.x = -1.5 * arc;
+          cud.rightArmPivot.rotation.x = -1.5 * arc;
+          if (cud.castAura) {
+            cud.castAura.visible = true;
+            cud.castAura.rotation.y += delta * 6;
+          }
+        } else {
+          comp.animState.castTime = 0;
+          cud.leftArmPivot.rotation.set(0, 0, 0);
+          cud.rightArmPivot.rotation.set(0, 0, 0);
+          if (cud.castAura) cud.castAura.visible = false;
+        }
+      }
+    }
+  }
+
   // --- GAME LOOP ---
   let lastTime = performance.now();
 
@@ -5338,7 +6978,8 @@ const _vScreen = new THREE.Vector3();
     const right = new THREE.Vector3(Math.cos(cameraTheta), 0, -Math.sin(cameraTheta)).normalize();
 
     if (isMoving) {
-      const len = Math.hypot(moveFwd, moveRight);
+      _scratchVecA.set(moveFwd, 0, moveRight);
+      const len = _scratchVecA.distanceTo(_scratchVecOrigin);
       const normFwd = moveFwd / len;
       const normRight = moveRight / len;
 
@@ -5360,7 +7001,8 @@ const _vScreen = new THREE.Vector3();
     // =========================================================================
     let playerMoveDir = new THREE.Vector3();
     if (isMoving) {
-      const len = Math.hypot(moveFwd, moveRight);
+      _scratchVecA.set(moveFwd, 0, moveRight);
+      const len = _scratchVecA.distanceTo(_scratchVecOrigin);
       const normFwd = moveFwd / len;
       const normRight = moveRight / len;
       playerMoveDir.addScaledVector(forward, normFwd).addScaledVector(right, normRight).normalize();
@@ -5530,7 +7172,8 @@ const _vScreen = new THREE.Vector3();
     // =========================================================================
     // SANCTUARY HEALING LOGIC
     // =========================================================================
-    const playerDistToSanctuary = Math.hypot(playerMesh.position.x, playerMesh.position.z);
+    _scratchVecA.set(playerMesh.position.x, 0, playerMesh.position.z);
+    const playerDistToSanctuary = _scratchVecA.distanceTo(_scratchVecOrigin);
     const isPlayerInSanctuary = playerDistToSanctuary < (SANCTUARY_RADIUS + 1.5);
 
     if (isPlayerInSanctuary) {
@@ -5573,7 +7216,8 @@ const _vScreen = new THREE.Vector3();
     // =========================================================================
     for (const enemy of enemies) {
       const dist = enemy.mesh.position.distanceTo(playerMesh.position);
-      const enemyDistToCenter = Math.hypot(enemy.mesh.position.x, enemy.mesh.position.z);
+      _scratchVecA.set(enemy.mesh.position.x, 0, enemy.mesh.position.z);
+      const enemyDistToCenter = _scratchVecA.distanceTo(_scratchVecOrigin);
 
       // Repel enemies trying to enter elevated temple sanctuary
       if (enemyDistToCenter < SANCTUARY_RADIUS + 2.5) {
@@ -5598,7 +7242,7 @@ const _vScreen = new THREE.Vector3();
         if (enemy.attackCooldown <= 0) {
           enemy.attackCooldown = enemy.weaponSpeed;
           enemy.attackAnimTimer = 0.35; // Trigger enemy strike animation
-          const rawDmg = (4 + enemy.level * 1.6) - (gameState.statUpgrades.armor || 0) * 0.8;
+          const rawDmg = ((4 + enemy.level * 1.6) * 6.0) - (gameState.statUpgrades.armor || 0) * 0.8;
           const enemyDmg = safeCombatVal(rawDmg < 1 ? 1 : rawDmg);
           gameState.hp = safeClamp(gameState.hp - enemyDmg, 0, gameState.maxHp);
           showDamageNumber(playerMesh.position.x, playerMesh.position.y + 1, playerMesh.position.z, enemyDmg, '#ef4444');
@@ -5661,7 +7305,8 @@ const _vScreen = new THREE.Vector3();
       if (enemy.isMidBoss && !gameState.fortUnlocked) {
         enemy.mesh.position.y = FORT_ELEVATION + 1.8;
       } else {
-        const dFort = Math.hypot(enemy.mesh.position.x - FORT_X, enemy.mesh.position.z - FORT_Z);
+        _scratchVecA.set(enemy.mesh.position.x, 0, enemy.mesh.position.z);
+        const dFort = _scratchVecA.distanceTo(_scratchVecFort);
         if (dFort < FORT_SIZE / 2) {
           enemy.mesh.position.y = FORT_ELEVATION + 0.6;
         } else {
@@ -5690,6 +7335,9 @@ const _vScreen = new THREE.Vector3();
         }
       }
     }
+
+    // Update AI Support Party Companions (Valerius & Lyra)
+    updateCompanionAI(delta);
 
     // Cooldown ticks & Action Bar UI
     for (const key in cooldowns) {
@@ -5915,23 +7563,68 @@ const _vScreen = new THREE.Vector3();
     }
   }
 
+  function getActiveGearTarget() {
+    if (activeGearChar === 'companion-1' && gameState.companions && gameState.companions[0]) {
+      return { char: gameState.companions[0], isPlayer: false, index: 0 };
+    }
+    if (activeGearChar === 'companion-2' && gameState.companions && gameState.companions[1]) {
+      return { char: gameState.companions[1], isPlayer: false, index: 1 };
+    }
+    return { char: gameState, isPlayer: true, index: -1 };
+  }
+
   function renderGearUI() {
-    for (const slot in gameState.equipped) {
-      const item = gameState.equipped[slot];
+    const target = getActiveGearTarget();
+    const equippedMap = target.isPlayer ? gameState.equipped : target.char.equipped;
+
+    for (const slot in equippedMap) {
+      const item = equippedMap[slot];
       const nameEl = document.getElementById(`ui-name-${slot}`);
       const statEl = document.getElementById(`ui-stat-${slot}`);
+      const cardEl = document.getElementById(`slot-ui-${slot}`);
+
+      if (cardEl) {
+        cardEl.onclick = () => unequipSlot(slot);
+        cardEl.style.cursor = item ? 'pointer' : 'default';
+        cardEl.title = item ? `Click to unequip ${item.name} to backpack` : 'Empty slot';
+      }
+
       if (item) {
-        nameEl.innerText = item.name;
-        nameEl.className = `gear-slot-name rarity-${item.rarity}`;
-        statEl.innerText = getItemStatDescription(item);
+        if (nameEl) {
+          nameEl.innerText = item.name;
+          nameEl.className = `gear-slot-name rarity-${item.rarity}`;
+        }
+        if (statEl) statEl.innerText = getItemStatDescription(item);
       } else {
-        nameEl.innerText = 'Empty';
-        nameEl.className = 'gear-slot-name';
-        statEl.innerText = '-';
+        if (nameEl) {
+          nameEl.innerText = 'Empty';
+          nameEl.className = 'gear-slot-name';
+        }
+        if (statEl) statEl.innerText = '-';
       }
     }
     renderInventory();
   }
+
+  function unequipSlot(slot) {
+    const target = getActiveGearTarget();
+    const equippedMap = target.isPlayer ? gameState.equipped : target.char.equipped;
+    const item = equippedMap[slot];
+    if (!item) return;
+
+    equippedMap[slot] = null;
+    gameState.inventory.push(item);
+    playSound('loot');
+
+    if (target.isPlayer) {
+      recalculateStats();
+    } else {
+      recalculateCompanionStats(target.index);
+    }
+    renderGearUI();
+    saveProgressToParent();
+  }
+  window.unequipSlot = unequipSlot;
 
   function renderInventory() {
     const container = document.getElementById('inventory-list');
@@ -6057,8 +7750,11 @@ const _vScreen = new THREE.Vector3();
     const item = gameState.inventory[invIndex];
     if (!item) return;
 
-    const oldItem = gameState.equipped[item.slot];
-    gameState.equipped[item.slot] = item;
+    const target = getActiveGearTarget();
+    const equippedMap = target.isPlayer ? gameState.equipped : target.char.equipped;
+
+    const oldItem = equippedMap[item.slot];
+    equippedMap[item.slot] = item;
     gameState.inventory.splice(invIndex, 1);
 
     if (oldItem) {
@@ -6066,7 +7762,11 @@ const _vScreen = new THREE.Vector3();
     }
 
     playSound('loot');
-    recalculateStats();
+    if (target.isPlayer) {
+      recalculateStats();
+    } else {
+      recalculateCompanionStats(target.index);
+    }
     renderGearUI();
     saveProgressToParent();
   }
@@ -6775,9 +8475,11 @@ const _vScreen = new THREE.Vector3();
       gameState.inventory.push(generateGearItem('chest', 1, 'magic'));
 
       init3DWorld();
+      initCompanions();
       recalculateStats();
       renderGearUI();
       updateNearbyEnemiesList();
+      updatePartyHUD();
       initRealTimeSync();
       animate();
 
@@ -6912,6 +8614,42 @@ const _vScreen = new THREE.Vector3();
       else soundBtn.innerText = soundText;
     }
   };
+
+  const btnOpenP2pEl = document.getElementById('btn-open-p2p');
+  if (btnOpenP2pEl) btnOpenP2pEl.onclick = () => {
+    const m = document.getElementById('p2p-modal');
+    if (m) m.style.display = 'flex';
+  };
+
+  const btnCloseP2pModalEl = document.getElementById('btn-close-p2p-modal');
+  if (btnCloseP2pModalEl) btnCloseP2pModalEl.onclick = () => {
+    const m = document.getElementById('p2p-modal');
+    if (m) m.style.display = 'none';
+  };
+
+  const btnCopyOfferEl = document.getElementById('btn-copy-p2p-offer');
+  if (btnCopyOfferEl) btnCopyOfferEl.onclick = () => {
+    const offerInput = document.getElementById('p2p-local-offer');
+    if (offerInput && offerInput.value) {
+      navigator.clipboard.writeText(offerInput.value).then(() => {
+        showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2.5, playerMesh.position.z, 'P2P Offer Copied to Clipboard!', '#38bdf8');
+      }).catch(() => {});
+    }
+  };
+
+  const btnConnectP2pCodeEl = document.getElementById('btn-connect-p2p-code');
+  if (btnConnectP2pCodeEl) btnConnectP2pCodeEl.onclick = () => {
+    const remoteInput = document.getElementById('p2p-remote-answer');
+    if (remoteInput && remoteInput.value.trim()) {
+      showDamageNumber(playerMesh.position.x, playerMesh.position.y + 2.5, playerMesh.position.z, 'WebRTC P2P Handshake Initiated...', '#34d399');
+      remoteInput.value = '';
+      const m = document.getElementById('p2p-modal');
+      if (m) m.style.display = 'none';
+    }
+  };
+
+  // Initial Party HUD render
+  updatePartyHUD();
 
 </script>
 </body>

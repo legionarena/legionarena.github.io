@@ -1,4 +1,4 @@
-import { User, DispatchedEmail, DbState, GameHighScore, UserPlaylist, IntelThread, IntelPost, RpgSaveData } from './types';
+import { User, DispatchedEmail, DbState, GameHighScore, UserPlaylist, RpgSaveData } from './types';
 
 const DB_STORAGE_KEY = 'firestorm_tournaments_db_v2';
 

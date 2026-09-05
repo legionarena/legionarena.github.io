@@ -63,39 +63,6 @@ export interface UserPlaylist {
   updatedAt: string;
 }
 
-export interface IntelThread {
-  id: string;
-  title: string;
-  callsignTag: string;
-  category: 'WARZONE_OPS' | 'FORTNITE_BR' | 'META_LOADOUT' | 'TACTICAL_RECON';
-  description: string;
-  briefing: string;
-  badge: string;
-  themeColor: string;
-  accentBorder: string;
-  postCount?: number;
-}
-
-export interface IntelPost {
-  id: string;
-  threadId: string;
-  userId: string;
-  userCallsign: string;
-  userRank: string;
-  userUid: string;
-  content: string;
-  imageBase64?: string; // base64 encoded image string (data:image/...)
-  imageName?: string;
-  reactions: {
-    fire: number;
-    target: number;
-    shield: number;
-    usersReacted: Record<string, string[]>; // reactionType -> array of userIds
-  };
-  createdAt: string;
-  updatedAt?: string;
-}
-
 export interface RpgGearItem {
   id: string;
   name: string;
@@ -170,7 +137,7 @@ export interface DbState {
   emailOutbox: DispatchedEmail[];
   highScores: GameHighScore[];
   playlists: UserPlaylist[];
-  posts: IntelPost[];
+  
   rpgSaves?: Record<string, RpgSaveData>;
 }
 

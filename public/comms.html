@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Comms Room</title>
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0f172a;
+      --border: #1e293b;
+      --accent: #4f46e5;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    
+    #setup-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h1 { font-size: 1.5rem; margin-bottom: 10px; color: #fff; }
+    p.subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+    
+    .btn { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 15px; font-size: 1rem; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-danger { background: #e11d48; }
+    
+    .divider { display: flex; align-items: center; margin: 15px 0; color: var(--text-muted); font-size: 0.8rem; font-weight: bold; }
+    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); margin: 0 10px; }
+    
+    .input-group { display: flex; gap: 10px; }
+    input { flex: 1; background: #020617; border: 1px solid var(--border); color: white; padding: 10px 15px; border-radius: 8px; text-transform: uppercase; outline: none; }
+    input:focus { border-color: var(--accent); }
+    
+    #error-msg { color: #f87171; background: #7f1d1d40; border: 1px solid #ef444450; padding: 10px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 15px; display: none; }
+
+    #room-view { display: none; height: 100%; flex-direction: column; }
+    header { background: var(--panel); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .room-badge { background: #4f46e530; border: 1px solid #4f46e580; color: #a5b4fc; padding: 4px 10px; border-radius: 4px; font-family: monospace; font-weight: bold; font-size: 0.9rem; }
+    
+    .main-content { display: flex; flex: 1; overflow: hidden; }
+    .video-grid-container { flex: 1; padding: 15px; overflow-y: auto; background: #000; position: relative; }
+    #video-grid { display: grid; gap: 15px; height: 100%; grid-template-columns: 1fr; }
+    #video-grid.count-2 { grid-template-columns: 1fr 1fr; }
+    #video-grid.count-3, #video-grid.count-4 { grid-template-columns: 1fr 1fr; }
+    #video-grid.count-5, #video-grid.count-6 { grid-template-columns: 1fr 1fr 1fr; }
+    
+    .video-wrapper { position: relative; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .video-label { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; backdrop-filter: blur(4px); }
+    
+    .chat-panel { width: 300px; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+    .chat-header { padding: 10px 15px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: bold; color: var(--text-muted); }
+    .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .chat-msg { background: var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.9rem; max-width: 85%; word-break: break-word; }
+    .chat-msg.me { background: var(--accent); align-self: flex-end; border-bottom-right-radius: 2px; }
+    .chat-msg.them { align-self: flex-start; border-bottom-left-radius: 2px; }
+    .chat-sender { font-size: 0.7rem; font-weight: bold; margin-bottom: 2px; opacity: 0.7; }
+    
+    .chat-input-area { padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .chat-input-area input { text-transform: none; padding: 8px 12px; }
+    .chat-input-area button { width: auto; margin: 0; padding: 8px 12px; }
+    
+    .controls-overlay { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(15, 23, 42, 0.8); padding: 10px; border-radius: 16px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
+    .control-btn { background: var(--border); border: none; color: white; width: 44px; height: 44px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .control-btn:hover { background: #334155; }
+    .control-btn.muted { background: #991b1b40; color: #f87171; border: 1px solid #ef444450; }
+    
+    @media (max-width: 768px) {
+      .main-content { flex-direction: column; }
+      .chat-panel { width: 100%; height: 250px; border-left: none; border-top: 1px solid var(--border); }
+      #video-grid.count-3, #video-grid.count-4, #video-grid.count-5, #video-grid.count-6 { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="setup-view">
+    <div class="card">
+      <h1>Secure Comms Room</h1>
+      <p class="subtitle">Full-Mesh WebRTC P2P Room (Max 6)</p>
+      
+      <div id="error-msg"></div>
+      
+      <button class="btn" id="btn-create">Initialize New Room</button>
+      
+      <div class="divider">OR</div>
+      
+      <div class="input-group">
+        <input type="text" id="input-room-id" placeholder="ROOM ID" autocomplete="off">
+        <button class="btn" id="btn-join" style="width: auto; margin: 0;" disabled>Join</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="room-view">
+    <header>
+      <div style="display: flex; gap: 15px; align-items: center;">
+        <span class="room-badge" id="lbl-room-id">ROOM: ----</span>
+        <span style="font-size: 0.9rem; color: var(--text-muted);" id="lbl-count">1 / 6 Operators</span>
+      </div>
+      <button class="btn btn-danger" id="btn-leave" style="width: auto; margin: 0; padding: 6px 12px; font-size: 0.85rem;">Disconnect</button>
+    </header>
+    
+    <div class="main-content">
+      <div class="video-grid-container">
+        <div id="video-grid">
+          <div class="video-wrapper" id="wrapper-local">
+            <video id="video-local" autoplay playsinline muted></video>
+            <div class="video-label">Me</div>
+          </div>
+        </div>
+        
+        <div class="controls-overlay">
+          <button class="control-btn" id="btn-toggle-mic">🎙️</button>
+          <button class="control-btn" id="btn-toggle-cam">📷</button>
+        </div>
+      </div>
+      
+      <div class="chat-panel">
+        <div class="chat-header">P2P Data Channel</div>
+        <div class="chat-messages" id="chat-messages">
+          <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 10px;">Peer-to-peer chat established.</div>
+        </div>
+        <form class="chat-input-area" id="chat-form">
+          <input type="text" id="chat-input" placeholder="Message..." autocomplete="off">
+          <button type="submit" class="btn" id="btn-send-chat" disabled>Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, query, where, addDoc, deleteDoc, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      projectId: "firestorm-d67b5",
+      appId: "1:330826567799:web:3761dc5deedd348b7ef672",
+      apiKey: "AIzaSyD0UoJDWjXsAsBdFmxwiVGH4VQbPiDms90",
+      authDomain: "firestorm-d67b5.firebaseapp.com",
+      storageBucket: "firestorm-d67b5.firebasestorage.app",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app, "ai-studio-firestorm-ca0553c2-f394-4374-8a0e-e3208002c88c");
+
+    const ICE_SERVERS = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
+
+    // DOM Elements
+    const setupView = document.getElementById('setup-view');
+    const roomView = document.getElementById('room-view');
+    const errorMsg = document.getElementById('error-msg');
+    const inputRoomId = document.getElementById('input-room-id');
+    const btnCreate = document.getElementById('btn-create');
+    const btnJoin = document.getElementById('btn-join');
+    const btnLeave = document.getElementById('btn-leave');
+    
+    const lblRoomId = document.getElementById('lbl-room-id');
+    const lblCount = document.getElementById('lbl-count');
+    const videoGrid = document.getElementById('video-grid');
+    const videoLocal = document.getElementById('video-local');
+    
+    const btnToggleMic = document.getElementById('btn-toggle-mic');
+    const btnToggleCam = document.getElementById('btn-toggle-cam');
+    
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const btnSendChat = document.getElementById('btn-send-chat');
+
+    // State
+    let myPeerId = Math.random().toString(36).substring(2, 9).toUpperCase();
+    let currentRoomId = null;
+    let localStream = null;
+    let isMicOn = true;
+    let isCamOn = true;
+    
+    const peerConnections = {};
+    const dataChannels = {};
+    const unsubscribes = [];
+
+    // Init UI Listeners
+    inputRoomId.addEventListener('input', () => {
+      btnJoin.disabled = inputRoomId.value.trim().length === 0;
+    });
+
+    chatInput.addEventListener('input', () => {
+      btnSendChat.disabled = chatInput.value.trim().length === 0;
+    });
+
+    btnCreate.addEventListener('click', () => {
+      const newRoom = Math.random().toString(36).substring(2, 8).toUpperCase();
+      joinRoom(newRoom);
+    });
+
+    btnJoin.addEventListener('click', () => {
+      if (inputRoomId.value) joinRoom(inputRoomId.value.toUpperCase());
+    });
+
+    btnLeave.addEventListener('click', leaveRoom);
+
+    btnToggleMic.addEventListener('click', () => {
+      if (!localStream) return;
+      const track = localStream.getAudioTracks()[0];
+      if (track) {
+        track.enabled = !track.enabled;
+        isMicOn = track.enabled;
+        btnToggleMic.classList.toggle('muted', !isMicOn);
+      }
+    });
+
+    btnToggleCam.addEventListener('click', () => {
+      if (!localStream) return;
+      const track = localStream.getVideoTracks()[0];
+      if (track) {
+        track.enabled = !track.enabled;
+        isCamOn = track.enabled;
+        btnToggleCam.classList.toggle('muted', !isCamOn);
+      }
+    });
+
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      
+      Object.values(dataChannels).forEach(dc => {
+        if (dc.readyState === 'open') dc.send(text);
+      });
+      
+      appendMessage('Me', text);
+      chatInput.value = '';
+      btnSendChat.disabled = true;
+    });
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.style.display = 'block';
+    }
+
+    function appendMessage(sender, text) {
+      const div = document.createElement('div');
+      div.className = `chat-msg ${sender === 'Me' ? 'me' : 'them'}`;
+      if (sender !== 'Me') {
+        const span = document.createElement('div');
+        span.className = 'chat-sender';
+        span.textContent = sender;
+        div.appendChild(span);
+      }
+      const txt = document.createTextNode(text);
+      div.appendChild(txt);
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function updateGridClass() {
+      const count = Object.keys(peerConnections).length + 1;
+      lblCount.textContent = `${count} / 6 Operators`;
+      videoGrid.className = `count-${count}`;
+    }
+
+    async function getLocalMedia() {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        videoLocal.srcObject = localStream;
+        return true;
+      } catch (err) {
+        console.error('Media error', err);
+        showError('Could not access Camera/Microphone.');
+        return false;
+      }
+    }
+
+    async function joinRoom(roomId) {
+      errorMsg.style.display = 'none';
+      
+      try {
+        // Enforce max 6 participants rule using a transaction
+        await runTransaction(db, async (transaction) => {
+          // This is a simplified check for client side. We read existing participants
+          const partsRef = collection(db, `rooms/${roomId}/participants`);
+          const snapshot = await getDocs(partsRef);
+          if (snapshot.size >= 6) {
+            throw new Error('Room is full (max 6 participants)');
+          }
+        });
+        
+        const mediaReady = await getLocalMedia();
+        if (!mediaReady) return;
+        
+        currentRoomId = roomId;
+        lblRoomId.textContent = `ROOM: ${roomId}`;
+        
+        setupView.style.display = 'none';
+        roomView.style.display = 'flex';
+        
+        const myRef = doc(db, `rooms/${roomId}/participants/${myPeerId}`);
+        await setDoc(myRef, { joinedAt: serverTimestamp() });
+        
+        // Listen for messages directed to me (offers, answers, candidates)
+        const msgsQ = query(collection(db, `rooms/${roomId}/messages`), where('to', '==', myPeerId));
+        const unsubMsgs = onSnapshot(msgsQ, snapshot => {
+          snapshot.docChanges().forEach(async change => {
+            if (change.type === 'added') {
+              const data = change.doc.data();
+              handleSignalingData(data.from, data);
+            }
+          });
+        });
+        unsubscribes.push(unsubMsgs);
+        
+        // Listen for other participants leaving
+        const partsQ = collection(db, `rooms/${roomId}/participants`);
+        const unsubParts = onSnapshot(partsQ, snapshot => {
+          snapshot.docChanges().forEach(change => {
+            if (change.type === 'removed') {
+              removePeer(change.doc.id);
+            }
+          });
+        });
+        unsubscribes.push(unsubParts);
+
+        // Fetch existing participants to send offers to
+        const existingParts = await getDocs(partsQ);
+        existingParts.forEach(async docSnap => {
+          const targetId = docSnap.id;
+          if (targetId !== myPeerId) {
+            await createAndSendOffer(targetId);
+          }
+        });
+        
+        updateGridClass();
+        
+      } catch (err) {
+        console.error(err);
+        showError(err.message || 'Error joining room');
+      }
+    }
+
+    function createPeer(targetId) {
+      if (peerConnections[targetId]) return peerConnections[targetId];
+      
+      const pc = new RTCPeerConnection(ICE_SERVERS);
+      peerConnections[targetId] = pc;
+      
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+      
+      pc.ontrack = event => {
+        addRemoteVideo(targetId, event.streams[0]);
+      };
+      
+      pc.onicecandidate = async event => {
+        if (event.candidate) {
+          await addDoc(collection(db, `rooms/${currentRoomId}/messages`), {
+            from: myPeerId,
+            to: targetId,
+            type: 'candidate',
+            candidate: event.candidate.toJSON(),
+            timestamp: serverTimestamp()
+          });
+        }
+      };
+      
+      pc.oniceconnectionstatechange = () => {
+        if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+          removePeer(targetId);
+        }
+      };
+      
+      return pc;
+    }
+
+    function setupDataChannel(dc, targetId) {
+      dataChannels[targetId] = dc;
+      dc.onmessage = event => {
+        appendMessage(targetId.substring(0,4), event.data);
+      };
+    }
+
+    async function createAndSendOffer(targetId) {
+      const pc = createPeer(targetId);
+      const dc = pc.createDataChannel('chat');
+      setupDataChannel(dc, targetId);
+      
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      
+      await addDoc(collection(db, `rooms/${currentRoomId}/messages`), {
+        from: myPeerId,
+        to: targetId,
+        type: 'offer',
+        offer: { type: offer.type, sdp: offer.sdp },
+        timestamp: serverTimestamp()
+      });
+    }
+
+    async function handleSignalingData(fromId, data) {
+      let pc = peerConnections[fromId];
+      
+      if (data.type === 'offer') {
+        if (!pc) pc = createPeer(fromId);
+        
+        pc.ondatachannel = event => {
+          setupDataChannel(event.channel, fromId);
+        };
+        
+        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        
+        await addDoc(collection(db, `rooms/${currentRoomId}/messages`), {
+          from: myPeerId,
+          to: fromId,
+          type: 'answer',
+          answer: { type: answer.type, sdp: answer.sdp },
+          timestamp: serverTimestamp()
+        });
+      } 
+      else if (data.type === 'answer' && pc) {
+        if (pc.signalingState !== 'stable') {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+        }
+      } 
+      else if (data.type === 'candidate' && pc) {
+        await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+      }
+    }
+
+    function addRemoteVideo(id, stream) {
+      if (document.getElementById(`wrapper-${id}`)) return;
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'video-wrapper';
+      wrapper.id = `wrapper-${id}`;
+      
+      const video = document.createElement('video');
+      video.autoplay = true;
+      video.playsInline = true;
+      video.srcObject = stream;
+      
+      const label = document.createElement('div');
+      label.className = 'video-label';
+      label.textContent = `Peer ${id.substring(0,4)}`;
+      
+      wrapper.appendChild(video);
+      wrapper.appendChild(label);
+      videoGrid.appendChild(wrapper);
+      updateGridClass();
+    }
+
+    function removePeer(id) {
+      if (peerConnections[id]) {
+        peerConnections[id].close();
+        delete peerConnections[id];
+      }
+      if (dataChannels[id]) {
+        dataChannels[id].close();
+        delete dataChannels[id];
+      }
+      
+      const wrapper = document.getElementById(`wrapper-${id}`);
+      if (wrapper) wrapper.remove();
+      
+      updateGridClass();
+    }
+
+    async function leaveRoom() {
+      unsubscribes.forEach(u => u());
+      unsubscribes.length = 0;
+      
+      Object.keys(peerConnections).forEach(id => removePeer(id));
+      
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+        localStream = null;
+      }
+      
+      if (currentRoomId) {
+        try {
+          await deleteDoc(doc(db, `rooms/${currentRoomId}/participants/${myPeerId}`));
+        } catch (e) {}
+      }
+      
+      currentRoomId = null;
+      roomView.style.display = 'none';
+      setupView.style.display = 'flex';
+      inputRoomId.value = '';
+      btnJoin.disabled = true;
+      chatMessages.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 10px;">Peer-to-peer chat established.</div>';
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (currentRoomId) {
+        // Synchronous best-effort deletion
+        const myRef = doc(db, `rooms/${currentRoomId}/participants/${myPeerId}`);
+        deleteDoc(myRef).catch(()=>{});
+      }
+    });
+
+  </script>
+</body>
+</html>

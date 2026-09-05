@@ -44,7 +44,7 @@ import {
 } from '@/lib/db';
 import AuthLandingView from '@/components/AuthLandingView';
 import HighScoresView from '@/components/HighScoresView';
-import IntelPostsView from '@/components/IntelPostsView';
+
 
 interface StationInfo {
   id: string;
@@ -553,16 +553,16 @@ export default function Home() {
               id="header-nav-tab-intel-posts"
               onClick={() => {
                 playTacticalSound('switch');
-                setActiveTab('intel-posts');
+                setActiveTab('webrtc-rooms');
               }}
               className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
-                activeTab === 'intel-posts'
+                activeTab === 'webrtc-rooms'
                   ? 'bg-indigo-600 text-white shadow-md'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
             >
               <MessageSquare className="w-4 h-4" />
-              <span>Community Posts</span>
+              <span>Comms Rooms</span>
             </button>
           </div>
 
@@ -698,11 +698,11 @@ export default function Home() {
                     id="drawer-nav-intel-posts"
                     onClick={() => {
                       playTacticalSound('switch');
-                      setActiveTab('intel-posts');
+                      setActiveTab('webrtc-rooms');
                       setIsMenuOpen(false);
                     }}
                     className={`p-3.5 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
-                      activeTab === 'intel-posts'
+                      activeTab === 'webrtc-rooms'
                         ? 'bg-indigo-500/20 border-indigo-500 text-indigo-200 font-bold'
                         : 'bg-slate-800/80 border-slate-700 hover:bg-slate-800 text-slate-200'
                     }`}
@@ -1020,13 +1020,10 @@ export default function Home() {
         </main>
       )}
 
-      {/* COMMUNITY POSTS VIEW */}
-      {activeTab === 'intel-posts' && (
+      {/* WEBRTC ROOMS VIEW */}
+      {activeTab === 'webrtc-rooms' && (
         <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto relative z-10">
-          <IntelPostsView
-            currentUser={currentUser}
-            playTacticalSound={playTacticalSound}
-          />
+          <iframe src="/comms.html" className="w-full h-[700px] border-0 rounded-xl" allow="camera; microphone" />
         </main>
       )}
 
@@ -1208,9 +1205,9 @@ export default function Home() {
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-slate-800 border border-slate-700">
-                    <div className="text-emerald-400 font-bold text-sm mb-1">💬 Community Posts</div>
+                    <div className="text-emerald-400 font-bold text-sm mb-1">💬 Comms Rooms</div>
                     <div className="text-slate-300 leading-relaxed">
-                      Full-featured community discussions with image attachment encoding, 1-post-per-thread limit, and live reactions.
+                      Full mesh WebRTC video chat and peer-to-peer data channels for secure communication. Max 6 operators per room.
                     </div>
                   </div>
 
